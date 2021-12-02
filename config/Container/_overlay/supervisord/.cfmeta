@@ -1,0 +1,10 @@
+{
+    './**'                   => {},
+    './init.pl'              => { CHMOD => 550 },
+    './supervisord_fatal.py' => { CHMOD => 550 },
+    './syslog/'              => { CHMOD => 550 },
+    _default_meta            => {
+        CHMOD => 440
+    }
+}
+

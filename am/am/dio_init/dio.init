@@ -1,0 +1,32 @@
+#!/sbin/openrc-run
+
+#depend() {
+# container start invokes genesis, which mounts genesis and provides the Libs needed by DIO.
+# after container
+# however, just calling genesis might be the better option
+#}
+
+start() {
+   ebegin "Starting dio"
+   # invoking genesis mounts genesis and provides the Libs needed by DIO.
+   # Thats bad, but DIO relies on genesis anyway. Soooo just try not to reboot after Lib updates and before redeploying DIO
+   # /usr/bin/genesis exit
+   # then there is the please client, and its users don't have permission to access genesis.
+   # so lets copy over Libs and change permissions. best place to do that is on config install
+   /usr/sbin/dio   
+   eend $?
+}
+
+stop() {
+   ebegin "Stopping dio"
+   for i in  $(ps aux| grep '/usr/sbin/dio' | grep perl | awk '{print $2}'); do kill $i; done
+   eend $?
+}
+
+restart() {
+   ebegin "Restarting dio"
+   svc_stop
+   sleep 2
+   svc_start
+   eend $?
+}

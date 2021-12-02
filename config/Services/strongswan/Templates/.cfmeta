@@ -1,0 +1,32 @@
+{
+    './charon.conf' => {
+        LOCATION => '/etc/strongswan.d/charon.conf',
+        CHMOD    => 644
+    },
+    './dhcp.conf' => {
+        LOCATION => '/etc/strongswan.d/charon/dhcp.conf',
+        CHMOD    => 644
+    },
+    './ipsec.conf_global' => {
+        LOCATION => '/etc/ipsec.conf',
+        CHMOD    => 644
+    },
+    './ipsec.conf_node' => {
+        LOCATION => '/etc/ipsec.conf',
+        CHMOD    => 644
+    },
+    './ipsec.conf_roadwarrior' => {
+        LOCATION => '/etc/ipsec.conf',
+        CHMOD    => 644
+    },
+    './ipsec.secrets' => {
+        LOCATION => '/etc/ipsec.secrets',
+        CHMOD    => 640
+    },
+    './updown_s2s' => {
+        LOCATION => '/etc/strongswan.d/updown_',
+        CHMOD    => 744
+    },
+};
+
+

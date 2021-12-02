@@ -1,0 +1,8 @@
+{
+    dhcp => {
+        REQUIRE   => ['dnsmasq'],
+        TEMPLATES => './dhcp/Templates',
+        SCRIPTS   => './dhcp/Scripts'
+    }
+};
+

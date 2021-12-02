@@ -1,0 +1,27 @@
+#@flags
+enabled=0
+
+#@package
+www-apps/kibana-bin
+
+#@pre
+echo "www-apps/kibana-bin ~amd64" >> /etc/portage/package.accept_keywords
+
+#@post
+mv /etc/kibana /etc/kibana.build
+# config location given via commandline
+#ln -s [% images.paths.CONFIG %]/kibana /etc/kibana
+
+# syslog-ng does not support x-pack security, so disable in auth
+mkdir -p /opt/kibana/config && touch /opt/kibana/config/kibana.yml
+cd /opt/kibana && yes | bin/kibana-plugin install x-pack
+
+# logtrail plugin
+cd /opt/kibana && yes | bin/kibana-plugin install https://github.com/sivasamyk/logtrail/releases/download/0.1.6/logtrail-5.x-0.1.6.zip
+
+# node requires loosened pax settings
+#paxctl -C /opt/kibana/node/bin/node
+#paxctl -m /opt/kibana/node/bin/node
+
+# x-pack stores some generated files here and needs access
+chown -R kibana.kibana /opt/kibana/optimize/bundles/

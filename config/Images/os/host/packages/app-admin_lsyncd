@@ -1,0 +1,16 @@
+#@flags
+
+enabled=1
+
+#@package
+
+app-admin/lsyncd
+
+#@post
+
+#@pre
+# 2.1.5 stable was masked because of a security issue,
+# echo "app-admin/lsyncd ~amd64" >> /etc/portage/package.accept_keywords
+
+
+

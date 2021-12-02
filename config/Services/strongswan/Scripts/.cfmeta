@@ -1,0 +1,7 @@
+{
+  './strongswan_init' => {
+  	LOCATION => '/runonce/strongswan_init',
+	CHMOD => '550',
+  },
+}
+

@@ -1,0 +1,41 @@
+this is a quickfix implementation. I dont see that other systems will make use of this feature anytime soon.
+It would take significant modifications across the whole codebase to implement this properly. and clearly, the codebase is not ready for something like this.
+one issue for instance is, that we could not take advantage of the SysUsers Cmd of the HostOS Plugin. This is a hard problem right now.
+
+Primitives:
+##########
+
+- unidirectional from high security to low security systems
+- therefor cluster/infrastructure agnostic. (no keys from secure system allowed)
+
+
+Source Container:
+================
+- moves (!) files (best tar.bz2) to /data/archive.
+  inside containers, /data/* folders are mapped. thus there is a filesystem boundary. for the IN_MOVED_TO inotify handler to work,
+  a subdirectory in /data/archive needs to be created, and files from there need to be moved in /data/archive
+  seems stupid. however, as there are no other tools than ETL using this feature, its ok. later on a switch to fh write closed handlers might make sense
+
+Host:
+====
+
+- lsyncd reads inotify events on /data/archive (no subfolders) for tar.bz2 files that are moved in
+- files in /data/archive are transfered to archive server via sftp
+- files in /data/archive are deleted after transfer
+
+needed: cluster priv keys and a username
+
+Archive container:
+=================
+
+- cron to remove old files (6 weeks)
+- sshd with sftp only (ssh disabled), 2 groups (archive-write and archive-read). 
+	every archive source host gets a write user with a homedir (/cluster/machine/).
+	every dev gets a read user entry, so they can get removed again.
+- useraccounts, host pub keys
+- upload script that handles permissions
+
+
+
+
+

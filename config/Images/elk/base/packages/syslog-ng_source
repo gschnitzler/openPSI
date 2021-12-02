@@ -1,0 +1,48 @@
+#@flags
+enabled=0
+
+#@package
+
+# required for java support in syslog-ng source
+dev-java/gradle-bin
+
+#@pre
+
+echo dev-java/gradle-bin ~amd64 >> /etc/portage/package.accept_keywords
+
+# elasticsearch needs to be in place first
+#@post group=20
+
+# get compatible gradle version
+# cd /root && wget https://services.gradle.org/distributions/gradle-2.2-bin.zip
+# cd /root && unzip gradle-2.2-bin.zip
+# ln -s /root/gradle-2.2/bin/gradle /usr/bin/gradle
+
+# latest version of gradle package had no symlink set. fix
+if [ "$(which gradle)" = "" ]; then ln -s /usr/bin/gradle* /usr/bin/gradle; fi
+
+# syslog git master lacks configure scripts, so only release versions do
+cd /root && wget https://github.com/balabit/syslog-ng/releases/download/syslog-ng-3.22.1/syslog-ng-3.22.1.tar.gz
+cd /root && tar xf syslog-ng-*.tar.gz
+
+# add java includes
+export CFLAGS="-I$(cd /opt/icedtea-bin* && echo $PWD)/include -I$(cd /opt/icedtea-bin* && echo $PWD)/include/linux" && cd /root/$(ls /root/ | grep syslog-ng- | grep -v tar) && ./configure --prefix=/opt/syslog --enable-json --enable-java --enable-java-modules --disable-sql --disable-smtp --disable-mongodb --disable--amqp --enable-http --disable-redis --disable-systemd --disable-geoip --disable-riemann --disable-python --with-embedded-crypto --with-ivykis=internal --enable-linux-caps
+
+# configure script resolves symlinks, which the gentoo java installation does not like, so undo
+# remove this after https://github.com/balabit/syslog-ng/issues/1294 is fixed
+cd /root/$(ls /root/ | grep syslog-ng- | grep -v tar) && sed -i "s_^JAR .*_JAR = $(which jar)_" Makefile
+cd /root/$(ls /root/ | grep syslog-ng- | grep -v tar) && sed -i "s_^JAVAC .*_JAVAC = $(which javac)_" Makefile
+cd /root/$(ls /root/ | grep syslog-ng- | grep -v tar) && sed -i "s_^JAVAH .*_JAVAH = $(which javah)_" Makefile
+
+# add jvm libs
+cd /root/$(ls /root/ | grep syslog-ng- | grep -v tar) && sed -i "s#^JNI_LIBS.*#JNI_LIBS = -L$(cd /opt/icedtea-bin* && echo $PWD)/jre/lib/amd64/server -ljvm#" Makefile
+
+export CFLAGS="-I$(cd /opt/icedtea-bin* && echo $PWD)/include -I$(cd /opt/icedtea-bin* && echo $PWD)/include/linux" && cd /root/$(ls /root/ | grep syslog-ng- | grep -v tar) && make && make install
+
+rm -rf /root/syslog-ng*
+
+# lift mprotect restrictions for syslog. the jvm.so gets killed otherwise by grsec
+# last compile already had a PT_GNU_STACK header, thus -c instead of -C
+# if it fails in next iteration, try paxctl -C /opt/syslog/sbin/syslog-ng || paxctl -c /opt/syslog/sbin/syslog-ng
+#paxctl -c /opt/syslog/sbin/syslog-ng
+#paxctl -m /opt/syslog/sbin/syslog-ng

@@ -1,0 +1,8 @@
+{
+    backup => {
+        REQUIRE   => [],
+        SCRIPTS   => './backup/Scripts',
+        TEMPLATES => './backup/Templates',
+    }
+};
+

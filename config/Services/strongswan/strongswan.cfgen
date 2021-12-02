@@ -1,0 +1,8 @@
+{
+    strongswan => {
+        REQUIRE   => [],
+        SCRIPTS   => './strongswan/Scripts',
+        TEMPLATES => './strongswan/Templates',
+    }
+};
+

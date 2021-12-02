@@ -1,0 +1,10 @@
+#@flags
+
+enabled=1
+
+#@package
+
+sys-apps/smartmontools
+
+#@post
+

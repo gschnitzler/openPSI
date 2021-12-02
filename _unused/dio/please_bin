@@ -1,0 +1,17 @@
+#!/usr/bin/perl
+
+use lib '/usr/lib64/perl5/dio';
+use DIO::ModernStyle;
+use DIO::Client qw(dio_client);
+$|++;
+#####################
+
+$SIG{INT} = sub {
+    print time(), ": DON'T BREAK OPERATION. SIGNAL IGNORED";
+    return;
+};
+
+my $dio_client = dio_client();
+
+$dio_client->( 'DIO_GENESIS', join( ' ', @ARGV ) );
+

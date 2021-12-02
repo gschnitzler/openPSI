@@ -1,0 +1,43 @@
+#!/bin/bash
+
+cluster_dir="/data/psi/config/Cluster/"
+
+# generate CA
+openssl req -nodes -days 1000 -new -x509 -subj "/C=US/ST=SomeState/L=Location/O=Company/CN=domain.com" -keyout syslog.ca.priv -out syslog.ca.cert
+
+# generate host keys and certs for mutual auth for each machine
+for item in $(find $cluster_dir -type f | sed -e 's/.*Cluster\///' | grep / | sed -e 's/.cfgen$//'); do
+
+	fp_machine="$cluster_dir/$item.cfgen"
+	fqdn=$(cat $fp_machine | grep FULL | sed -e "s/[^'\"]*['\"]\([^'\"]*\)['\"].*/\1/")
+	name=$(echo $item | sed -e 's/.*\///')
+	group=$(echo $item | sed -e 's/\/.*//')
+	
+	echo "$group/$name FQDN: $fqdn"
+	
+	openssl req -nodes -days 1000 -new -x509 -subj "/C=US/ST=State/L=Location/O=Company/CN=$fqdn" -keyout syslog.$group.$name.priv -out syslog.$group.$name.cert
+	openssl x509 -x509toreq -in syslog.$group.$name.cert -signkey syslog.$group.$name.priv -out syslog.$group.$name.csr
+	#openssl ca requires fiddling with openssl.cnf and wants to scatter files everywhere. so we use openssl x509 as a mini CA. unsure how the serial file is threaded on renews
+	#openssl ca -policy policy_anything -infiles syslog.monitor.monitor.server.csr -out syslog.monitor.monitor.server.cert.signed
+	openssl x509 -req -days 1000 -CA syslog.ca.cert -CAkey syslog.ca.priv -CAcreateserial -CAserial syslog.ca.serial -in syslog.$group.$name.csr -out syslog.$group.$name.cert.signed
+
+
+	echo "========"
+	echo
+done
+
+# in addition, the syslog container (the server/receiver) also needs a pair
+
+container="ps-syslog.monitor.production"
+fqdn="logs.domain.com"
+openssl req -nodes -days 1000 -new -x509 -subj "/C=US/ST=State/L=Location/O=Company/CN=$fqdn" -keyout container.$container.priv -out container.$container.cert
+openssl x509 -x509toreq -in container.$container.cert -signkey container.$container.priv -out container.$container.csr
+openssl x509 -req -days 1000 -CA syslog.ca.cert -CAkey syslog.ca.priv -CAcreateserial -CAserial syslog.ca.serial -in container.$container.csr -out container.$container.cert.signed
+
+container="d-syslog.d.production"
+fqdn="logs.d.xyz"
+openssl req -nodes -days 1000 -new -x509 -subj "/C=US/ST=State/L=Location/O=Company/CN=$fqdn" -keyout container.$container.priv -out container.$container.cert
+openssl x509 -x509toreq -in container.$container.cert -signkey container.$container.priv -out container.$container.csr
+openssl x509 -req -days 1000 -CA syslog.ca.cert -CAkey syslog.ca.priv -CAcreateserial -CAserial syslog.ca.serial -in container.$container.csr -out container.$container.cert.signed
+
+

@@ -1,0 +1,10 @@
+
+	left=[% state.network.PUBLIC.ADDRESS %]
+	leftcert=[% plugin.node.left_cert %]
+	leftid=@[% machine.self.NAMES.FULL %]
+	leftsubnet=[% plugin.node.left_network.NETWORK %]
+	leftupdown=/etc/strongswan.d/updown_s2s
+	right=%any
+	rightsourceip=%dhcp
+	# we wait for a roadwarrior to connect
+	auto=add

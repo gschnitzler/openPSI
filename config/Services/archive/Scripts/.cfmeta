@@ -1,0 +1,7 @@
+{
+  './archive_init' => {
+  	LOCATION => '/runonce/archive_init',
+	CHMOD => '550',
+  },
+}
+

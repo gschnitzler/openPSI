@@ -1,0 +1,23 @@
+#@flags
+
+enabled=1
+
+#@package
+
+app-admin/syslog-ng
+app-admin/logrotate
+
+#@post
+
+# install defaults
+bzcat /usr/share/doc/syslog-ng-*/syslog-ng.conf.gentoo.hardened.bz2 > /etc/syslog-ng/syslog-ng.conf
+bzcat /usr/share/doc/syslog-ng-*/syslog-ng.logrotate.hardened.bz2 > /etc/logrotate.d/syslog-ng
+# since syslog is configured to send logs offshore, boot it up after network. otherwise it might fail on boot occasionally
+sed -i 's/^#rc_need="net.eth0"/rc_need="net"/' /etc/conf.d/syslog-ng
+rc-update add syslog-ng default
+
+#@pre
+
+# json and http required for elasticsearch
+echo app-admin/syslog-ng json http >> /etc/portage/package.use/syslog-ng
+

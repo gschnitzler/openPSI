@@ -1,0 +1,7 @@
+{
+  './dio_init' => {
+  	LOCATION => '/runonce/dio_init',
+	CHMOD => '550'
+  },
+}
+

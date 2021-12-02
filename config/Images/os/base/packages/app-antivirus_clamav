@@ -1,0 +1,30 @@
+#@flags
+
+enabled=1
+
+#@package
+
+app-antivirus/clamav
+
+#@post
+
+# clam needs loosened pax settings. was in a hurry, disabled all
+#paxctl-ng -pemr /usr/bin/freshclam
+#paxctl-ng -pemr /usr/bin/clamconf
+#paxctl-ng -pemr /usr/sbin/clamd
+
+# although installed as requirement for subsequent images, it is disabled, because its not needed right now and i think freshclam more often than not blocks booting of a machine.
+#rc-update add clamd default
+
+# initial av db needed for clamd to start
+# default mirrors are really slow, find some faster one
+# the daemon is setup in mta image, as clamav is not used by default (see comment above)
+/usr/bin/freshclam
+
+#@pre
+# --disable-zlib-vcheck is a workaround, see https://bugs.gentoo.org/show_bug.cgi?id=604650
+# remove once this issue is resolved
+mkdir -p  /etc/portage/env/app-antivirus
+echo 'EXTRA_ECONF="--disable-zlib-vcheck"' > /etc/portage/env/app-antivirus/clamav
+echo app-antivirus/clamav bzip2 -ipv6 >> /etc/portage/package.use/clamav
+

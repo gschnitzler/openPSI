@@ -1,0 +1,16 @@
+{
+    './moduli' => {
+        LOCATION => '/etc/ssh/moduli',
+        CHMOD    => 644
+    },
+    './ssh_config' => {
+        LOCATION => '/etc/ssh/ssh_config',
+        CHMOD    => 644
+    },
+    './sshd_config' => {
+        LOCATION => '/etc/ssh/sshd_config',
+        CHMOD    => 600
+    },
+};
+
+

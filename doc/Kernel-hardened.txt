@@ -1,0 +1,146 @@
+Kernel Config
+##############
+
+you need to build 2 kernels:
+one for the vbox environment and one for metal
+kernels are basically the same, except for grsecurity, see !!!!!!!!! below.
+use the right --kernname for each one
+
+###############################
+ab kernel 3.5 unter security: 
+[*] Grsecurity
+Configuration Method (Automatic)
+Usage Type (Server)
+Virtualization Type (Guest) oder NONE für METAL !!!!!!!!!!!!!!!
+Virtualization Hardware (EPT/RVI Processor Support)
+Virtualization Software (VirtualBox) or (NONE) (kernname=vbox or metal) !!!!!!!!!!!!
+Required Priorities (Security)
+
+unter customize configuration/Filesystem Protection:  
+Capability restrictions *   CONFIG_GRKERNSEC_CHROOT_CAPS:  ausschalten
+Deny (f)chmod +s  *   CONFIG_GRKERNSEC_CHROOT_CHMOD:  ausschalten
+Deny double-chroots  *   CONFIG_GRKERNSEC_CHROOT_DOUBLE:  auschalten
+Deny mounts  *   CONFIG_GRKERNSEC_CHROOT_MOUNT:  auschalten
+Deny pivot_root in chroot  *   CONFIG_GRKERNSEC_CHROOT_PIVOT ausschalten
+
+########################
+unter general
+ 
+ --- Control Group support
+  [*]   Memory controller
+  [*]     Swap controller
+  [*]       Swap controller enabled by default
+  [*]   IO controller
+  [ ]     IO controller debugging
+  [*]   CPU controller  --->
+  [*]   PIDs controller  
+  [*]   Freezer controller
+  [*]    HugeTLB controller
+  [*]   Cpuset controller
+  [*]     Include legacy /proc/<pid>/cpuset file (NEW)
+  [*]   Device controller
+  [*]   Simple CPU accounting controller
+  [*]   Perf controller  
+  [ ]   Example controller           
+
+--- Group CPU scheduler
+[*]   Group scheduling for SCHED_OTHER
+[*]     CPU bandwidth provisioning for FAIR_GROUP_SCHED
+[*]   Group scheduling for SCHED_RR/FIFO       
+
+[*] GCC plugins
+Stack Protector buffer overflow detection (Strong)
+
+ #### [*] open by fhandle syscalls | option hidden but default yes via CONFIG_EXPERT
+############################################
+ [*] Enable loadable module support
+
+###########################
+
+
+-*- Enable the block layer
+[*]   Block layer bio throttling support
+---> IO Schedulers  ---> 
+<*> Deadline I/O scheduler
+<*> CFQ I/O scheduler
+[*]   CFQ Group Scheduling support
+
+
+#######################################
+Processor type and features  ---> 
+[*] Symmetric multi-processing support
+[*] SMT (Hyperthreading) scheduler support 
+
+########
+
+
+Networking support > Networking options
+[*] Network priority cgroup
+
+
+#######################################
+x     -> Device Drivers                                    
+x       -> Character devices                             
+x         -> Enable TTY (TTY [=y])                       
+x (1)       -> Unix98 PTY support (UNIX98_PTYS [=y])     
+# [*]     Support multiple instances of devpts  | not found anymore?
+
+-> Device Drivers                                            
+  -> Multiple devices driver support (RAID and LVM) (MD [=y])
+ <*>     RAID-0 (striping) mode
+ <*>     RAID-1 (mirroring) mode    
+     -> Device mapper support (BLK_DEV_DM [=y]) 
+<*>     Thin provisioning target       CONFIG_DM_THIN_PROVISIONING
+
+# needed for early /dev
+ Device Drivers  ---> 
+ Generic Driver Options  --->      
+ [*]   Automount devtmpfs at /dev, after the kernel mounted the rootfs
+
+unter 
+  Device Drivers  --->   
+[*] Network device support  ---> 
+ [*]   Ethernet driver support  ---> 
+ <*>     Intel(R) 82575/82576 PCI-Express Gigabit Ethernet support  # Hetzner PX-60
+# gigabyte n3150n-d3v router board
+<*>     Realtek 8169 gigabit ethernet support
+
+ <*> Serial ATA and Parallel ATA drivers  --->  
+ <*>   AHCI SATA support                                                            
+ <*>   Platform AHCI SATA support         
+ <*>       Intel ESB, ICH, PIIX3, PIIX4 PATA/SATA support 
+ <*>     Generic ATA support 
+
+
+
+#########################
+
+-> Filesystems
+ <*> Btrfs filesystem support
+  [*]   Btrfs POSIX Access Control Lists
+  [ ]   Btrfs with integrity check tool compiled in (DANGEROUS) (NEW)
+  [*]   Btrfs will run sanity tests upon loading                     
+  [ ]   Btrfs debugging support (NEW)                                
+  [*]   Btrfs assert support                 
+ <*> Overlay filesystem support  
+
+##############################
+
+### unter Networking Support/networking options/ Network packet filtering framework (Netfilter) /Core Netfilter Configuration 
+ <M>   LOG target support   
+ <M>   "addrtype" address type match support   
+ <M>   "recent" match support  
+ <M>   "ipvs" match support
+ <M>   REDIRECT target support
+### unter Networking Support/networking options/ Network packet filtering framework (Netfilter) 
+	<M>   IP virtual server support  --->
+	 <M>   round-robin scheduling 
+###	/Netfilter Configuration
+<M>   iptables NAT support 
+<M>     MASQUERADE target support
+
+> Networking support > Networking options > QoS and/or fair queueing
+ <*>   Control Group Classifier      
+
+kernel hacking -->
+[ ] Build targets in Documentation/ tree

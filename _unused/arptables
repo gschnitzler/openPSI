@@ -1,0 +1,11 @@
+LOCATION /var/lib/iptables/arp-save 600
+*filter
+:INPUT DROP
+:OUTPUT ACCEPT
+:FORWARD ACCEPT
+:ipsec -
+
+# ipsec hookins
+-A INPUT -j ipsec
+
+

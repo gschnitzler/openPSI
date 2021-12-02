@@ -1,0 +1,36 @@
+#@flags
+
+enabled=1
+
+#@package
+
+#@pre
+
+#@post
+
+# the actual installation
+mkdir -p /opt/pagekit
+cd /opt/pagekit && wget https://pagekit.com/api/download/latest
+cd /opt/pagekit && mv latest latest.zip && unzip latest.zip && rm -f latest.zip
+
+mkdir -p /opt/pagekit/tmp/cache
+mkdir -p /opt/pagekit/tmp/logs
+mkdir -p /opt/pagekit/tmp/sessions
+mkdir -p /opt/pagekit/tmp/packages
+chmod -R 777 /opt/pagekit/tmp
+chown -R 81:81 /opt/pagekit
+
+find /opt/pagekit | grep '\.php$' | xargs chmod a+x
+
+ln -s [% images.paths.CONFIG %]/pagekit/config.php /opt/pagekit/config.php
+
+# be sure to copy the original folders to the pdata location on initial install
+# also, to setup the database, have the pagekit configfile removed on first call.
+
+mv /opt/pagekit/storage /opt/pagekit/storage_original
+ln -s [% images.paths.PERSISTENT %]/pagekit_storage /opt/pagekit/storage
+
+mv /opt/pagekit/packages /opt/pagekit/packages_original
+ln -s [% images.paths.PERSISTENT %]/pagekit_packages /opt/pagekit/packages
+
+

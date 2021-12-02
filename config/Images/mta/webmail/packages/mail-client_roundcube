@@ -1,0 +1,20 @@
+#@flags
+
+enabled=1
+
+#@package
+
+mail-client/roundcube
+
+#@post group=3
+
+# while postfixadmin got webapp-configured with default values during emerge, roundcube did not.
+webapp-config -h localhost -d roundcube -I roundcube $(ls /usr/share/webapps/roundcube/)
+# this file does not exist at build time
+#mv /var/www/localhost/htdocs/roundcube/config/config.inc.php /var/www/localhost/htdocs/roundcube/config/config.inc.php.dist 
+ln -s [% images.paths.CONFIG %]/roundcube-config.inc.php /var/www/localhost/htdocs/roundcube/config/config.inc.php
+
+#@pre
+
+echo mail-client/roundcube mysql vhosts >> /etc/portage/package.use/roundcube
+

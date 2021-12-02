@@ -1,0 +1,11 @@
+rc-update add dio default
+# seems like UID:GID resolution does not work during initial chroot.
+# so lets not use names
+chown 0:[% machine.self.USER_ACCOUNTS.GROUPS.psdev.GID %] /usr/bin/please
+# dio and please require genesis Libs. while dio could use them by just invoking 'genesis exit' to mount genesis on start,
+# please can't, as its users lack permissions to access genesis.
+# so lets just copy em over and change permissions.
+rm -rf /usr/lib64/perl5/Libs
+cp -Rfp /data/psi/Libs /usr/lib64/perl5/
+chmod -R a+rx /usr/lib64/perl5/Libs
+rm -rf /usr/lib64/perl5/Libs/API /usr/lib64/perl5/Libs/Core /usr/lib64/perl5/Libs/Process

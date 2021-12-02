@@ -1,0 +1,15 @@
+#@description
+
+used for shared folders on op machines
+
+#@flags
+
+enabled=1
+
+#@package
+
+net-fs/cifs-utils
+
+#@post
+#@pre
+echo 'net-fs/cifs-utils -acl -ads -caps -caps-ng -pam' > /etc/portage/package.use/cifs

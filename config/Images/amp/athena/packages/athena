@@ -1,0 +1,67 @@
+#@description
+athena is a replacement for wkhtmltopdf
+this is a rough translation of the docker files
+
+#@flags
+enabled=1
+
+#@package
+
+####### if you build this manually, add --cap-add=SYS_PTRACE to container DOCKER->{OPTS}. passing it on container start does not work.
+####### otherwise dev-libs/gobject-introspection fails to build.
+####### (sandbox uses ptrace)
+
+# required for npm
+net-libs/nodejs
+
+## athena is hardwired to gtk2. slot 2 is used for gtk+ 2
+x11-libs/gtk+:2
+
+gnome-base/gconf
+dev-libs/nss
+# for libxss
+x11-libs/libXScrnSaver
+# for libasound2
+media-libs/alsa-lib
+net-print/cups
+
+# basic fonts
+media-fonts/noto
+media-fonts/dejavu
+media-fonts/droid
+media-fonts/corefonts
+media-fonts/inconsolata
+
+#@pre
+
+mkdir -p /etc/portage/package.license/
+echo media-fonts/corefonts MSttfEULA >> /etc/portage/package.license/fonts
+echo "x11-libs/gtk+ X" > /etc/portage/package.use/athena
+echo "x11-libs/cairo X" >> /etc/portage/package.use/athena
+echo "dev-libs/gobject-introspection cairo" >> /etc/portage/package.use/athena
+echo "app-text/ghostscript-gpl cups" >> /etc/portage/package.use/athena
+
+#@post
+
+# download
+cd /root && wget https://github.com/arachnys/athenapdf/archive/v2.16.0.tar.gz
+cd /root/ && tar xf *.tar.gz && rm *.tar.gz
+
+# scrap all the bullshit the Dockerfiles do. its a node app.
+# https://github.com/arachnys/athenapdf/blob/master/cli/docs/building.md
+cd /root/athenapdf*/cli/ && npm install
+cd /root/athenapdf*/cli/ && npm run build
+mv /root/athenapdf*/cli/build/athenapdf*/ /opt/athenapdf/
+
+# install their custom fonts.conf, for what its worth
+mv /etc/fonts/fonts.conf /etc/fonts/fonts.conf.description
+mv /root/athenapdf*/cli/fonts.conf /etc/fonts/conf.d/100-athena.conf
+
+# thats it. make sure Xvfb runs in the background, and just start the app
+
+# cleanup
+rm -rf /root/*
+rm -rf /root/.electron
+rm -rf /root/.cache
+rm -rf /root/.npm
+

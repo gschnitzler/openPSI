@@ -1,0 +1,8 @@
+{
+    prometheus => {
+        REQUIRE   => [],
+        SCRIPTS   => './prometheus/Scripts',
+        TEMPLATES => './prometheus/Templates',
+    }
+};
+

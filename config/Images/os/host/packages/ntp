@@ -1,0 +1,18 @@
+#@description
+
+openntpd is a far saner implementation than ISC ntpd
+tradeoffs are neglectable
+best part is, no configuration needed. it works out of the box
+
+#@flags
+
+enabled=1
+
+#@package
+
+net-misc/openntpd
+
+#@post
+
+rc-update add ntpd default
+

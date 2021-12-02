@@ -1,0 +1,49 @@
+#@flags
+
+enabled=1
+
+#@package
+
+dev-db/mariadb
+
+#@pre
+
+echo "dev-db/mariadb galera server backup sst-mariabackup" > /etc/portage/package.use/mariadb
+
+# using xtrabackup package now, instead of xtrabackup-bin (long standing problems with hardcoded libgcrypt, among other things)
+# removing ~amd64 mask xtrabackup-bin forces the sst-xtrabackup USE flag from mariadb to use xtrabackup (without bin),
+# which in turn requires python use flags.
+# lastly, switched over to mariabackup
+echo "dev-lang/python sqlite" >> /etc/portage/package.use/python
+
+# mariadb configdir needs to be recreated, because the symbolic link points nowhere during build
+# rm -f /etc/mysql && mkdir -p /etc/mysql
+
+
+
+#@post
+
+# for initialisation do now:
+# run container with --privileged=true
+# copy /etc/mysql to /data/
+# edit my.cnf
+# ln config back to /etc/mysql
+# run emerge --config mariadb
+
+# aside the database, the emerge --config above also creates directories, which we have to handle here
+# however, this does not work with the diff creation at build, so empty directories are removed again.
+# handle this at container start, but leave it here
+mkdir -p /var/run/mysqld 
+chown -R mysql.mysql /var/run/mysqld 
+# this should now be handled via my.cf
+#mkdir -p /var/log/mysql 
+#chown -R mysql.mysql /var/log/mysql
+
+# use our config
+mv /etc/mysql /etc/mysql.dist
+ln -s [% images.paths.CONFIG %]/mysql /etc
+
+# enable syslog logging
+# this option only works with mysqld_safe script. which only redirects STDOUT/ERR output to logger
+# sed -i 's/MY_ARGS="/MY_ARGS="--syslog /' /etc/conf.d/mysql
+

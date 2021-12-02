@@ -1,0 +1,27 @@
+{   test_leaf2 => {
+        root   => './test/leaf2',
+        from   => 'test_trunk',
+        build  => 'no',
+        docker => 'no',
+        add    => {
+            portage => {
+                #source => 'IMAGE:test_trunk_portage',
+                source => 'IMAGE:base_portage',
+                target => '/usr/portage'
+            }
+        },
+        export => {
+            test_leaf2 => {
+                diff    => 1,
+                source  => '/',
+                exclude => ['./usr/portage/*']
+            },
+            #test_leaf2_portage => {
+            #    source  => '/usr/portage',
+            #    exclude => [],
+            #    diff    => 0
+            #}
+        }
+    }
+};
+

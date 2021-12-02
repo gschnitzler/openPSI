@@ -1,0 +1,16 @@
+{   devop => {
+        USE_PLUGINS => {
+            Bootstrap   => 'yes',    # only needed on devop machine, also bootstrap config has to be dropped
+            Build       => 'yes',    # used to build hostos/docker images, only needed on buildhost
+            Container   => 'yes',
+            Copy        => 'yes',
+            Deploy      => 'yes',    # push/pull/remote
+            Docker      => 'yes',    # handles docker images
+            HostOS      => 'yes',
+            Images      => 'yes',    # handles images directory
+            Network     => 'yes',    # handles network state
+        },
+        DROP_CONFIG => {}
+    }
+};
+

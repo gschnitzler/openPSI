@@ -1,0 +1,20 @@
+{   node => {
+        USE_PLUGINS => {
+            Bootstrap => 'no',     # only needed on devop machine, also bootstrap config has to be dropped
+            Build     => 'no',     # used to build hostos/docker images, only needed on buildhost
+            Container => 'yes',
+            Copy      => 'yes',
+            Deploy    => 'yes',    # push/pull/remote
+            Docker    => 'yes',    # handles docker images
+            HostOS    => 'yes',
+            Images    => 'yes',    # handles images directory
+            Network   => 'yes',    # handles network state
+        },
+        DROP_CONFIG => {
+
+            # templates are used by imagebuilder, os* config describe the HostOS images, only relevant to imagebuilder
+            images     => 'scripts,templates,config/os_base,config/os_host',
+        }
+    }
+};
+

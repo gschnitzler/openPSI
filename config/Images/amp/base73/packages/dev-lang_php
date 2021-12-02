@@ -1,0 +1,31 @@
+#@flags
+
+enabled=1
+
+#@package
+
+# zip needed by app to password encrypt on cmdline via exec and shell, utilizing weak crypto. yep, thats right.
+dev-lang/php
+dev-php/pear
+app-arch/zip
+
+#@post
+
+mv /etc/php /etc/php.dist
+ln -s [% images.paths.CONFIG %]/php/ /etc/
+
+#@pre
+
+# which php default settings to use (for development reasons, comment the rm -rf /etc/php out below and recopy new /etc/php)
+# PHP API for extensions
+echo PHP_INI_VERSION=\"production\" >> /etc/portage/make.conf
+echo PHP_TARGETS=\"php7-3\"  >> /etc/portage/make.conf
+
+# lock to 7.3
+echo ">=dev-lang/php-7.4.0" >> /etc/portage/package.mask/php73
+
+# imap is a webmail dep
+# mysql is needed for pdo, see https://bugs.gentoo.org/show_bug.cgi?id-481190
+echo dev-lang/php bcmath bzip2 calendar cgi cli crypt curl exif fpm gd imap intl json mhash mysql mysqli opcache pdo session sockets sodium ssl threads truetype unicode xml xmlreader xmlwriter zip zip-encryption zlib  >> /etc/portage/package.use/php
+echo app-eselect/eselect-php fpm >> /etc/portage/package.use/php
+

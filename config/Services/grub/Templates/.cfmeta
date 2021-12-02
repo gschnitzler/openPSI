@@ -1,0 +1,12 @@
+{
+    './grub.cfg_header' => {
+        LOCATION => '/boot/grub/grub.cfg',
+        CHMOD    => 600
+    },
+    './grub.cfg_kernel' => {
+        LOCATION => '/boot/grub/grub.cfg',
+        CHMOD    => 600
+    }
+};
+
+

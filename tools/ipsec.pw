@@ -1,0 +1,56 @@
+cluster_dir="/data/psi/config/Cluster/"
+
+#generate host CAs (key and cert)
+for group in $(find $cluster_dir -type d | grep -v '/$' | sed -e 's/.*\///' | grep -v '^$'); do
+
+	priv_f=ipsec.$group.ca.priv
+	cert_f=ipsec.$group.ca.cert
+	
+	# generate a private key for the ipsec CA
+	ipsec pki --gen --type rsa --size 4096 --outform pem > $priv_f
+	chmod 600 $priv_f
+
+	# generate a CA cert, make sure to change the strings below
+	ipsec pki --self --ca --lifetime 3650 --in $priv_f --type rsa --dn "C=AT, O=$group, CN=$group Root CA" --outform pem > $cert_f
+done
+
+# generate host private keys and certs
+for i in $(find $cluster_dir -type f | sed -e 's/.*Cluster\///' | grep -v '/$' | grep / | sed -e 's/.cfgen$//'); do
+
+	group=$(echo $i | sed -e 's/\/.*//')
+	name=$(echo $i | sed -e 's/.*\///')
+	priv_f="ipsec.$group.$name.priv"
+	cert_f="ipsec.$group.$name.cert"
+	# private key
+        ipsec pki --gen --type rsa --size 2048 --outform pem > $priv_f
+        chmod 600 $priv_f
+
+	# cert
+	fqdn=$(grep -rn FULL $cluster_dir | grep $name | grep $group | sed -e "s/.*'\(.*\)'.*/\1/")
+	ipsec pki --pub --in $priv_f --type rsa | ipsec pki --issue --lifetime 1100 --cacert ipsec.$group.ca.cert --cakey ipsec.$group.ca.priv --dn "C=AT, O=$group, CN=$fqdn" --san $fqdn --flag serverAuth --outform pem > $cert_f
+
+done
+
+# do users manually, use 'email', create certs per group
+# note the export passwort and give it to the user with the p12 file
+name="gs"
+cluster_dir="/data/psi/config/Cluster/"
+for group in build; do
+
+	# pick a random fqdn of the nodes in a group
+		# fqdn should be something like a.b.com
+        fqdn=$(grep -rn FULL $cluster_dir | grep "$group/.*:" | sed -e "s/.*'\(.*\)'.*/\1/" | head -n1)
+        priv_f="ipsec.$group.user.$name.priv"
+        cert_f="ipsec.$group.user.$name.cert"
+        p12_f="ipsec.$group.user.$name.p12"
+        ca_pf=ipsec.$group.ca.priv
+        ca_cf=ipsec.$group.ca.cert
+        # private key
+        ipsec pki --gen --type rsa --size 2048 --outform pem > $priv_f
+
+        # cert
+        ipsec pki --pub --in $priv_f --type rsa | ipsec pki --issue --lifetime 1100 --cacert $ca_cf --cakey $ca_pf --dn "C=AT, O=$group, CN=$name@$fqdn" --san $name@$fqdn --outform pem > $cert_f
+        openssl pkcs12 -export -inkey $priv_f -in $cert_f -name "$name on $group" -certfile $ca_cf -caname "$group Root CA" -out $p12_f
+done
+
+# remove all the dev keys, they are not used. makes no sense

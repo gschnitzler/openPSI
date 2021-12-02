@@ -1,0 +1,94 @@
+# sometimes critic is just wrong, or its styles are outdated (postfix dereference), unless you are sure that's the case:
+# - all code should pass severity 4 without any problems
+# - ignoring the use of die (i know), severity 3 should pass only with problems regarding complexity or inconvenience
+# - some things like die or the string use of eval I used for config loading is outright bad, but a lot of work to undo.
+# 
+##########################################################
+# here is the perlcriticrc
+
+# critic will complain about missing strictures and warnings, unless Modern::Perl or explicit use strict/warnings is used.
+# Modern::Perl only works because it is added to critics config files. this is to satisfy critic
+[TestingAndDebugging::RequireUseStrict]
+equivalent_modules = ModernStyle
+[TestingAndDebugging::RequireUseWarnings]
+equivalent_modules = ModernStyle
+
+# where croak made more sense, it is used.
+# should croak be used more often? possibly
+# however, we don't follow the CPAN Module concept. exceptions almost always arise internally, not because of arguments
+# and we die a lot. adding exceptions to every statement is tiresome
+[-ErrorHandling::RequireCarping]
+
+# critic thinks subroutine signatures are prototypes
+[-Subroutines::ProhibitSubroutinePrototypes]
+
+# 1; at the end of a module. i removed them were they were not needed. maybe reconsider it when problems arise
+[-Modules::RequireEndWithOne]
+
+# the /x flag. really non of the regular expressions get extended, or are complex enough, set the limit to 20
+[RegularExpressions::RequireExtendedFormatting]
+minimum_regex_length_to_complain_about = 20
+
+# there is no gain in using $VERSION, as we are strictly rolling release and there is no CPAN style module use.
+[-Modules::RequireVersionVar]
+
+# critic detects postderefs as double sigils.
+# remove this once its fixed
+[-References::ProhibitDoubleSigils]
+
+# the /m flag. ^.*$ matches start and end of a string, where /m makes it mark start/end of a line (as Unix tools do).
+# thing is... what's a line? any why would you want to use occasional multiline regex parsing aside of oneliners?
+# I get the 'protect newbies' point. however, I have a strong opinion about using regexp:
+# unless you read and completely understood 'mastering regular expressions', don't use them. like ever. period
+[-RegularExpressions::RequireLineBoundaryMatching]
+
+# basically the same as above, but for /s
+[-RegularExpressions::RequireDotMatchAnything]
+
+# 'we wanted to go to the moon, so we made the moon crash into earth'
+# making presumptions about regexp is the root of all evil
+# its about the REGULAR in regular expressions.
+# if you are not sure what's REGULAR in your data, don't use regexp. it will fail
+[-RegularExpressions::ProhibitEnumeratedClasses]
+
+# whoever gets problems with reading ' ', '', " " or "" should consider using proper fonts, getting better glasses, a better monitor or all of it.
+# writing foo($a, q{ }, 'b') instead of just foo($a, ' ', 'b') does add shit to readability.
+# this also removes warnings for things like '     ', but to be honest: if that's what you do, you have bigger fish to fry
+[-ValuesAndExpressions::ProhibitEmptyQuotes]
+
+# 'The Indians have never seen white people, #BurnAllWhitePeople' is not what Columbus said.
+# I get that negative controls might be confusing. so just don't use them when they are.
+[-ControlStructures::ProhibitUnlessBlocks]
+
+# the same as with regex and unless. you have understood it when you know when NOT to use it, and that's 99% of the time.
+# used right, for concise oneliners, it adds a lot to readability. whenever it takes 2 seconds to grasp, rewrite it.
+[-ControlStructures::ProhibitPostfixControls]
+
+# http://cpansearch.perl.org/src/THALJEF/Perl-Critic-1.121/lib/Perl/Critic/Policy/Variables/ProhibitPunctuationVars.pm
+# https://rt.cpan.org/Public/Bug/Display.html?id=55604
+# already using 1.121, the bugs still there.
+[-Variables::ProhibitPunctuationVars]
+
+# its perl. deal with it.
+[-ValuesAndExpressions::ProhibitNoisyQuotes]
+
+# perltidy is used from within the editor of your choice. which in this case is not the same machine.
+[-CodeLayout::RequireTidyCode]
+
+# check the return value of say and print? not in this code...
+[InputOutput::RequireCheckedSyscalls]
+functions = :builtins
+exclude_functions = print say sleep
+
+# meh... things like Dumper or STD* stand out anyway. in general, you never look at an isolated print statement.
+# print is almost always used in a context ({}), which you need to grasp before taking action.
+# so you know if there is a filehandle involved. if you are still not sure, fix/cleanup the code. cluttering the code with more shit is not the solution.
+[-InputOutput::RequireBracedFileHandleWithPrint]
+
+# pooping this syntactic sugar all over the place is not worth it
+[-CodeLayout::RequireTrailingCommas]
+
+# i tried, but for me (or my code) this seems to have the opposite effect. perl tidy does not align multiple lines of my $a = join '' bl, bla; correctly anymore
+# more complex (read ugly) string concatenations turn from messes into boundary less messes.
+# there are false positives and taming critic is a huge hassle. in the end there is no gain.
+[-CodeLayout::ProhibitParensWithBuiltins]

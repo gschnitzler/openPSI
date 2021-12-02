@@ -1,0 +1,14 @@
+#@flags
+
+enabled=1
+
+#@package
+
+dev-vcs/git
+
+#@pre
+
+# required since 2018
+echo dev-libs/libpcre2 jit > /etc/portage/package.use/git
+
+

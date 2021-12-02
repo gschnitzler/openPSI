@@ -1,0 +1,11 @@
+#@description
+
+replacement of net-misc/bridge-utils
+
+#@flags
+
+enabled=1
+
+#@package
+
+net-misc/netifrc

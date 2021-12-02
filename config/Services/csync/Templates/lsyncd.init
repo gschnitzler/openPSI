@@ -1,0 +1,37 @@
+#!/sbin/openrc-run
+
+depend() {
+    after bootmisc
+    after ipsec
+    need csync2
+    use logger
+}
+
+checkconfig() {
+    if [[ ! -f "/etc/lsyncd.conf" ]] ; then
+        eerror "File /etc/lsyncd.conf is missing"
+        return 1
+    fi
+
+    return 0
+}
+
+start() {
+    checkconfig || return $?  
+
+    ebegin "Starting lsyncd"
+    start-stop-daemon --start \
+        --exec /usr/bin/lsyncd \
+        --pidfile "/run/lsyncd.pid" \
+        -- \
+        -pidfile "/run/lsyncd.pid" \
+        "/etc/lsyncd.conf"
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping lsyncd"
+    start-stop-daemon --stop \
+        --pidfile "/run/lsyncd.pid"
+    eend $?
+}

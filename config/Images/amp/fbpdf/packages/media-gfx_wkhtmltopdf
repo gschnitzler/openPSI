@@ -1,0 +1,37 @@
+#@flags
+
+enabled=1
+
+#@package
+
+media-gfx/wkhtmltopdf
+
+#@description
+This package is just used to setup the dependencies for the git version.
+The emerged package is actually deinstalled in @post of the git version
+
+#@pre
+
+echo "media-gfx/wkhtmltopdf ~amd64" >> /etc/portage/package.accept_keywords
+
+echo "media-libs/gst-plugins-base introspection nls -ogg -pango -vorbis -orc" > /etc/portage/package.use/wkhtmltopdf
+echo "dev-qt/qtwebkit printsupport" >> /etc/portage/package.use/wkhtmltopdf
+echo "x11-libs/libxcb xkb" >> /etc/portage/package.use/wkhtmltopdf
+echo "x11-libs/libxkbcommon X" >> /etc/portage/package.use/wkhtmltopdf
+echo "dev-libs/libpcre pcre16" >> /etc/portage/package.use/wkhtmltopdf
+echo "dev-libs/libpcre2 pcre16" >> /etc/portage/package.use/wkhtmltopdf
+echo "dev-qt/qtcore icu" >> /etc/portage/package.use/wkhtmltopdf
+echo "media-libs/mesa X" >> /etc/portage/package.use/wkhtmltopdf
+
+#@post group=10
+
+# remove the installed version again so the git version can take over.
+# actually, this causes all the deps to be removed again.
+# emerge -c media-gfx/wkhtmltopdf
+# instead, just remove their binaries
+mv /usr/bin/wkhtmltoimage /usr/bin/wkhtmltoimage_gentoo
+mv /usr/bin/wkhtmltopdf /usr/bin/wkhtmltopdf_gentoo
+
+
+
+

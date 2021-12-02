@@ -1,0 +1,7 @@
+{
+  './prometheus_init' => {
+  	LOCATION => '/runonce/prometheus_init',
+	CHMOD => '550',
+  },
+}
+

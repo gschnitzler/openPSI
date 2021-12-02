@@ -1,0 +1,51 @@
+LOCATION /etc/init.d/arptables 744
+#!/sbin/openrc-run
+# for roadwarriors proxy_arp_pvlan needs to be set, and a arptables firewall with at least the following rules need to be in place:
+# arptables -P INPUT DROP
+# arptables -A INPUT -d $localip -j ACCEPT
+# arptables -A INPUT -d $somevpnclientip -j ACCEPT
+# this needs to be arptables-saved to /var/lib/iptables/arp-save
+
+# the vpn ip-pool in racoon.conf must not overlap with existing clients
+
+# IMPORTANT NOTE:
+# dhcp enabled interfaces can not be arp-protected (as the ip might change at any time) using static scripts
+# it is most important to not have pvlan activated on such interfaces.
+# you have been warned
+
+
+extra_commands="save"
+
+depend() {
+        # needs to load after net, because the interface docker0 is not up yet
+        after net
+        use logger
+}
+
+start() {
+        ebegin "Loading arptables and enabling arp_proxy_pvlan "
+        /sbin/arptables-restore  < /var/lib/iptables/arp-save
+        sysctl net.ipv4.conf.[% cluster.self.SERVICE.IPSEC.INTERFACE %].proxy_arp_pvlan=1
+        eend $?
+}
+
+stop() {
+        ebegin "Stopping arptables and disabling arp_proxy_pvlan"
+        sysctl net.ipv4.conf.[% cluster.self.SERVICE.IPSEC.INTERFACE %].proxy_arp_pvlan=0
+        /sbin/arptables -P INPUT ACCEPT
+        /sbin/arptables -F INPUT
+        /sbin/arptables -P OUTPUT ACCEPT
+        /sbin/arptables -F OUTPUT
+        /sbin/arptables -P FORWARD ACCEPT
+        /sbin/arptables -F FORWARD
+        /sbin/arptables -F ipsec
+        /sbin/arptables -X ipsec
+
+        eend $?
+}
+
+save() {
+        ebegin "Saving arptables state"
+        /sbin/arptables-save  >  /var/lib/iptables/arp-save
+        eend $?
+}

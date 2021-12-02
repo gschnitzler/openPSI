@@ -1,0 +1,6 @@
+{
+    './'           => { CHMOD => '555', },
+    './start.conf' => {},
+    _default_meta  => { CHMOD => '440' }
+}
+

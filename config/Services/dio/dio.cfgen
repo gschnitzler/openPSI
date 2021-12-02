@@ -1,0 +1,29 @@
+{
+    dio => {
+        REQUIRE              => [],
+        SCRIPTS              => './dio/Scripts',
+        TEMPLATES            => '/data/psi/am',
+        TEMPLATE_PERMISSIONS => {
+            './am/**'=> {
+                #CHMOD => '744'
+            },
+            './am/dio_init/dio.init' => {
+                CHMOD    => '750',
+                LOCATION => '/etc/init.d/dio'
+            },
+            './am/dio.pl' => {
+                CHMOD    => '500',
+                LOCATION => '/usr/sbin/dio'
+            },
+            './am/please.pl' => {
+                CHMOD    => '550',
+                LOCATION => '/usr/bin/please'
+            },
+            '_default_meta' => {
+                CHMOD => '555',
+                LOCATION => '/usr/lib64/perl5/'
+            },
+        }
+    }
+};
+

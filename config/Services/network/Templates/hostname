@@ -1,0 +1,3 @@
+# Set to the hostname of this machine
+hostname="[% machine.self.NAMES.SHORT %]"
+

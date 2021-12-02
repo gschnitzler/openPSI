@@ -1,0 +1,14 @@
+#@description
+
+this package is needed to generate entropy for gpg key generation.
+gpg keys are used for backup
+
+#@flags
+
+enabled=1
+
+#@package
+
+sys-apps/rng-tools
+
+

@@ -1,0 +1,202 @@
+Kernel Config
+##############
+
+Gentoo Linux
+[*] Gentoo Linux support 
+[*]   Linux dynamic and persistent device naming (userspace devfs) support
+[*]   Select options required by Portage features
+Support for init systems, system and service managers  --->
+     [*] OpenRC, runit and other script based systems and managers
+     [*] systemd     
+
+
+########################
+General setup  --->
+[*] Configure standard kernel features (expert users)  --->   
+#### [*] open by fhandle syscalls | option hidden but default yes via CONFIG_EXPERT
+
+-*- Control Group support  --->
+  [*]   Memory controller
+  [*]     Swap controller
+  [*]       Swap controller enabled by default
+  [*]   IO controller
+  [ ]     IO controller debugging
+  [*]   CPU controller  --->
+  [*]   PIDs controller  
+  [*]   RDMA controller
+  [*]   Freezer controller
+  [*]    HugeTLB controller
+  [*]   Cpuset controller
+  [*]     Include legacy /proc/<pid>/cpuset file (NEW)
+  [*]   Device controller
+  [*]   Simple CPU accounting controller
+  [*]   Perf controller  
+  [ ]   Support for eBPF programs attached to cgroups
+  [ ]   Example controller           
+
+--- Group CPU scheduler
+[*]   Group scheduling for SCHED_OTHER
+[*]     CPU bandwidth provisioning for FAIR_GROUP_SCHED
+[*]   Group scheduling for SCHED_RR/FIFO       
+
+ General architecture-dependent options  ---> 
+ [*] Stack Protector buffer overflow detection                      │ │
+   [*]   Strong Stack Protector 
+[*] GCC plugins
+    [ ]   Compute the cyclomatic complexity of a function              │ │
+    [*]   Generate some entropy during boot and runtime                │ │
+    [*]   Force initialization of variables containing userspace addres│ │
+    [*]     Force initialize all struct type variables passed by refere│ │
+    [ ]     Report forcefully initialized variables                    │ │
+    [*]   Randomize layout of sensitive kernel structures              │ │
+    [ ]     Use cacheline-aware structure randomization       
+
+
+
+####################################
+
+[*] Enable loadable module support
+
+###########################
+
+
+-*- Enable the block layer
+[*]   Block layer bio throttling support
+---> IO Schedulers  ---> 
+<*> Deadline I/O scheduler
+<*> CFQ I/O scheduler
+[*]   CFQ Group Scheduling support
+
+
+#######################################
+Processor type and features  ---> 
+[*] AMD ACPI2Platform devices support 
+[*] CPU microcode loading support
+[*]   Intel microcode loading support
+[*]   AMD microcode loading support
+[*] Numa Memory Allocation and Scheduler Support                   │ │
+[*]   Old style AMD Opteron NUMA detection (NEW)                   │ │
+[*]   ACPI NUMA detection (NEW)         
+[*] Symmetric multi-processing support
+--- Supported processor vendors     
+  [*]   Support Intel processors (NEW)
+  [*]   Support AMD processors (NEW)
+[*] SMT (Hyperthreading) scheduler support 
+    Preemption Model (No Forced Preemption (Server))  ---> 
+[*] Intel MPX (Memory Protection Extensions)
+[*] Intel Memory Protection Keys        
+Performance monitoring  --->
+    <*> AMD Processor Power Reporting Mechanism
+[*] AMD Secure Memory Encryption (SME) support                                                                               │ │
+[*]   Activate AMD Secure Memory Encryption (SME) by default (NEW)
+##############################
+
+
+Networking support > Networking options
+<*>   Packet: sockets monitoring interface
+[*] TCP/IP networking
+<*>   IP: IPsec transport mode
+<*>   IP: IPsec tunnel mode
+<*>   INET: socket monitoring interface
+[*] Network packet filtering framework (Netfilter)  --->
+<*> 802.1d Ethernet Bridging
+[*] Network priority cgroup
+QoS and/or fair queueing -->
+ <*>   Control Group Classifier      
+
+Networking Support > networking options > Network packet filtering framework (Netfilter) 
+  <M>   IP virtual server support  --->
+
+Networking Support > networking options > Network packet filtering framework (Netfilter) > Core Netfilter Configuration 
+{*} Netfilter LOG over NFNETLINK interface
+<*> Netfilter connection tracking support
+<*> Connection tracking netlink interface
+<M> IPv4/IPv6 redirect support
+<*> Netfilter nf_tables support
+<M>   Netfilter nf_tables masquerade support
+<M>   Netfilter nf_tables redirect support 
+<M>   Netfilter nf_tables reject support
+{*} Netfilter Xtables support (required for ip_tables)
+<*>   "conntrack" connection tracking match support
+<M>   LOG target support   
+<M>   REDIRECT target support
+<M>   "addrtype" address type match support   
+<M>   "recent" match support  
+<M>   "ipvs" match support
+
+
+### Netfilter Configuration
+<*> IPv4 connection tracking support (required for NAT)
+{*} IPv4 nf_tables support
+<*> IPv4 NAT
+<*>   IPv4 nf_tables nat chain support 
+{*}   IPv4 masquerade support                
+<M>   IPv4 masquerading support for nf_tables
+<M>   IPv4 redirect support for nf_tables    
+<*> IP tables support (required for filtering/masq/NAT)
+<M>   iptables NAT support 
+<M>     MASQUERADE target support
+<M>     REDIRECT target support
+
+
+#######################################
+Device Drivers     
+
+[*] IOMMU Hardware Support  --->
+    [*]   AMD IOMMU support
+    <*>     AMD IOMMU Version 2 driver
+NVME Support -->
+<M> NVM Express block device 
+<M> NVMe Target support  
+
+# needed for early /dev
+Generic Driver Options  --->      
+[*]   Automount devtmpfs at /dev, after the kernel mounted the rootfs
+
+<*> Serial ATA and Parallel ATA drivers  --->  
+ <*>   AHCI SATA support                                                            
+ <*>   Platform AHCI SATA support         
+ <*>       Intel ESB, ICH, PIIX3, PIIX4 PATA/SATA support 
+ <*>     Generic ATA support 
+
+# not needed anymore
+#Multiple devices driver support (RAID and LVM) (MD [=y])
+# <*>     RAID-0 (striping) mode
+# <*>     RAID-1 (mirroring) mode    
+#     -> Device mapper support (BLK_DEV_DM [=y]) 
+#<*>     Thin provisioning target       CONFIG_DM_THIN_PROVISIONING
+
+[*] Network device support  ---> 
+ [*]   Ethernet driver support  ---> 
+ <*>     Broadcom NetXtremeII 10Gb support # Hetzner AX-160
+ <*>     Intel(R) 82575/82576 PCI-Express Gigabit Ethernet support  # Hetzner PX-60
+# gigabyte n3150n-d3v router board
+<*>     Realtek 8169 gigabit ethernet support
+
+
+x       -> Character devices                             
+x         -> Enable TTY (TTY [=y])                       
+x (1)       -> Unix98 PTY support (UNIX98_PTYS [=y])     
+# [*]     Support multiple instances of devpts  | not found anymore? but activated via gentoo systemd kernel option
+
+
+#########################
+
+-> Filesystems
+ <*> Btrfs filesystem support
+  [*]   Btrfs POSIX Access Control Lists
+  [ ]   Btrfs with integrity check tool compiled in (DANGEROUS) (NEW)
+  [*]   Btrfs will run sanity tests upon loading                     
+  [ ]   Btrfs debugging support (NEW)                                
+  [*]   Btrfs assert support    
+# optional.... to test it sometimes as btrfs docker alternative             
+ <*> Overlay filesystem support  
+
+# onetime workaround for missing docs
+#kernel hacking -->
+#[ ] Build targets in Documentation/ tree
+
+#######
+Security options  --->
+[*] Harden memory copies between kernel and userspace
+[*] AppArmor support

@@ -1,0 +1,24 @@
+echo  configure tripwire
+# twsetup passwords are whatever, default to just hit 'y'.
+# it does not accept 'yes' output, i tried
+twsetup.sh
+# to learn tripwire its own db files, this has to be done twice
+tripwire --check  || true
+tripwire --update -r $(ls -t /var/lib/tripwire/report/* | head -n 1)
+tripwire --check  || true
+tripwire --update -r $(ls -t /var/lib/tripwire/report/* | head -n 1)
+# a cronjob was set up automatically that reports to cron
+# note that all of this is just to satisfy KPMG requirements, and is practically bogus
+# a real tripwire setup would require a centralized trusted server.
+# the database should be generated at image build level, genesis generated configfiles and container data should be excempt,
+# all that should be transferred to said trusted central server.
+# also, twsetup.sh should be reimplemented to automate it.
+# furthermore, container data (data/pdata/config) would need to dynamically update the tripwire database on deploy/install
+# tripwire cant check a running containers filesystem easily, which would be what attackers target first. the host system is very unlikely to be attacked.
+# there is just too much dynamic content. only the host installation is static and easy enough to inspect to make this practical.
+# but then again, that only covers a tiny fraction of the filesystem
+# in essence, tripwire is the wrong tool for the job.
+# i see no alternative short of implementing a solution myself. however, the feature requirements (especially for dev deployment) are high and very complex.
+# plus: data from dev is to be considered tainted already. 
+# at the end of the day: given the highly dynamic setup, checksum verification is impractical and mostly snakeoil.
+# thus, tripwire is disabled

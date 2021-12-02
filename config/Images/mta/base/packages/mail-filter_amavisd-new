@@ -1,0 +1,21 @@
+#@flags
+
+enabled=1
+
+#@package
+
+mail-filter/amavisd-new
+
+#@post
+
+mv /etc/amavisd.conf /etc/amavisd.conf.dist
+ln -s [% images.paths.CONFIG %]/amavisd.conf /etc/amavisd.conf
+
+#@pre
+
+mkdir -p /etc/portage/package.license
+echo app-arch/lha lha > /etc/portage/package.license/amavis
+echo app-arch/unarj arj >> /etc/portage/package.license/amavis
+echo app-arch/unrar unRAR >> /etc/portage/package.license/amavis
+echo mail-filter/amavisd-new clamav spamassassin mysql >> /etc/portage/package.use/amavis
+

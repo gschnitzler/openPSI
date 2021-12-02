@@ -1,0 +1,8 @@
+#@flags
+
+enabled=0
+
+#@package
+
+parted
+

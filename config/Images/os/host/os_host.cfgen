@@ -1,0 +1,67 @@
+{
+    os_host => {
+        root      => './os/host',
+        scripts   => './os/base/scripts',
+        templates => './os/host/templates',
+        from      => 'os_baseos',
+        build     => 'yes',
+        docker    => 'no',
+        add       => {
+            os_baseos => {
+                source => 'IMAGE:base',
+                target => '/',
+            },
+            portage => {
+                source => 'IMAGE:base_portage',
+                target => '/var/db/repos/gentoo'
+            }
+        },
+        export => {
+            boot => {
+                source  => '/boot/',
+                diff    => 0,
+                exclude => [
+                    #
+                    './lost+found/*',
+                    './lilo.conf',
+                    './grub*',
+                    './initramfs*'
+                ],
+
+            },
+            hostos => {
+                source  => '/',
+                diff    => 0,
+                exclude => [
+                    './mnt/*',
+                    './root/*',
+                    './home/*',
+                    './proc/*',
+                    './dev/*',
+                    './boot/*',
+                    './usr/portage/*',
+                    './var/db/repos/gentoo/*',
+                    './data/*',       # should not be hardcoded
+                    './etc/ssh/*',    # don't leak the keys
+                    './lost+found/*',
+                    './run/*',
+                    './sys/*',
+                    './tmp/*',
+                    './usr/src/*',    # don't pack the kernel source
+                ]
+            },
+        },
+
+        # prometheus
+        groups => { 'node_exporter' => '10402', },
+        users  => {
+            'node_exporter' => {
+                uid   => '10402',
+                gid   => '10402',
+                home  => '/dev/null',
+                shell => '/sbin/nologin',
+            },
+        }
+    }
+};
+

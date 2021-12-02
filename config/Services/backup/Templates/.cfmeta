@@ -1,0 +1,15 @@
+{
+    './backup_borg_key' => {
+        LOCATION => '/root/.backup_borg_key',
+        CHMOD    => 400
+    },
+    './backup_ssh_priv' => {
+        LOCATION => '/root/.ssh/backup',
+        CHMOD    => 600
+    },
+    './backup_ssh_pub' => {
+        LOCATION => '/root/backup_ssh_pub', # gets deleted after use
+        CHMOD    => 644
+    },
+}
+

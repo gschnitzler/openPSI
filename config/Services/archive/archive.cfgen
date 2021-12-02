@@ -1,0 +1,8 @@
+{
+    archive => {
+        REQUIRE   => [],
+        SCRIPTS   => './archive/Scripts',
+        TEMPLATES => './archive/Templates',
+    }
+};
+

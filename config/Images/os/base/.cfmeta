@@ -1,0 +1,15 @@
+{
+  './*' => {},
+  './packages/' => {
+    CHMOD => '755'
+  },
+  './packages/*' => {},
+  './scripts/' => {
+    CHMOD => '755'
+  },
+  './scripts/*' => {},
+  _default_meta => {
+    CHMOD => '644'
+  }
+}
+

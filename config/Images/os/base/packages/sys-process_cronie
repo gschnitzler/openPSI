@@ -1,0 +1,12 @@
+#@flags
+
+enabled=1
+
+#@package
+
+sys-process/cronie
+
+#@post
+
+rc-update add cronie default
+

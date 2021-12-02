@@ -1,0 +1,27 @@
+#@flags
+
+enabled=1
+
+#@package
+
+sys-kernel/dracut
+
+#@post group=15
+
+early_microcode="yes"
+
+echo "creating initramfs"
+rm -rf /boot/dracut*
+
+# newer version of dracut detects the running kernel and tries to use that kernels modules
+# this tricks it into using the right ones
+ln -s /lib/modules/$(ls /lib/modules/ | head -n1) /lib/modules/$(uname -r)
+# dracut now takes some time to gzip the kernel modules
+# --early-microcode is used to load microcode updates
+dracut --early-microcode -m "btrfs base rootfs-block kernel-modules fs-lib img-lib usrmount udev-rules i18n" --force --mount "[% machine.self.RAID.DISK1 %] / btrfs subvol=system1" /boot/dracut-system1.img
+dracut --early-microcode -m "btrfs base rootfs-block kernel-modules fs-lib img-lib usrmount udev-rules i18n" --force --mount "[% machine.self.RAID.DISK1 %] / btrfs subvol=system2" /boot/dracut-system2.img
+
+#@pre
+
+#echo "sys-kernel/dracut ~amd64" >> /etc/portage/package.accept_keywords
+

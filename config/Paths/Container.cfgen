@@ -1,0 +1,15 @@
+{
+    container => {
+        HOST     => { PREFIX => 'container' },
+        MAPPINGS => {
+            CONFIG     => 'config',
+            DATA       => 'data',
+            PERSISTENT => 'pdata',
+            SHARED     => 'sdata',
+            MAPPED     => 'mdata',
+            BACKUP     => 'backup',
+            ARCHIVE    => 'archive'
+        }
+    }
+};
+

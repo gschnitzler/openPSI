@@ -1,0 +1,7 @@
+{
+  './csync_init' => {
+  	LOCATION => '/runonce/csync_init',
+	CHMOD => '550',
+  },
+}
+

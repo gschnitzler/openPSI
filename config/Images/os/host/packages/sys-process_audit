@@ -1,0 +1,15 @@
+#@description
+
+used for the pam module pam_tty_audit.so
+
+#@flags
+
+enabled=1
+
+#@package
+
+sys-process/audit
+
+#@post
+
+

@@ -1,0 +1,2 @@
+echo "cleaning target disk"
+rm -rf [% paths.hostos.MOUNT %]/*

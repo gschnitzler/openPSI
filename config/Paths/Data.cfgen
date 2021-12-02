@@ -1,0 +1,18 @@
+my $data = "/data";
+
+{
+    data => {
+        ROOT                   => "$data",
+        IMAGES                 => "$data/images",
+        DOCKER                 => "$data/docker",
+        BUILD                  => "$data/build",
+        DOCKER                 => "$data/docker",
+        BACKUP                 => "$data/backup",
+        LOCAL_HOST_CONFIG      => "$data/local_config/host",
+        LOCAL_CONTAINER_CONFIG => "$data/local_config/container",
+        LOCAL_GENESIS_CONFIG   => "$data/local_config/genesis",
+        LOCAL_SECRETS_CONFIG   => "$data/local_config/secrets",
+        LOCAL_DNS_CONFIG       => "$data/local_config/dns",
+    }
+};
+

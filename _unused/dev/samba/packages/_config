@@ -1,0 +1,8 @@
+#@flags
+
+enabled=1
+
+#@post group=15
+
+rm -rf /etc/supervisord.conf && ln -s [% images.paths.CONFIG %]/supervisord.conf /etc/
+

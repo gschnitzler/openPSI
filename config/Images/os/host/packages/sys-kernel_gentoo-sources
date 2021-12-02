@@ -1,0 +1,39 @@
+#@flags
+
+enabled=1
+
+#@package
+
+# docker has a hard dependency on _configured_ kernel sources, so this is in pre
+
+#@pre
+
+# linux-firmware (amd) and intel-microcode used for loading updated microcode. reason are spectre, meltdown etc
+echo "sys-apps/util-linux static-libs" >>  /etc/portage/package.use/genkernel
+mkdir -p /etc/portage/package.license/
+echo sys-kernel/linux-firmware linux-fw-redistributable no-source-code > /etc/portage/package.license/kernel
+echo sys-firmware/intel-microcode intel-ucode  >> /etc/portage/package.license/kernel
+
+emerge sys-kernel/gentoo-sources sys-kernel/genkernel sys-kernel/linux-firmware sys-firmware/intel-microcode
+
+##################################################################
+# set this to yes to change kernel config in bootstrap
+echo "setting menuconfig: "
+sed -i 's/\(MENUCONFIG=\)\"no\"/\1\"yes\"/' /etc/genkernel.conf
+##################################################################
+
+echo "metal kernel"
+# this works because the kernel can be configured via environment variables, and this whole section is run in a single shell
+[% images.templates.os_host.kernelmetal %]
+
+# --microcode enables microcode updates in kernel and for the initramfs we through away. dracut is used instead
+genkernel kernel --microcode --menuconfig --no-btrfs --no-zfs --kernel-filename=kernel-metal-`date +%y%m%d%H`-%%KV%% --systemmap-filename=System.map-metal-`date +%y%m%d%H`-%%KV%% --no-clean
+# this is to retrieve the config for reintegration
+cp -f /usr/src/linux/.config /root/kernel-metal-`cat /usr/src/linux/.config | head | grep "Kernel Configuration" | sed -e 's/.* \([^ ]\+gentoo[^\ ]*\) .*/\1/'`
+
+##################################################################
+
+echo "removing initramfs"
+rm -rf /boot/initramfs*
+
+

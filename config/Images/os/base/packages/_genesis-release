@@ -1,0 +1,8 @@
+#@flags
+
+enabled=1
+
+#@post group=20
+
+echo Base init: `date +%y%m%d%H` > /etc/genesis-release
+

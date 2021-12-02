@@ -1,0 +1,20 @@
+{
+    './docker' => {
+        LOCATION => '/etc/conf.d/docker',
+        CHMOD    => 644
+    },
+    './hostname' => {
+        LOCATION => '/etc/conf.d/hostname',
+        CHMOD    => 600
+    },
+    './iptables' => {
+        LOCATION => '/var/lib/iptables/rules-save',
+        CHMOD    => 600
+    },
+    './network' => {
+        LOCATION => '/etc/conf.d/net',
+        CHMOD    => 600
+    },
+};
+
+

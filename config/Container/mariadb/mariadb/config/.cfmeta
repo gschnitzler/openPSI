@@ -1,0 +1,12 @@
+{
+    './'           => { CHMOD => 550 },
+    './start.conf' => {},
+    './mysql/'     => { CHMOD => 550 },
+    './mysql/*'    => {},
+    _default_meta  => {
+        CHMOD => '440',
+        UID   => '60',
+        GID   => '60'
+    }
+}
+

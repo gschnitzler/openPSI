@@ -1,0 +1,20 @@
+#@description
+
+used by SSH::Deploy and SSH::Remote 
+
+#@flags
+
+enabled=1
+
+#@package
+
+net-misc/sshpass
+
+#@post
+
+# this is now done via the ssh Service
+# remove pointless checks
+#echo "UserKnownHostsFile=/dev/null" >> /etc/ssh/ssh_config
+#echo "StrictHostKeyChecking=no" >> /etc/ssh/ssh_config
+#echo "LogLevel QUIET" >> /etc/ssh/ssh_config
+

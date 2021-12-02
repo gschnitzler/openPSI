@@ -1,0 +1,13 @@
+{   './archive.init' => {
+        CHMOD    => '760',
+        LOCATION => '/etc/init.d/archive_server'
+    },
+    './archive.pl' => {
+        CHMOD    => '500',
+        LOCATION => '/usr/sbin/archive_server'
+    },
+    './own_priv' => {
+        CHMOD    => '600',
+        LOCATION => '/root/.ssh/archive'
+    },
+}

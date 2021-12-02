@@ -1,0 +1,10 @@
+my $psi = '/data/psi';
+
+{   psi => {
+        ROOT    => "$psi",
+        GENESIS => "$psi/genesis",
+        LIBS    => "$psi/Libs"
+
+    }
+};
+

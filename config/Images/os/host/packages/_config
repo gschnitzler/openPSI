@@ -1,0 +1,59 @@
+#@flags
+
+enabled=1
+
+#@post group=15
+
+###################################
+
+echo "creating /etc/fstab..."
+cat > /etc/fstab << "EOF"
+# fstab system1:
+# this file as is, is required for the buildhost to boot. thus, the IF device.
+# commands like switch must handle this afterwards
+LABEL=disk1		/boot           btrfs            device=[% machine.self.RAID.DISK1 %],[% IF machine.self.RAID.LEVEL != 'raidS' %]device=[% machine.self.RAID.DISK2 %],[% END %]subvol=boot,rw,noatime,ssd,discard,degraded 0 0
+LABEL=disk1		/               btrfs            device=[% machine.self.RAID.DISK1 %],[% IF machine.self.RAID.LEVEL != 'raidS' %]device=[% machine.self.RAID.DISK2 %],[% END %]subvol=system1,rw,noatime,ssd,discard,degraded 0 0
+LABEL=disk1		[% paths.data.ROOT %]           btrfs            device=[% machine.self.RAID.DISK1 %],[% IF machine.self.RAID.LEVEL != 'raidS' %]device=[% machine.self.RAID.DISK2 %],[% END %]subvol=data,rw,noatime,ssd,discard,degraded 0 0
+EOF
+
+###################################
+
+echo "creating genesis cmd"
+cat > /usr/bin/mount_genesis << "EOF"
+#!/bin/bash
+if [ -f [% paths.data.ROOT %]/.mount_genesis ]; then
+        if [ "$(stat --format '%a_%u' [% paths.data.ROOT %]/.mount_genesis)" == "700_0" ]; then
+		if [ ! -d [% paths.psi.GENESIS %] ]; then
+	                /data/.mount_genesis;
+		fi
+        fi
+elif [ -d /media/sf_PSI/genesis ]; then
+	if [ ! -d [% paths.psi.GENESIS %] ]; then
+        mount -t vboxsf -o rw,uid=2001,gid=2001,umask=077 PSI [% paths.psi.ROOT %]; # hardcoded gschnitzler.psdev
+	fi
+elif [ ! "$(ls -A [% paths.psi.GENESIS %]/ )" ]; then
+	image=$(ls [% paths.data.IMAGES %]/genesis_* | sort -rn | head -n 1);
+    	# some copy implementations are broken and dont support -f
+    	rm -f [% paths.data.ROOT %]/genesis.img*
+	cp $image [% paths.data.ROOT %]/genesis.img.xz;
+	cd [% paths.data.ROOT %];
+	xz -d genesis.img.xz;
+	chmod 400 genesis.img;
+	mount -r genesis.img [% paths.psi.ROOT %];
+fi
+EOF
+chmod 500 /usr/bin/mount_genesis
+
+cat > /usr/bin/genesis << "EOF"
+#!/bin/bash
+/usr/bin/mount_genesis
+cd [% paths.psi.GENESIS %]
+exec ./genesis.pl $*
+EOF
+chmod 500 /usr/bin/genesis
+
+###################################
+
+echo HostOS init: `date +%y%m%d%H` >> [% paths.hostos.RELEASE %]
+
+

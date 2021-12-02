@@ -1,0 +1,51 @@
+#@flags
+
+enabled=1
+
+#@package
+dev-python/setuptools
+dev-python/pip
+dev-python/python-ldap
+# docs forgot to mention this.
+dev-python/requests
+# they don't tell, but its still required in 7.1.x
+sys-libs/libselinux
+
+#@post group=10
+
+# --user is a gentoo requirement
+pip3 install --user --timeout=3600 Pillow pylibmc captcha jinja2 sqlalchemy psd-tools django-pylibmc django-simple-captcha
+rm -rf /root/.cache/
+# keep the /root/.local/ dir. its where pip with --user installs to, and where seafile looks for it.
+
+
+ln -s [% images.paths.CONFIG %]/seafile/conf /root/ccnet
+ln -s [% images.paths.CONFIG %]/seafile/conf /root/conf
+ln -s /root/seafile /root/seafile-server-latest
+ln -s [% images.paths.PERSISTENT %]/seahub-data /root/seahub-data
+ln -s [% images.paths.PERSISTENT %]/seafile /root/seafile-data
+ln -s [% images.paths.PERSISTENT %]/logs /root/logs
+
+# seahub relies on seafile, but supervisord can not 'wait'
+# so wrap it up
+echo '#!/bin/bash' > /root/startup.sh
+echo '/root/seafile/seafile.sh start' >> /root/startup.sh
+echo 'sleep 7'  >> /root/startup.sh
+# this used to accept a port. it still does, but its ignored. accepting the default of gunicorn.conf. redirect via proxy
+echo '/root/seafile/seahub.sh start' >> /root/startup.sh
+chmod u+x /root/startup.sh
+
+
+#@pre
+
+
+# switched over to seafile 7.1.x to escape python 2.7
+echo "downloading seafile server..."
+cd /root/ && wget https://s3.eu-central-1.amazonaws.com/download.seadrive.org/seafile-server_7.1.4_x86-64.tar.gz
+cd /root/ && tar zfx *.tar.gz
+rm -rf /root/*.tar.gz
+mkdir -p /root/seafile && mv /root/seafile-server*/* /root/seafile
+rm -rf /root/seafile-server*
+
+
+

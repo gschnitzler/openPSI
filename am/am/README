@@ -1,0 +1,9 @@
+edit Config/Constants.pm to your liking
+./am_forker.pl (install missing deps via 'cpan install Modulename' or 'cpanm Modulename')
+./am_inotify.pl (install missing deps via cpan install Modulename' or 'cpanm Modulename')
+
+to see what happens, use something like this
+for ((i=100;i<101;i++)); do touch /tmp/test/tm/out/$i\_qbo.xz; done
+
+
+

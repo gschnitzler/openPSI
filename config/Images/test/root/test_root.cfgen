@@ -1,0 +1,55 @@
+{   test_root => {
+
+        root      => './test/root',
+        scripts   => './test/root/scripts',
+        from      => 'test_rootimage',
+        build     => 'no',
+        bootstrap => 'yes',
+        docker    => 'yes',
+        add       => {
+            test_rootimage => {
+                source => 'IMAGE:base',
+                target => '/'
+            },
+            portage => {
+                source => 'IMAGE:base_portage',
+                target => '/usr/portage'
+            }
+        },
+        export => {
+            test_root => {
+                diff    => 0,
+                source  => '/',
+                exclude => [
+                    #
+                    './mnt/*',
+                    './root/*',
+                    './home/*',
+                    './proc/*',
+                    './dev/*',
+                    './boot/*',
+                    './usr/portage/*',
+
+                    # should not be hardcoded
+                    './data/*',
+                    './lost+found/*',
+                    './run/*',
+                    './sys/*',
+                    './tmp/*',
+
+                    # this differs from baseos
+                    './lib64/modules/*',
+                    './usr/src/*'
+                    ]
+
+            },
+
+            #test_root_portage => {
+            #    source  => '/usr/portage',
+            #    exclude => [],
+            #    diff    => 0
+            #}
+        }
+    }
+};
+

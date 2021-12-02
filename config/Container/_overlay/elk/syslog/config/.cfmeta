@@ -1,0 +1,4 @@
+{
+    './supervisord.conf' => { CHMOD => '440' },
+}
+

@@ -1,0 +1,22 @@
+{
+    'fpm' => {
+        production => {
+            CONFIG              => './fpm/fpm/config',
+            CONFIG_OVERLAY      => './_overlay/supervisord ./_overlay/apache/php',
+            OVERLAY_PERMISSIONS => {},
+            DNS                 => { REGISTER => '' },
+            NETWORK             => {
+                INTERFACE => 'fpmprod',
+                FORWARD   => {},
+                IP        => { main => '91' },
+            },
+            DOCKER => {
+                OPTS  => '',
+                IMAGE => 'amp_fbpdf',
+            },
+            START_AFTER => {},
+            SECRETS     => {},
+            EXPOSE      => {},
+        }
+    }
+};

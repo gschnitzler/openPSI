@@ -1,0 +1,276 @@
+#@flags
+
+enabled=1
+
+#@description
+SOOOoo... wkhtmltopdf is a big pile of horseshit.
+they managed to bundle (and patch) the whole world, and then did what everybody else did who tried that before.
+they broke down under the maintenance burden and never touched it again.
+talk about devs bundling their deps. anyway.
+wkhtmltopdf should, under no circumstances, be anywhere near the internet.
+either get rid of this crap, or push it into a seperate image.
+from there, securing our premises could look like this:
+- container with wkhtmltopdf image has no internet access and a RESTful webservice that accepts all data needed to render a pdf.
+- that container does that, writes the file to disk and returns the filename to the caller
+- the file is somehow transferred to another container which is accessible from the internet to serve the file
+- the caller uses a link to the file under that containers url
+
+#@package
+
+#@pre
+# dont use pre, as this file depends on the action of the gentoo version
+
+#@post group=15
+
+# the patches below make stuff compile with gcc up to 8. so stick to 8
+echo '>=sys-devel/gcc-9' >/etc/portage/package.mask/wkhtmltopdf
+emerge sys-devel/gcc
+gcc-config $(gcc-config --list-profiles | grep 8.3 | awk '{print $1}' | sed -e 's/\[//g' | sed -e 's/\]//')
+
+
+# install the git version
+
+cd /root && git clone --recursive https://github.com/wkhtmltopdf/wkhtmltopdf.git
+
+# use last version before the build scripts were split off to another repository
+cd /root/wkhtmltopdf && git fetch --all --tags --prune
+#cd /root/wkhtmltopdf && git checkout tags/$(git tag -l | grep 0.12 | sort -rn | head -n 1)
+cd /root/wkhtmltopdf && git checkout 42ee518b99a4067fbcc6a8f74408c221394cd5aa
+#cd /root/wkhtmltopdf && git merge master
+
+#### so the forked off qt version does not compile with gcc6+
+# https://github.com/wkhtmltopdf/qt/issues/32 mentions a patch, found here:
+# https://src.fedoraproject.org/cgit/rpms/qt.git/tree/qt-everywhere-opensource-src-4.8.7-gcc6.patch
+# but the patches are now in the latest branches.
+# so we use the latest branch
+# still, webkit does not compile, found a gcc6 patch here:
+# https://github.com/aantonw/docker-alpine-wkhtmltopdf-patched-qt/blob/master/conf/qt-gcc6.patch
+# took out the things not yet patched in the branches, apply it below
+
+cd /root/wkhtmltopdf/qt && git fetch --all --tags --prune
+cd /root/wkhtmltopdf/qt && git checkout tags/$(git tag -l | grep 4 | sort -rn | head -n 1)
+cd /root/wkhtmltopdf/qt && git merge $(git branch -l | grep 4 | sort -rn | head -n 1)
+
+cd /root/wkhtmltopdf/qt && patch -p1 << "EOF"
+diff --git a/src/3rdparty/javascriptcore/JavaScriptCore/runtime/Structure.cpp b/src/3rdparty/javascriptcore/JavaScriptCore/runtime/Structure.cpp
+index 499c53a71d..ccc307089d 100644
+--- a/src/3rdparty/javascriptcore/JavaScriptCore/runtime/Structure.cpp
++++ b/src/3rdparty/javascriptcore/JavaScriptCore/runtime/Structure.cpp
+@@ -157,7 +157,7 @@ Structure::~Structure()
+ {
+     if (m_previous) {
+         if (m_nameInPrevious)
+-            m_previous->table.remove(StructureTransitionTableHash::Key(RefPtr<UString::Rep>(m_nameInPrevious.get()), m_attributesInPrevious), m_specificValueInPrevious);
++            m_previous->table.remove(StructureTransitionTableHash::Key(RefPtr<UString::Rep>(m_nameInPrevious.get()), (unsigned int)(m_attributesInPrevious)), m_specificValueInPrevious);
+         else
+             m_previous->table.removeAnonymousSlotTransition(m_anonymousSlotsInPrevious);
+ 
+diff --git a/src/3rdparty/javascriptcore/JavaScriptCore/runtime/Structure.h b/src/3rdparty/javascriptcore/JavaScriptCore/runtime/Structure.h
+index 7571efc1e9..77d4f5047f 100644
+EOF
+
+cd /root/wkhtmltopdf/qt && patch -p1 << "EOF"
+--- a/src/3rdparty/javascriptcore/JavaScriptCore/runtime/Structure.h
++++ b/src/3rdparty/javascriptcore/JavaScriptCore/runtime/Structure.h
+@@ -317,7 +317,7 @@ namespace JSC {
+         TransitionTable* transitionTable = new TransitionTable;
+         setTransitionTable(transitionTable);
+         if (existingTransition)
+-            add(StructureTransitionTableHash::Key(RefPtr<UString::Rep>(existingTransition->m_nameInPrevious.get()), existingTransition->m_attributesInPrevious), existingTransition, existingTransition->m_specificValueInPrevious);
++            add(StructureTransitionTableHash::Key(RefPtr<UString::Rep>(existingTransition->m_nameInPrevious.get()), (unsigned int)(existingTransition->m_attributesInPrevious)), existingTransition, existingTransition->m_specificValueInPrevious);
+     }
+ } // namespace JSC
+EOF
+
+cd /root/wkhtmltopdf/qt && patch -p1 << "EOF"
+diff --git a/src/3rdparty/javascriptcore/JavaScriptCore/wtf/HashTable.h b/src/3rdparty/javascriptcore/JavaScriptCore/wtf/HashTable.h
+index 42a9233000..e761edb1fa 100644
+--- a/src/3rdparty/javascriptcore/JavaScriptCore/wtf/HashTable.h
++++ b/src/3rdparty/javascriptcore/JavaScriptCore/wtf/HashTable.h
+@@ -257,17 +257,6 @@ namespace WTF {
+ 
+     using std::swap;
+ 
+-#if !COMPILER(MSVC) && !OS(QNX) && !defined(_LIBCPP_VERSION)
+-    // The Dinkumware C++ library (used by MSVC and QNX) and clang's libc++ have a swap for pairs defined.
+-
+-    // swap pairs by component, in case of pair members that specialize swap
+-    template<typename T, typename U> inline void swap(pair<T, U>& a, pair<T, U>& b)
+-    {
+-        swap(a.first, b.first);
+-        swap(a.second, b.second);
+-    }
+-#endif
+-
+     template<typename T, bool useSwap> struct Mover;
+     template<typename T> struct Mover<T, true> { static void move(T& from, T& to) { swap(from, to); } };
+     template<typename T> struct Mover<T, false> { static void move(T& from, T& to) { to = from; } };
+EOF
+
+cd /root/wkhtmltopdf/qt && patch -p1 << "EOF"
+diff --git a/src/3rdparty/javascriptcore/JavaScriptCore/wtf/TypeTraits.h b/src/3rdparty/javascriptcore/JavaScriptCore/wtf/TypeTraits.h
+index ede98e4f26..ce890876ee 100644
+--- a/src/3rdparty/javascriptcore/JavaScriptCore/wtf/TypeTraits.h
++++ b/src/3rdparty/javascriptcore/JavaScriptCore/wtf/TypeTraits.h
+@@ -25,7 +25,7 @@
+ #include "Platform.h"
+ 
+ #if (defined(__GLIBCXX__) && (__GLIBCXX__ >= 20070724) && defined(__GXX_EXPERIMENTAL_CXX0X__)) || (defined(_MSC_VER) && (_MSC_VER >= 1600))
+-#include <type_traits>
++#include <tr1/type_traits>
+ #endif
+ 
+ namespace WTF {
+EOF
+
+cd /root/wkhtmltopdf/qt && patch -p1 << "EOF"
+diff --git a/src/3rdparty/javascriptcore/JavaScriptCore/wtf/unicode/UTF8.cpp b/src/3rdparty/javascriptcore/JavaScriptCore/wtf/unicode/UTF8.cpp
+index 21d58563cc..ba819fc11a 100644
+--- a/src/3rdparty/javascriptcore/JavaScriptCore/wtf/unicode/UTF8.cpp
++++ b/src/3rdparty/javascriptcore/JavaScriptCore/wtf/unicode/UTF8.cpp
+@@ -228,7 +228,7 @@ static bool isLegalUTF8(const unsigned char* source, int length)
+ // Magic values subtracted from a buffer value during UTF8 conversion.
+ // This table contains as many values as there might be trailing bytes
+ // in a UTF-8 sequence.
+-static const UChar32 offsetsFromUTF8[6] = { 0x00000000UL, 0x00003080UL, 0x000E2080UL, 
++static const long offsetsFromUTF8[6] = { 0x00000000UL, 0x00003080UL, 0x000E2080UL, 
+             0x03C82080UL, 0xFA082080UL, 0x82082080UL };
+ 
+ ConversionResult convertUTF8ToUTF16(
+diff --git a/src/3rdparty/javascriptcore/JavaScriptCore/yarr/RegexCompiler.cpp b/src/3rdparty/javascriptcore/JavaScriptCore/yarr/RegexCompiler.cpp
+index 9cd3d123c1..917eac055a 100644
+EOF
+
+cd /root/wkhtmltopdf/qt && patch -p1 << "EOF"
+--- a/src/3rdparty/javascriptcore/JavaScriptCore/yarr/RegexCompiler.cpp
++++ b/src/3rdparty/javascriptcore/JavaScriptCore/yarr/RegexCompiler.cpp
+@@ -719,7 +719,7 @@ const char* compileRegex(const UString& patternString, RegexPattern& pattern)
+ 
+     constructor.setupOffsets();
+ 
+-    return false;
++    return nullptr;
+ };
+EOF
+
+## double # because #@@ would trip over my parser :)
+## this patch was merged into master 
+## https://github.com/wkhtmltopdf/qt/compare/c745cfd57fbba4f2fe6e17dc95d7a8a3a4c57829...ce61dc78a0a68428848bfc6531b9ef18019d9134#diff-b69759ba1d5654775a228741ee6e6879
+##cd /root/wkhtmltopdf/qt && patch -p1 << "EOF" 
+##diff --git a/src/3rdparty/webkit/Source/JavaScriptCore/JavaScriptCore.pro b/src/3rdparty/webkit/Source/JavaScriptCore/JavaScriptCore.pro
+##index f20ffc3..e63d672 100644
+##--- a/src/3rdparty/webkit/Source/JavaScriptCore/JavaScriptCore.pro
+##+++ b/src/3rdparty/webkit/Source/JavaScriptCore/JavaScriptCore.pro
+##@@ -241,3 +241,7 @@ lessThan(QT_GCC_MAJOR_VERSION, 5) {
+##         }
+##     }
+## }
+##+
+##+*-g++* {
+##+    QMAKE_CXXFLAGS += -std=gnu++98
+##+}
+##EOF
+
+cd /root/wkhtmltopdf/qt && patch -p1 << "EOF"
+diff --git a/src/corelib/global/qglobal.h b/src/corelib/global/qglobal.h
+index 7b69922b89..d88d4e5ead 100644
+--- a/src/corelib/global/qglobal.h
++++ b/src/corelib/global/qglobal.h
+@@ -52,7 +52,7 @@
+ /*
+    can be used like #if (QT_VERSION >= QT_VERSION_CHECK(4, 4, 0))
+ */
+-#define QT_VERSION_CHECK(major, minor, patch) ((major<<16)|(minor<<8)|(patch))
++#define QT_VERSION_CHECK(qt_version_check_major, qt_version_check_minor, qt_version_check_patch) ((qt_version_check_major<<16)|(qt_version_check_minor<<8)|(qt_version_check_patch))
+ 
+ #define QT_PACKAGEDATE_STR "YYYY-MM-DD"
+ 
+@@ -2432,7 +2432,7 @@ class QFlags
+ public:
+     typedef Enum enum_type;
+     Q_DECL_CONSTEXPR inline QFlags(const QFlags &f) : i(f.i) {}
+-    Q_DECL_CONSTEXPR inline QFlags(Enum f) : i(f) {}
++    Q_DECL_CONSTEXPR inline QFlags(Enum f) : i(int(f)) {}
+     Q_DECL_CONSTEXPR inline QFlags(Zero = 0) : i(0) {}
+     inline QFlags(QFlag f) : i(f) {}
+EOF
+
+
+cd /root/wkhtmltopdf/qt && patch -p1 << "EOF"
+diff --git a/src/declarative/declarative.pro b/src/declarative/declarative.pro
+index 5bf4e0115f..d1c56ae4da 100644
+--- a/src/declarative/declarative.pro
++++ b/src/declarative/declarative.pro
+@@ -4,7 +4,7 @@ QT         = core gui script network
+ contains(QT_CONFIG, svg): QT += svg
+ DEFINES   += QT_BUILD_DECLARATIVE_LIB QT_NO_URL_CAST_FROM_STRING
+ win32-msvc*|win32-icc:QMAKE_LFLAGS += /BASE:0x66000000
+-solaris-cc*:QMAKE_CXXFLAGS_RELEASE -= -O2
++QMAKE_CXXFLAGS_RELEASE -= -O2
+ 
+ unix|win32-g++*:QMAKE_PKGCONFIG_REQUIRES = QtCore QtGui
+EOF
+
+
+cd /root/wkhtmltopdf/qt && patch -p1 << "EOF"
+diff --git a/src/plugins/accessible/widgets/itemviews.cpp b/src/plugins/accessible/widgets/itemviews.cpp
+index 14c9279dbe..c982b6c43c 100644
+--- a/src/plugins/accessible/widgets/itemviews.cpp
++++ b/src/plugins/accessible/widgets/itemviews.cpp
+@@ -393,7 +393,7 @@ bool QAccessibleTable2::unselectColumn(int column)
+     QModelIndex index = view()->model()->index(0, column, view()->rootIndex());
+     if (!index.isValid() || view()->selectionMode() & QAbstractItemView::NoSelection)
+         return false;
+-    view()->selectionModel()->select(index, QItemSelectionModel::Columns & QItemSelectionModel::Deselect);
++    view()->selectionModel()->select(index, QItemSelectionModel::SelectionFlag(QItemSelectionModel::Columns & QItemSelectionModel::Deselect));
+     return true;
+ }
+EOF
+
+cd /root/wkhtmltopdf/qt && patch -p1 << "EOF" 
+diff --git a/src/tools/moc/main.cpp b/src/tools/moc/main.cpp
+index 147e3f5a79..7e4453d8f1 100644
+--- a/src/tools/moc/main.cpp
++++ b/src/tools/moc/main.cpp
+@@ -190,6 +190,8 @@ int runMoc(int _argc, char **_argv)
+ 
+     // Workaround a bug while parsing the boost/type_traits/has_operator.hpp header. See QTBUG-22829
+     pp.macros["BOOST_TT_HAS_OPERATOR_HPP_INCLUDED"];
++    pp.macros["BOOST_TYPE_TRAITS_HPP"];
++    pp.macros["_SYS_SYSMACROS_H_OUTER"];
+ 
+     QByteArray filename;
+     QByteArray output;
+EOF
+
+
+###############################################################################
+
+# the build script has a bug returning wrong version information from git.
+# and then adding '' to it. and then trying to pass this to the shell.
+# this disables that
+sed -i 's/hash = get_output.*/hash = 0/' /root/wkhtmltopdf/scripts/build.py
+
+# the build script has a bug in the latest version, where the install directory is set wrongly
+# use absolute path instead
+sed -i 's/install INSTALL_ROOT=..\/w/install\ INSTALL_ROOT=\/root\/wkhtmltopdf\/static-build\/posix-local\/w/' /root/wkhtmltopdf/scripts/build.py
+
+# they made a patch that breaks qt Makefile generation and is not needed on linux
+sed -i 's/else:if(CONFIG(static,\ shared|static):\ LIBS\ +=\ zlib.lib//' /root/wkhtmltopdf/qt/src/3rdparty/zlib_dependency.pri
+sed -i 's/else:if(CONFIG(static,\ shared|static):\ LIBS\ +=\ zlib.lib//' /root/wkhtmltopdf/qt/src/tools/bootstrap/bootstrap.pri
+
+# compile the crappile
+cd /root/wkhtmltopdf && scripts/build.py posix-local
+
+# installation
+cp /root/wkhtmltopdf/static-build/*tar* /opt/ && cd /opt/ && tar fx *tar*
+rm -f /opt/*tar*
+cd /opt && mv wkhtml* wkhtmltopdf
+
+# link it in path for apps to use
+for i in $(ls /opt/wkhtmltopdf/bin); do ln -s /opt/wkhtmltopdf/bin/$i /usr/bin/$i; done
+
+# cleanup
+rm -rf /var/chroot /root/wkhtmltopdf
+
+

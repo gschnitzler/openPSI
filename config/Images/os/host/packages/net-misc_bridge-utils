@@ -1,0 +1,12 @@
+#@description
+
+has been deprecated in favor of net-misc/netifrc
+
+#@flags
+
+enabled=0
+
+#@package
+
+net-misc/bridge-utils
+

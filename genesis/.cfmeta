@@ -1,0 +1,21 @@
+{
+    './' => {
+        CHMOD => '500',
+    },
+    './*' => {
+        CHMOD => '700'
+    },
+    './Config/' => {
+        CHMOD => '500'
+    },
+    './Plugins/' => {
+        CHMOD => '500'
+    },
+    './Plugins/**' => {
+        CHMOD => '500'
+    },
+    _default_meta => {
+        CHMOD => '600'
+    }
+}
+

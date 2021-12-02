@@ -1,0 +1,7 @@
+{
+  './install_backup.sh' => {
+  	LOCATION => '/runonce/install_backup.sh',
+	CHMOD => '550',
+  },
+}
+

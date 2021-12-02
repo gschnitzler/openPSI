@@ -1,0 +1,2 @@
+command_args="--collector.textfile.directory=/var/lib/node_exporter/ --web.listen-address [% machine.self.NETWORK.INTERN.ADDRESS %]:9100"
+

@@ -1,0 +1,13 @@
+#@description
+
+used for backup (old, replaced by borg)
+
+#@flags
+
+enabled=0
+
+#@package
+
+# used for backup
+app-backup/duplicity
+

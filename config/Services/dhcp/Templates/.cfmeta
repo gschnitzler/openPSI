@@ -1,0 +1,7 @@
+{
+  './dnsmasq.dhcp.conf' => {
+  	LOCATION => '/etc/dnsmasq.dhcp.conf',
+  	CHMOD => 644
+  }
+}
+

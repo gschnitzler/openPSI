@@ -1,0 +1,7 @@
+{
+  './ssmtp.conf' => {
+  LOCATION => '/etc/ssmtp/ssmtp.conf',
+  CHMOD => 640
+},
+}
+

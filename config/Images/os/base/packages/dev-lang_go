@@ -1,0 +1,21 @@
+#@description
+
+Docker is a go app, based in os_host
+prometheus is a go app, build from mariadb_galera
+Seeing that more and more go apps are creeping in,
+go was relocated to base
+
+#@flags
+
+enabled=1
+
+#@package
+
+dev-lang/go
+
+#@pre
+
+#@post
+
+
+

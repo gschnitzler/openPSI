@@ -1,0 +1,8 @@
+{
+    dnsmasq => {
+        REQUIRE   => [],
+        SCRIPTS   => './dnsmasq/Scripts',
+        TEMPLATES => './dnsmasq/Templates',
+    }
+};
+

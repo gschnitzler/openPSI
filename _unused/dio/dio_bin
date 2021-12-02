@@ -1,0 +1,51 @@
+#!/usr/bin/perl
+
+use lib '/usr/lib64/perl5/dio';
+use DIO::ModernStyle;
+use DIO::Server qw(dio_server);
+use POSIX qw(setsid);                # Daemon and Signals
+use English qw( -no_match_vars );    # required for $GID,$EGID,$EUID,$UID
+
+
+my $drop_gid = [% machine.self.USER_ACCOUNTS.GROUPS.psdev.GID %];
+my $drop_uid = [% machine.self.HOST_UID %];
+
+#####################
+
+sub _exit {
+    say time(), ": received sigint/term, exiting.";
+    exit 0;
+}
+
+sub daemonize {
+
+    my ($stdout_log) = @_;
+    say "Becoming a Daemon...";
+
+    chdir '/' or die "Can't chdir to /: $!";
+    open STDIN,  "< /dev/null"   or die "Can't read /dev/null: $!";
+    open STDOUT, ">>$stdout_log" or die "Can't write to $stdout_log: $!";
+    open STDERR, ">>$stdout_log" or die "Can't write to $stdout_log: $!";
+    defined( my $pid = fork() ) or die "Can't fork: $!";
+    exit if $pid;
+    setsid or die "Can't start a new session: $!";
+
+    # drop privs to machine user and group
+    ($GID) = $drop_gid;
+    $EGID = $drop_gid;
+    $EUID = $UID = $drop_uid;
+
+    return $pid;
+}
+
+#######################
+
+$SIG{TERM} = \&_exit;
+$SIG{INT}  = \&_exit;
+
+my $dio_server = dio_server();
+
+daemonize('/dev/null');
+$dio_server->();
+exit $?;
+

@@ -1,0 +1,4 @@
+# update docker config, dont let docker manage networks (do this by disabling bridge)
+DOCKER_OPTS="--data-root [% paths.data.DOCKER %]/ --iptables=false -s btrfs --bridge=[% state.network.INTERN.INTERFACE %] --log-driver=syslog --log-opt syslog-facility=daemon"
+
+

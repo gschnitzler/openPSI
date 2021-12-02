@@ -1,0 +1,222 @@
+#@flags
+
+enabled=1
+
+#@post group=16
+
+echo "syncing repository..."
+emerge --sync --quiet
+echo "reemerging portage..."
+emerge --oneshot portage
+echo "install Locale::GetText..."
+# more often than not, this prevents an error later
+emerge --oneshot dev-perl/Locale-gettext
+echo "updating world..."
+emerge --update --newuse --deep --with-bdeps=y @world
+
+echo Base Update: `date +%y%m%d%H` >> /etc/genesis-release
+
+echo "all done"
+echo "check:"
+echo "gcc-config -l"
+echo "eselect kernel list"
+echo "eselect python list"
+
+##################################################################
+
+#@pre group=5
+
+echo "configuring system...."
+
+###################################
+
+echo "switching keymap to german..."
+sed -i 's/\(keymap=\)"us"/\1\"de-latin1\"/' /etc/conf.d/keymaps
+
+###################################
+
+# activate serial console
+#sed -i 's/^#\(.*ttyS.*\)/\1/' /etc/inittab
+
+echo "changing console color and behaviour..."
+sed -i 's/\(.*agetty\ \)\(.*tty1.*\)/\1--noclear\ \2/' /etc/inittab
+# replace blue directory color with green one in ls, and executeables red
+sed -i 's/^\(DIR 01;\)..\(.*\)/\132\2/' /etc/DIR_COLORS
+sed -i 's/^\(EXEC 01;\)..\(.*\)/\131\2/' /etc/DIR_COLORS
+# replace blue color in bash with green one
+sed -i 's/\(PS1+=.*\)34\(.*\)/\132\2/' /etc/bash/bashrc
+# ls  --group-directories-first as default
+sed -i "s/\(alias ls='ls\)/\1 --group-directories-first/" /etc/bash/bashrc
+
+###################################
+
+echo "configuring portage..."
+cat > /etc/portage/make.conf << "EOF"
+# several architectures have to be supported.
+# dev notebooks (assume at least haswell)
+# hetzner servers (at least haswell or epic1)
+# my own router (silvermont)
+#
+# silvermont lacks AVX and a lot more.
+# so the closest i found for the time beeing is westmere
+# still, this is way better than i686
+CFLAGS="-march=westmere -O2 -pipe"
+CXXFLAGS="${CFLAGS}"
+CHOST="x86_64-pc-linux-gnu"
+# audit USE flag is used for the audit kernel subsystem.
+# there is only a few packages using this flag. so far, only pam is of interest.
+# with pam, this provides pam_tty_audit.so
+# many tools pull in python nowadays. some of them are not ported to python 3 yet.
+# libressl seems to be the new default, but galera does not support it yet
+USE="-ipv6 -X -gtk -gnome -kde -qt4 -alsa -emacs -xemacs -systemd -cups -libressl openssl ssl caps audit"
+
+# there are conflicts when packages use different python 3 versions and force their deps to use the same.
+# the dep packages often do not support all python 3 targets.
+# see https://wiki.gentoo.org/wiki/Project:Python/PYTHON_TARGETS
+# and https://www.gentoo.org/support/news-items/2020-04-22-python3-7.html
+PYTHON_TARGETS="python3_7"
+PYTHON_SINGLE_TARGET="python3_7"
+
+CURL_SSL="openssl"
+
+# might be a good idea to put cores and gentoo mirrors into config
+GENTOO_MIRRORS="ftp://ftp.wh2.tu-dresden.de/pub/mirrors/gentoo/ http://mirror.netcologne.de/gentoo/ http://de-mirror.org/gentoo/"
+MAKEOPTS="-j48 -l48" # number of cores of the build system (including HT)
+ACCEPT_KEYWORDS="amd64"
+GRUB_PLATFORMS="pc" # change this to efi-64 for efi
+EMERGE_DEFAULT_OPTS="--keep-going=y --jobs=48 --load-average=48.00" # number of (HT)
+PORT_LOGDIR="/var/log/portage"
+FEATURES="${FEATURES} parallel-fetch parallel-install sandbox candy xattr"
+# countdown of unmerge
+CLEAN_DELAY="0"
+EOF
+
+mkdir -p /etc/portage/repos.conf && mkdir -p /var/db/repos/gentoo
+cp -f /usr/share/portage/config/repos.conf /etc/portage/repos.conf/gentoo.conf
+
+# not sure if its better to move this in package definitions
+# create base dirs. seems they are not supplied anymore
+mkdir -p /etc/portage/package.mask
+
+# let portage use python3 (speedup)
+echo "sys-apps/portage python3" >> /etc/portage/package.use/portage
+# some package try to pull in stuff we dont want
+echo 'app-editors/xemacs' >> /etc/portage/package.mask/xemacs
+echo 'app-xemacs/*' >> /etc/portage/package.mask/xemacs
+
+# should you feel tempted to remove these lines: its never to late to reevaluate your career choices
+echo 'sys-fs/udev' >> /etc/portage/package.mask/systemd
+echo 'sys-apps/systemd' >> /etc/portage/package.mask/systemd
+
+
+###################################
+
+echo "activating forwarding permanently..."
+sed -i 's/\(net.ipv4.ip_forward = \)0/\11/' /etc/sysctl.conf
+echo "# elasticsearch needs this to work properly" >> /etc/sysctl.conf
+echo "vm.max_map_count=262144" >> /etc/sysctl.conf
+
+###################################
+
+echo "disabling that all network devices must be up for init scripts to work."
+sed -i 's/#\(rc_depend_strict=\)\"YES\"/\1\"NO\"/' /etc/rc.conf
+
+###################################
+
+echo "disable systemds/udevs stupid behaviour of giving interfaces random names. why in the world would one want that?"
+touch /etc/udev/rules.d/80-net-setup-link.rules
+
+###################################
+
+echo "creating dirsize cmd"
+cat > /usr/bin/dirsize << "EOF"
+#!/bin/sh
+if test -z "$1"; then
+        echo "dirsize [option] [dir]";
+        echo "options: sum, find";
+elif test "$1" = "sum"; then
+        shift +1;
+        du -hm --max-depth=0 "$*";
+elif test "$1" = "find"; then
+        shift +1;
+        du -hm --max-depth=1 "$*" | sort -nr | sed -e "s/\      / MB\   /";
+else
+        echo $(dirsize);
+fi
+EOF
+chmod u+x /usr/bin/dirsize
+
+###################################
+
+echo "creating ipls cmd"
+cat > /usr/bin/ipls << "EOF"
+#!/bin/bash
+
+### IPLS v0
+
+iptables -L -v -n --line-numbers
+
+echo -en "\n========================================= N A T =========================================\n\n"
+
+iptables -t nat -L -v -n --line-numbers
+
+# arptables support was removed, because with strongswan, there is no need for it anymore
+# (it was used to spoof arp pakets from roadwarriors with racoon)
+#echo -en "\n========================================= A R P =========================================\n\n"
+#arptables --line-numbers -L -v -n
+EOF
+
+chmod u+x /usr/bin/ipls
+
+###################################
+
+echo "changing locale..."
+# the US one seems to be required. otherwise there is a lot of errors all over the place like
+#/usr/bin/locale: Cannot set LC_CTYPE to default locale: No such file or directory
+#/usr/bin/locale: Cannot set LC_MESSAGES to default locale: No such file or directory
+#/usr/bin/locale: Cannot set LC_COLLATE to default locale: No such file or directory
+#setlocale: unsupported locale setting
+sed -i 's/#\(en_US.UTF-8 UTF-8\)/\1/' /etc/locale.gen
+#en_US does give 12h time. GB gives 24h time. use that
+echo 'en_GB.UTF-8 UTF-8' >>  /etc/locale.gen
+locale-gen && eselect locale set $(eselect locale list | grep en_GB.utf8 | awk '{print $1}' | sed -e 's/\[\([0-9]\+\)\]/\1/')
+
+###################################
+
+echo "syncing repository..."
+sed -i 's/\(sync-rsync-verify-metamanifest\).*/\1\ =\ no/' /etc/portage/repos.conf/gentoo.conf
+emerge --sync --quiet
+
+###################################
+
+echo "selecting right profile"
+eselect profile set $(eselect profile list | grep 'default/linux/amd64/.*/no-multilib/hardened' | grep stable | grep -v selinux | awk '{print $1}' | tail -n1 | sed -e 's/\[\([0-9]\+\)\]/\1/')
+eselect profile list
+#echo "use \'eselect profile set N\', then type exit"
+
+###################################
+
+echo "setting timezone: "
+#cp /usr/share/zoneinfo/Europe/Vienna /etc/localtime
+cp /usr/share/zoneinfo/UTC /etc/localtime
+#echo "Europe/Vienna" > /etc/timezone
+echo "UTC" > /etc/timezone
+emerge --config sys-libs/timezone-data
+
+###################################
+
+# get rid of the unknown_domain issue on the login screen.
+# sadly, i never figured out how to fix it.
+sed -i 's/\.\\O//' /etc/issue
+
+# reload stuff
+env-update && source /etc/profile 
+
+##################################
+# replace openssl by libressl. here goes
+#emerge -f dev-libs/libressl # fetch it first, in case some tools break
+#emerge -C dev-libs/openssl
+#emerge -v dev-libs/libressl
+#emerge @preserved-rebuild
+# cleanup is done in post
+

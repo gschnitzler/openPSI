@@ -1,0 +1,19 @@
+#@flags
+
+enabled=1
+
+#@package
+
+www-servers/apache www-apache/mod_security
+
+#@pre
+
+echo APACHE2_MODULES=\"auth_basic auth_digest authn_core authz_core authz_user authz_host authn_file socache_shmcb actions alias autoindex cache cgid deflate dir disk_cache env expires ext_filter file_cache filter headers include info log_config logio mem_cache mime mime_magic negotiation rewrite setenvif speling ssl status unique_id unixd usertrack vhost_alias proxy proxy_http proxy_connect proxy_scgi proxy_fcgi\" >> /etc/portage/make.conf
+
+echo APACHE2_MPMS=\"event\" >> /etc/portage/make.conf
+
+# use apache 2.4, change this once apache 2.4 is marked stable
+#echo "www-servers/apache ~amd64" >> /etc/portage/package.accept_keywords
+#echo "app-admin/apache-tools ~amd64" >> /etc/portage/package.accept_keywords
+echo www-servers/apache ssl threads >> /etc/portage/package.use/apache
+

@@ -1,0 +1,8 @@
+{
+    smartd => {
+        REQUIRE   => [],
+        SCRIPTS   => './smartd/Scripts',
+        TEMPLATES => './smartd/Templates',
+    }
+};
+

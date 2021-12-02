@@ -1,0 +1,13 @@
+
+	left=[% state.network.PUBLIC.ADDRESS %]
+	leftcert=[% plugin.node.left_cert %]
+	leftid=@[% machine.self.NAMES.FULL %]
+	leftsubnet=[% plugin.node.left_network.NETWORK %]
+	# override the default updown script (controlled via leftfirewall=, which must not be here when leftupdown is )
+	#leftupdown=/etc/strongswan.d/updown_[% plugin.node.NAMES.SHORT %]
+	leftupdown=/etc/strongswan.d/updown_s2s
+	right=[% plugin.node.NETWORK.PUBLIC.ADDRESS %]
+	rightid=@[% plugin.node.NAMES.FULL %]
+	rightsubnet=[% plugin.node.right_network.NETWORK %]
+	# initiate the connection when traffic is seen
+	auto=route

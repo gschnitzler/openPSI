@@ -1,0 +1,16 @@
+#@description
+
+used for backup
+
+#@flags
+enabled=1
+
+#@pre
+echo "net-libs/zeromq drafts" >> /etc/portage/package.use/borgbackup
+
+#@package
+
+# sshfs is required to mount the offsite repository 
+app-backup/borgbackup
+net-fs/sshfs
+

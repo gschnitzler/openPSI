@@ -1,0 +1,14 @@
+#@flags
+
+enabled=1
+
+#@package
+
+mail-mta/ssmtp
+
+#@post
+
+chown root:mail /var/spool/mail/
+chmod 03775 /var/spool/mail/
+
+

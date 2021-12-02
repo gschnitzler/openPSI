@@ -1,0 +1,19 @@
+#@flags
+
+disabled in favour of strongswan
+
+enabled=0
+
+#@package
+
+net-firewall/ipsec-tools
+
+#@post
+
+rc-update add racoon default
+
+
+#@pre
+
+echo "net-firewall/ipsec-tools nat hybrid" >> /etc/portage/package.use/ipsec
+

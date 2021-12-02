@@ -1,0 +1,18 @@
+# whenever you change contents of this file, keep in mind that you have to manually update all grub.cfg files on all machines,
+# otherwise changes wont take effect
+
+menuentry '[% plugin.grub.system %]' --class gentoo --class gnu-linux --class gnu --class os {
+        load_video
+        insmod gzio
+		#insmod part_gpt
+        insmod btrfs
+		# this is the /boot partition
+        #set root='hd0,gpt2'
+    	#set root='hd0'
+        # /boot/ is in fact the btrfs subvolume
+        # net.ifnames=0 gives clear interface names like eth0, instead of the random shit from udev
+        # ipv6.disable does what it says, but better than sysctl magic
+	# ###### the IF statement is resolved at cfgen level, so its not possible to use plugin variables for the disks
+        linux   /boot/[% plugin.grub.kernel %] root=[% plugin.grub.root %] net.ifnames=0 ipv6.disable=1 ro rootflags=degraded,device=[% machine.self.RAID.DISK1 %],[% IF machine.self.RAID.LEVEL != 'raidS' %]device=[% machine.self.RAID.DISK2 %],[% END %]subvol=[% plugin.grub.subvol %]
+        initrd /boot/dracut-[% plugin.grub.subvol %].img
+}

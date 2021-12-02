@@ -1,0 +1,112 @@
+#@flags
+
+enabled=1
+
+#@package
+
+app-emulation/docker
+
+#@post
+
+# set new data directory
+echo "setting up initial docker config: "
+mkdir -p [% paths.data.DOCKER %]
+
+rm -rf /var/lib/docker
+
+# dont start docker befor bridge is up
+cat >> /etc/init.d/docker << "EOF"
+depend() {
+        after net
+}
+EOF
+
+rc-update add docker default
+
+echo "creating startup script for docker containers"
+cat > /etc/init.d/container << "EOF"
+#!/sbin/openrc-run
+
+
+depend() {
+	# this way containers get reinitialized if docker is restarted through init scripts
+    need docker
+    # containers should be started last and stopped first, so things like ipsec can boot up before
+    after local 
+    after sshd
+}
+
+start() {
+        ebegin "Starting Containers"
+	    PATH="$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/bin:/sbin"
+        BREAKPOINT=30; # so it can take the daemon more than 20s to create its sock file. i mean. what? seriously... guys.. come on. the fck?
+        echo -n "waiting for docker daemon to start"
+
+	    while sleep 1; do
+            echo -n .
+            # some changes in gentoo let this script run with a tmpfs /run and /var/run.
+            # i could not find out what it is or how to fix that. i cant imagine it to be a feature, as it would break a lot of stuff.
+            # in this case: the docker.sock file is not seen (by this script). 
+            # interestingly, subshells are unaffected, so lets use some of those
+            #if [ -S /var/run/docker.sock ]; then
+            if [ ! $(/bin/bash "docker version" > /dev/null 2>&1) ]; then
+                echo ""
+                echo "Stopping old Containers (might take a while)"
+                /bin/bash /usr/bin/genesis stop container > /dev/null 2>&1
+                /bin/bash /usr/bin/genesis start container # > /dev/null 2>&1
+                break;
+    		fi
+            if [ $BREAKPOINT == 0 ]; then
+                exit 1;
+            fi;
+            BREAKPOINT=$(($BREAKPOINT - 1));
+	    done
+        
+        eend $?
+}
+
+stop() {
+        ebegin "Stopping Containers (might take a while)"
+        /usr/bin/genesis stop container > /dev/null 2>&1
+        eend $?
+}
+
+
+EOF
+chmod u+x /etc/init.d/container
+rc-update add container default
+
+# since docker was split up in multiple binaries, it has become worse
+# we have to lift mprotect for its binaries, because they are stupid go hipsters...
+# i mean like really... they break their gloriously stable 1.0 api with every fucking minor revision.
+# and now one of those 20 year old code heros read a book about architecture and discovered text relocations.
+# seriously. ive seen a lot of stupid shit from those morrons, but this is outrageous.
+# the funny thing is they claim compatibility in their security docs with pax and grsec. yet non of them ever bothered to install anything but ubuntu.
+# all while building in seccomp and shit. i swear to god if they ever fuck it up again i implement docker myself.
+#paxctl -C /usr/bin/runc
+#paxctl -m /usr/bin/runc
+#paxctl -C /usr/bin/containerd-shim
+#paxctl -m /usr/bin/containerd-shim
+#paxctl -C /usr/bin/containerd
+#paxctl -m /usr/bin/containerd
+
+#@pre
+
+# these might be switched to stable
+#echo "app-emulation/docker-proxy ~amd64" >> /etc/portage/package.accept_keywords
+#echo "sys-process/tini ~amd64" >> /etc/portage/package.accept_keywords
+#echo "dev-go/blackfriday ~amd64" >> /etc/portage/package.accept_keywords
+#echo "app-emulation/docker ~amd64" >> /etc/portage/package.accept_keywords
+#echo "app-emulation/runc ~amd64" >> /etc/portage/package.accept_keywords
+#echo "app-emulation/containerd ~amd64" >> /etc/portage/package.accept_keywords
+#echo "dev-go/sanitized-anchor-name ~amd64" >> /etc/portage/package.accept_keywords
+#echo "dev-go/go-md2man ~amd64" >> /etc/portage/package.accept_keywords
+#echo "sys-libs/libseccomp ~amd64" >> /etc/portage/package.accept_keywords
+
+echo "sys-libs/libseccomp static-libs" > /etc/portage/package.use/docker
+echo "app-emulation/docker btrfs overlay seccomp -device-mapper" >> /etc/portage/package.use/docker
+echo "sys-process/tini static" >> /etc/portage/package.use/docker
+
+# only fixed group (docker is the only package that has persistent data)
+groupadd -g 666 docker
+

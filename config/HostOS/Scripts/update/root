@@ -1,0 +1,12 @@
+#!/bin/bash
+
+echo "installing HostOS to [% paths.hostos.MOUNT %] using  [% state.images.image.hostos.latest %]"
+
+tar xpf [% state.images.image.hostos.latest %] --xattrs -C [% paths.hostos.MOUNT %] > /dev/null
+
+mkdir -p [% paths.hostos.MOUNT %]/boot && mkdir -p [% paths.hostos.MOUNT %][% paths.data.ROOT %]
+
+echo "installation complete"
+
+
+

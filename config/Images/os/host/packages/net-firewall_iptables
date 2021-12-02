@@ -1,0 +1,19 @@
+#@flags
+
+enabled=1
+
+#@package
+
+net-firewall/iptables
+
+#@pre
+
+echo "net-firewall/iptables conntrack netlink nftables" >> /etc/portage/package.use/iptables
+
+#@post
+
+sed -i 's/\(SAVE_ON_STOP="\).*/\1no"/' /etc/conf.d/iptables
+rc-update add iptables default
+/etc/init.d/iptables save
+
+

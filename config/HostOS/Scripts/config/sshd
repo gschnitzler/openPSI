@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# this sets the auth methods in sshd. used to enable/disable 2factor auth
+echo "setting sshd auth methods:"
+sed -i 's/^\(AuthenticationMethods \).*/\1[% machine.self.COMPONENTS.SERVICE.ssh.AUTHMETHODS %]/' /etc/ssh/sshd_config

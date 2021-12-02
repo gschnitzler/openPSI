@@ -1,0 +1,4 @@
+nameserver [% machine.self.DNS.NAMESERVER1 %]
+nameserver [% machine.self.DNS.NAMESERVER2 %]
+nameserver [% machine.self.DNS.NAMESERVER3 %]
+

@@ -1,0 +1,31 @@
+#@flags
+
+enabled=1
+
+#@package
+
+# this package is now in base
+#app-antivirus/clamav
+
+#@post
+
+# just link in mta specific configuration and setup amavis, rest is done in base
+
+mv /etc/clamd.conf /etc/clamd.conf.dist
+mv /etc/freshclam.conf /etc/freshclam.conf.dist
+ln -s [% images.paths.CONFIG %]/freshclam.conf /etc/freshclam.conf
+ln -s [% images.paths.CONFIG %]/clamd.conf /etc/clamd.conf
+
+# clam needs loosened pax settings
+#paxctl -cm /usr/sbin/clamd && paxctl -cm /usr/bin/freshclam
+
+# clamav and amavis need to talk
+gpasswd -a clamav amavis
+
+# be aware that clamav fails on a node that has not yet downloaded a database.
+# on a new node run 'freshclam' manually to initialize
+
+#@pre
+
+#echo app-antivirus/clamav bzip2 -ipv6 >> /etc/portage/package.use/clamav
+
