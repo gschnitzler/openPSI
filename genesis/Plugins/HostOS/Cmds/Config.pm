@@ -41,7 +41,7 @@ sub _generate_config ( $modules, $query, @args ) {
     foreach my $module ( $modules->@* ) {
         push @filled_templates, $module->( $query, @args );
     }
-    
+
     # write out after all are generated
     foreach my $tree (@filled_templates) {
         write_templates( $local_path, $tree, 1 );
@@ -129,6 +129,7 @@ sub import_config ($config) {
                 paths  => { local_config => 'paths data LOCAL_HOST_CONFIG' },
                 config => {
                     dnsmasq => {
+                        dhcp             => 'machine self COMPONENTS SERVICE dhcp', # dhcp hostnames need to be incorporated into hosts config
                         nodes            => 'machine nodes',
                         container        => 'machine self COMPONENTS CONTAINER',
                         container_config => 'container',
@@ -145,8 +146,8 @@ sub import_config ($config) {
         dhcp => {
             ENABLE => 'yes',
             CMD    => sub (@arg) { _generate_config( [ \&gen_dhcp ], @arg ) },
-            DESC   => 'Generate smartd config',
-            HELP   => ['Generate smartd config'],
+            DESC   => 'Generate dhcp config',
+            HELP   => ['Generate dhcp config'],
             DATA   => {
                 paths         => { local_config => 'paths data LOCAL_HOST_CONFIG' },
                 config        => { dhcp         => { dhcp => 'machine self COMPONENTS SERVICE dhcp' } },

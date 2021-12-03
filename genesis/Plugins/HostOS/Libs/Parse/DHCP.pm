@@ -51,6 +51,9 @@ sub _gen_dhcp ( $content, $config ) {
 
 sub gen_dhcp ($query) {
 
+    # lookup of hostnames of dhcp clients only works on active leases. so names need to also be added to /etc/hosts.
+    # which is done in dnsmasq plugin
+
     print_table 'Generating dhcp cfg:', ' ', ': ';
     my $templates        = $query->('templates dhcp');
     my $scripts          = $query->('scripts dhcp');

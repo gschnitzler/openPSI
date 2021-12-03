@@ -5,6 +5,8 @@ enabled=1
 #@package
 
 app-emulation/docker
+# gentoo split of the cli temporarily. just because upstream did not do batshit crazy things in a while.
+app-emulation/docker-cli
 
 #@post
 

@@ -19,12 +19,21 @@ sub _gen_hosts ($config) {
     my $ownname          = $config->{name};
     my $ownfullname      = $config->{fullname};
     my $nodes            = $config->{nodes};
+    my $dhcp             = $config->{dhcp};
     my $container_config = $config->{container_config};
     my @hosts            = ();
 
     push @hosts, join( ' ', '127.0.0.1', 'localhost' );    # add loopback
     push @hosts, join( ' ', $hostip, $ownname, $ownfullname );    # add myself
 
+    # dhcp hosts.
+    if ( exists $dhcp->{HOSTS} ) {
+        my $dhcp_hosts = $dhcp->{HOSTS};
+        foreach my $host_name ( keys $dhcp_hosts->%* ) {          # add nodenames
+            my $ip = $dhcp_hosts->{$host_name}->{IP};
+            push @hosts, join( ' ', $ip, $host_name );
+        }
+    }
     foreach my $node ( keys $nodes->%* ) {                        # add nodenames
 
         my $ip   = $nodes->{$node}->{NETWORK}->{INTERN}->{ADDRESS};

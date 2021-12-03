@@ -47,6 +47,9 @@ rm -rf /tmp/cfgen_cache && ./cfgen.pl build
 # in dnssl run
 ./dnssl.pl update dns
 ./dnssl.pl update ssl certs 
+# update repo secrets
+tmux
+./dnssl.pl update git secrets
 ```
 
 This prepares a machine for executing genesis:
