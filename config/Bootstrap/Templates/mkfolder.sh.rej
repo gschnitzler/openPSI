@@ -1,7 +1,0 @@
---- config/Bootstrap/Templates/mkfolder.sh
-+++ config/Bootstrap/Templates/mkfolder.sh
-@@ -1,4 +1,2 @@
- #!/bin/bash
- mkdir -p [% paths.data.ROOT %]
--
--
