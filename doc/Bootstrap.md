@@ -25,14 +25,19 @@ archie could not install packages because its root fs was too small
 manjaro architect. does the job:
 
 systemrescue 7.x boot copy to ram
-iptables -P INPUT ACCEPT
-iptables -F INPUT
-passwd
-(connect via ssh)
-pacman -Sy && pacman -S gcc make parted tmux lftp vim glibc linux-headers linux-api-headers libxcrypt # you may want to remove stuff from /etc/pacman.d/mirrorlist
-# systemctl restart sshd
 
-#- use the kernel parameter net.ifnames=0 with systemrescuecd
+iptables -P INPUT ACCEPT
+
+iptables -F INPUT
+
+passwd 
+
+(connect via ssh)
+
+
+pacman -Sy && pacman -S gcc make parted tmux lftp vim glibc linux-headers linux-api-headers libxcrypt # you may want to remove stuff from /etc/pacman.d/mirrorlist
+
+- use the kernel parameter net.ifnames=0 with systemrescuecd (outdated) 
 - set password with 'passwd'
 - config network ( to an IP known to genesis)
 
