@@ -10,6 +10,6 @@ menuentry '[% plugin.grub.system %]' --class gentoo --class gnu-linux --class gn
         # net.ifnames=0 gives clear interface names like eth0, instead of the random shit from udev
         # ipv6.disable does what it says, but better than sysctl magic
 	    # ###### the IF statement is resolved at cfgen level, so its not possible to use plugin variables for the disks
-        linux  /[% plugin.grub.kernel %] root=[% plugin.grub.root %][% 'p' IF plugin.grub.root.match('nvme') %]3 net.ifnames=0 ipv6.disable=1 ro rootflags=degraded,device=[% machine.self.RAID.DISK1 %][% 'p' IF machine.self.RAID.DISK1.match('nvme') %]3,[% IF machine.self.RAID.LEVEL != 'raidS' %]device=[% machine.self.RAID.DISK2 %][% 'p' IF machine.self.RAID.DISK2.match('nvme') %]3,[% END %]subvol=[% plugin.grub.subvol %]
+        linux  /[% plugin.grub.kernel %] root=[% plugin.grub.root %][% 'p' IF machine.self.RAID.DISK1.match('nvme') %]3 net.ifnames=0 ipv6.disable=1 ro rootflags=degraded,device=[% machine.self.RAID.DISK1 %][% 'p' IF machine.self.RAID.DISK1.match('nvme') %]3,[% IF machine.self.RAID.LEVEL != 'raidS' %]device=[% machine.self.RAID.DISK2 %][% 'p' IF machine.self.RAID.DISK2.match('nvme') %]3,[% END %]subvol=[% plugin.grub.subvol %]
         initrd /dracut-[% plugin.grub.subvol %].img
 }
