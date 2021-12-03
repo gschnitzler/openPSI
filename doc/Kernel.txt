@@ -34,38 +34,10 @@ General setup  --->
   [ ]   Support for eBPF programs attached to cgroups
   [ ]   Example controller           
 
---- Group CPU scheduler
+--- CPU Controller
 [*]   Group scheduling for SCHED_OTHER
 [*]     CPU bandwidth provisioning for FAIR_GROUP_SCHED
 [*]   Group scheduling for SCHED_RR/FIFO       
-
- General architecture-dependent options  ---> 
- [*] Stack Protector buffer overflow detection                      │ │
-   [*]   Strong Stack Protector 
-[*] GCC plugins
-    [ ]   Compute the cyclomatic complexity of a function              │ │
-    [*]   Generate some entropy during boot and runtime                │ │
-    [*]   Force initialization of variables containing userspace addres│ │
-    [*]     Force initialize all struct type variables passed by refere│ │
-    [ ]     Report forcefully initialized variables                    │ │
-    [*]   Randomize layout of sensitive kernel structures              │ │
-    [ ]     Use cacheline-aware structure randomization       
-
-
-
-####################################
-
-[*] Enable loadable module support
-
-###########################
-
-
--*- Enable the block layer
-[*]   Block layer bio throttling support
----> IO Schedulers  ---> 
-<*> Deadline I/O scheduler
-<*> CFQ I/O scheduler
-[*]   CFQ Group Scheduling support
 
 
 #######################################
@@ -74,8 +46,8 @@ Processor type and features  --->
 [*] CPU microcode loading support
 [*]   Intel microcode loading support
 [*]   AMD microcode loading support
-[*] Numa Memory Allocation and Scheduler Support                   │ │
-[*]   Old style AMD Opteron NUMA detection (NEW)                   │ │
+[*] Numa Memory Allocation and Scheduler Support
+[*]   Old style AMD Opteron NUMA detection (NEW)
 [*]   ACPI NUMA detection (NEW)         
 [*] Symmetric multi-processing support
 --- Supported processor vendors     
@@ -87,8 +59,48 @@ Processor type and features  --->
 [*] Intel Memory Protection Keys        
 Performance monitoring  --->
     <*> AMD Processor Power Reporting Mechanism
-[*] AMD Secure Memory Encryption (SME) support                                                                               │ │
+[*] AMD Secure Memory Encryption (SME) support
 [*]   Activate AMD Secure Memory Encryption (SME) by default (NEW)
+[*] EFI runtime service support 
+[*]   EFI stub support
+[*]     EFI mixed-mode support
+[*] Linux Guest support
+
+
+Firmware Drivers  --->
+    EFI (Extensible Firmware Interface) Support  --->
+        <*> EFI Variable Support via sysfs
+
+
+ General architecture-dependent options  ---> 
+ [*] Stack Protector buffer overflow detection                      
+   [*]   Strong Stack Protector 
+[*] GCC plugins
+    [ ]   Compute the cyclomatic complexity of a function              
+    [*]   Generate some entropy during boot and runtime                
+    [*]   Force initialization of variables containing userspace addres
+    [*]     Force initialize all struct type variables passed by refere
+    [ ]     Report forcefully initialized variables                    
+    [*]   Randomize layout of sensitive kernel structures              
+    [ ]     Use cacheline-aware structure randomization       
+
+
+####################################
+
+[*] Enable loadable module support
+
+###########################
+
+
+-*- Enable the block layer
+[*]   Block layer bio throttling support
+
+---> IO Schedulers  ---> 
+<*> Deadline I/O scheduler
+<*> CFQ I/O scheduler
+[*]   CFQ Group Scheduling support
+
+
 ##############################
 
 
@@ -154,7 +166,7 @@ Generic Driver Options  --->
 [*]   Automount devtmpfs at /dev, after the kernel mounted the rootfs
 
 <*> Serial ATA and Parallel ATA drivers  --->  
- <*>   AHCI SATA support                                                            
+ <*>   AHCI SATA support
  <*>   Platform AHCI SATA support         
  <*>       Intel ESB, ICH, PIIX3, PIIX4 PATA/SATA support 
  <*>     Generic ATA support 
@@ -174,11 +186,13 @@ Generic Driver Options  --->
 <*>     Realtek 8169 gigabit ethernet support
 
 
-x       -> Character devices                             
+x       -> Character devices
 x         -> Enable TTY (TTY [=y])                       
 x (1)       -> Unix98 PTY support (UNIX98_PTYS [=y])     
 # [*]     Support multiple instances of devpts  | not found anymore? but activated via gentoo systemd kernel option
 
+[*] Virtualization Drivers
+Microsoft hyper-v guest support
 
 #########################
 
@@ -189,7 +203,7 @@ x (1)       -> Unix98 PTY support (UNIX98_PTYS [=y])
   [*]   Btrfs will run sanity tests upon loading                     
   [ ]   Btrfs debugging support (NEW)                                
   [*]   Btrfs assert support    
-# optional.... to test it sometimes as btrfs docker alternative             
+# optional.... to test it sometimes as btrfs docker alternative
  <*> Overlay filesystem support  
 
 # onetime workaround for missing docs
@@ -200,3 +214,23 @@ x (1)       -> Unix98 PTY support (UNIX98_PTYS [=y])
 Security options  --->
 [*] Harden memory copies between kernel and userspace
 [*] AppArmor support
+
+
+For a Hyper-V generation 2 system, you'll need certain options enabled in the Kernel in this order because latter options aren't available until earlier options are enabled:
+
+    CONFIG_HYPERVISOR_GUEST:    Processor type and featuers > Linux Guest Support
+    CONFIG_PARAVIRT:            Processor type and features > Linux Guest Support > Enable paravirtualization code
+    CONFIG_PARAVIRT_SPINLOCKS:  Processor type and features > Linux Guest Support > Paravirtualization layer for spinlocks
+    CONFIG_CONNECTOR:           Device Drivers > Connector - unified userspace <-> kernelspase linker
+    CONFIG_SCSI_FC_ATTRS:       Device Drivers > SCSI device support > SCSI Transports > FiberChannel Transport Attributes
+    CONFIG_HYPERV:              Device Drivers > Microsoft Hyper-V guest support > Microsoft Hyper-V client drivers
+    CONFIG_HYPERV_UTILS:        Device Drivers > Microsoft Hyper-V guest support > Microsoft Hyper-V Utilities driver
+    CONFIG_HYPERV_BALLOON:      Device Drivers > Microsoft Hyper-V guest support > Microsoft Hyper-V Balloon driver
+    CONFIG_HYPERV_STORAGE:      Device Drivers > SCSI device support > SCSI low-level drivers > Microsoft Hyper-V virtual storage driver
+    CONFIG_HYPERV_NET:          Device Drivers > Network device support > Microsoft Hyper-V virtual network driver
+    CONFIG_HYPERV_KEYBOARD:     Device Drivers > Input device support > Hardware I/O ports > Microsoft Synthetic Keyboard driver
+    CONFIG_FB_HYPERV:           Device Drivers > Graphics support > Frame buffer Devices > Microsoft Hyper-V Synthetic Video support
+    CONFIG_HID_HYPERV_MOUSE:    Device Drivers > HID support > Special HID drivers > Microsoft Hyper-V mouse driver
+    CONFIG_PCI_HYPERV:          Device Drivers > PCI Support > Hyper-V PCI Frontend
+    CONFIG_VSOCKETS:            Networking support > Networking options > Virtual Socket protocol
+    CONFIG_HYPERV_VSOCKETS:     Networking support > Networking options > Hyper-V transport for Virtual Sockets

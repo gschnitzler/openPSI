@@ -29,8 +29,8 @@ echo "installing grub in mbr"
 # it did boot fine on virtualbox though. 2 days of debugging down the rabbit hole didn't help, and i stopped caring 2 hours into the grub source.
 # so for now we lock to version 2.02 which is still in tree upstream.
 # mid term, we would need to reintroduce partitions and EFI. which requires rebuilding all servers
-grub-install [% machine.self.RAID.DISK1 %]
-
-[% IF machine.self.RAID.LEVEL != 'raidS' %]
-grub-install [% machine.self.RAID.DISK2 %]
-[% END %]
+#grub-install [% machine.self.RAID.DISK1 %]
+grub-install --target=x86_64-efi --efi-directory=/boot
+#[% IF machine.self.RAID.LEVEL != 'raidS' %]
+#grub-install [% machine.self.RAID.DISK2 %]
+#[% END %]

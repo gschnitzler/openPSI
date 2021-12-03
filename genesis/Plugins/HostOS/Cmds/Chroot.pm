@@ -14,10 +14,16 @@ our @EXPORT_OK = qw(import_chroot);
 # if you are in the process of redesigning, get rid of this
 #################################################################
 
-sub _add_partition($disk) {
+sub _add_root_partition($disk) {
     $disk =~ /nvme/
       ? return join( '', $disk, 'p3' )
       : return join( '', $disk, '3' );
+}
+
+sub _add_boot_partition($disk) {
+    $disk =~ /nvme/
+      ? return join( '', $disk, 'p2' )
+      : return join( '', $disk, '2' );
 }
 
 sub _write_file ( $path, @data ) {
@@ -91,7 +97,7 @@ sub _enter_shell ( $action, $query, @ ) {
     my $bashinit2 = join( '', $bashinit, '_2' );
     my $mount     = $query->('mount');
     my $genesis   = $query->('genesis');
-    my $disk      = _add_partition $query->('disk');
+    my $disk      = _add_root_partition $query->('disk');
     my $target    = $query->('target');
     my $data_root = $query->('data_root');
 
@@ -152,7 +158,7 @@ sub _umount_dev ( $query, @ ) {
 sub _mount_target ( $query, @ ) {
 
     my $mount  = $query->('mount');
-    my $disk   = _add_partition $query->('disk');
+    my $disk   = _add_root_partition $query->('disk');
     my $target = $query->('target');
     say "mounting $target to $mount ...";
     run_system "mkdir -p $mount";    # using mount with system always throws an exception. so don't check
@@ -174,13 +180,15 @@ sub _mount_genesis ( $query, @ ) {
 sub _mount_databoot ( $query, @ ) {
 
     my $mount       = $query->('mount');
-    my $disk        = _add_partition $query->('disk');
+    my $disk        = _add_root_partition $query->('disk');
+    my $boot_disk   = _add_boot_partition $query->('disk');
     my $data_root   = $query->('data_root');
     my $target_data = "$mount$data_root";
     my $target_boot = "$mount/boot";
+
     say "mounting /boot and /data to $mount ...";
-    run_system "mkdir -p $target_boot";                             # using mount with system always throws an exception. so don't check
-    run_system "mount -o subvol=\"boot\" $disk $target_boot";
+    run_system "mkdir -p $target_boot";    # using mount with system always throws an exception. so don't check
+    run_system "mount $boot_disk $target_boot";
     run_system "mkdir -p $target_data";
     run_system "mount -o subvol=\"data\" $disk $target_data";
     return;
@@ -189,11 +197,12 @@ sub _mount_databoot ( $query, @ ) {
 sub _mount_boot ( $query, @ ) {
 
     my $mount       = $query->('mount');
-    my $disk        = _add_partition $query->('disk');
+    my $disk        = _add_root_partition $query->('disk');
+    my $boot_disk   = _add_boot_partition $query->('disk');
     my $target_boot = "$mount/boot";
     say 'mounting /boot ...';
     run_system "mkdir -p $target_boot";    # using mount with system always throws an exception. so don't check
-    run_system "mount -o subvol=\"boot\" $disk $target_boot";
+    run_system "mount $boot_disk $target_boot";
     return;
 }
 

@@ -31,5 +31,6 @@ fi
 terminal_output gfxterm
 # new grub sets this here and in menuentries. lets do the same
 insmod btrfs
+insmod part_gpt
 set timeout=5
 set default="[% plugin.grub.current %]"

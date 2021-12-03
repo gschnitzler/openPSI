@@ -3,7 +3,7 @@
         FSTAB        => '/etc/fstab',
         PKGVERSION   => '/etc/pkg-version',
         RELEASE      => '/etc/genesis-release',
-        MOUNT        => '/mnt',
+        MOUNT        => '/mnt/genesis',
 
         # the purpose of bashinit is for macros to resume in a chroot.
         BASHINIT => '/tmp/bashinit',

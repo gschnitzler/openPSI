@@ -3,6 +3,9 @@
 
 This Document covers bootstrapping of machines
 
+#### Hyper-V Setup:
+- gen2
+
 #### VirtualBox Setup:
 
 - Chipset: ICH9
@@ -20,11 +23,22 @@ This Document covers bootstrapping of machines
 
 #### Preparations
 
-- boot a rescue system on target machine (tested are systemrescuecd and hetzner)
+- boot a suitable rescue system on target machine. actually not that easy. 
+systemrescuecd got rebased on arch. it somehow misses basic header files like sys/types.h and i couldn't find its package.
+compiling prerequisits on gentoo minimal seemed overkill.
+knoppix does not like hyperv and just shuts down
+grml has a gcc quirk. package is installed but not found.
+debian live lacks everything needed out of the box and is just a pain to use.
+slax got rebased on debian and is just the wrong tool for the job
+archie could not install packages because its root fs was too small
+manjaro architect. does the job:
+
+pacman -Sy && pacman -S gcc make parted tmux lftp # you may want to remove stuff from /etc/pacman.d/mirrorlist
+systemctl restart sshd
+
 - use the kernel parameter net.ifnames=0 with systemrescuecd
 - set password with 'passwd'
 - config network ( to an IP known to genesis)
-- make sure the disks are clean (they must not contain a partition)
 
 #### op machine 
 

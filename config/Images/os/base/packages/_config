@@ -83,7 +83,7 @@ CURL_SSL="openssl"
 GENTOO_MIRRORS="ftp://ftp.wh2.tu-dresden.de/pub/mirrors/gentoo/ http://mirror.netcologne.de/gentoo/ http://de-mirror.org/gentoo/"
 MAKEOPTS="-j28 -l28" # number of cores of the build system (including HT)
 ACCEPT_KEYWORDS="amd64"
-GRUB_PLATFORMS="pc" # change this to efi-64 for efi
+GRUB_PLATFORMS="efi-64" # change this to efi-64 for efi
 EMERGE_DEFAULT_OPTS="--keep-going=y --jobs=28 --load-average=28.00" # number of (HT)
 PORT_LOGDIR="/var/log/portage"
 FEATURES="${FEATURES} parallel-fetch parallel-install sandbox candy xattr"

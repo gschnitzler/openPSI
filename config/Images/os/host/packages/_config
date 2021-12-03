@@ -11,9 +11,9 @@ cat > /etc/fstab << "EOF"
 # fstab system1:
 # this file as is, is required for the buildhost to boot. thus, the IF device.
 # commands like switch must handle this afterwards
-LABEL=disk1		/boot           btrfs            device=[% machine.self.RAID.DISK1 %][% 'p' IF machine.self.RAID.DISK1.match('nvme') %]3,[% IF machine.self.RAID.LEVEL != 'raidS' %]device=[% machine.self.RAID.DISK2 %][% 'p' IF machine.self.RAID.DISK2.match('nvme') %]3,[% END %]subvol=boot,rw,noatime,ssd,discard,degraded 0 0
-LABEL=disk1		/               btrfs            device=[% machine.self.RAID.DISK1 %][% 'p' IF machine.self.RAID.DISK1.match('nvme') %]3,[% IF machine.self.RAID.LEVEL != 'raidS' %]device=[% machine.self.RAID.DISK2 %][% 'p' IF machine.self.RAID.DISK2.match('nvme') %]3,[% END %]subvol=system1,rw,noatime,ssd,discard,degraded 0 0
-LABEL=disk1		[% paths.data.ROOT %]           btrfs            device=[% machine.self.RAID.DISK1 %][% 'p' IF machine.self.RAID.DISK1.match('nvme') %]3,[% IF machine.self.RAID.LEVEL != 'raidS' %]device=[% machine.self.RAID.DISK2 %][% 'p' IF machine.self.RAID.DISK2.match('nvme') %]3,[% END %]subvol=data,rw,noatime,ssd,discard,degraded 0 0
+PARTLABEL=boot			/boot           vfat            defaults,rw,noatime 0 0
+PARTLABEL=rootfs		/               btrfs           device=[% machine.self.RAID.DISK1 %][% 'p' IF machine.self.RAID.DISK1.match('nvme') %]3,[% IF machine.self.RAID.LEVEL != 'raidS' %]device=[% machine.self.RAID.DISK2 %][% 'p' IF machine.self.RAID.DISK2.match('nvme') %]3,[% END %]subvol=system1,rw,noatime,ssd,discard,degraded 0 0
+PARTLABEL=rootfs		[% paths.data.ROOT %]           btrfs            device=[% machine.self.RAID.DISK1 %][% 'p' IF machine.self.RAID.DISK1.match('nvme') %]3,[% IF machine.self.RAID.LEVEL != 'raidS' %]device=[% machine.self.RAID.DISK2 %][% 'p' IF machine.self.RAID.DISK2.match('nvme') %]3,[% END %]subvol=data,rw,noatime,ssd,discard,degraded 0 0
 EOF
 
 ###################################

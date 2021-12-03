@@ -45,18 +45,26 @@ sub _struct_fstab ( $struct, $heap, $flush_heap, $line ) {
 }
 
 #############################################################################
-sub _add_partition($disk) {
+sub _add_root_partition($disk) {
     $disk =~ /nvme/
       ? return join( '', $disk, 'p3' )
       : return join( '', $disk, '3' );
+}
+
+sub _add_boot_partition($disk) {
+    $disk =~ /nvme/
+      ? return join( '', $disk, 'p2' )
+      : return join( '', $disk, '2' );
 }
 
 sub write_fstab ( $p ) {
 
     my $fstab      = $p->{fstab};
     my $fstab_f    = $p->{path};
-    my $disk1      = _add_partition( $p->{disk1} );
-    my $disk2      = _add_partition( $p->{disk2} );
+    my $disk1      = _add_root_partition( $p->{disk1} );
+    my $disk2      = _add_root_partition( $p->{disk2} );
+    my $boot_disk1 = _add_boot_partition( $p->{disk1} );
+    my $boot_disk2 = _add_boot_partition( $p->{disk2} );
     my $raid_level = $p->{raid_level};
     my $ff         = [];
 
@@ -72,13 +80,23 @@ sub write_fstab ( $p ) {
 
         # now remove the device= from the fsflags, and insert what is needed
         $fsflags =~ s/device=[^,]+,//xg;
-        if ( $raid_level eq 'raidS' ) {
-            $fsflags = join( ',', "device=$disk1", $fsflags );
+
+        if ( $fstab->{$key}->{device} =~ /boot/ ) {
+            if ( $raid_level eq 'raidS' ) {
+            #    $fsflags = join( ',', "device=$boot_disk1", $fsflags );
+            }
+            else {
+            #    $fsflags = join( ',', "device=$boot_disk1", "device=$boot_disk2", $fsflags );
+            }
         }
         else {
-            $fsflags = join( ',', "device=$disk1", "device=$disk2", $fsflags );
+            if ( $raid_level eq 'raidS' ) {
+                $fsflags = join( ',', "device=$disk1", $fsflags );
+            }
+            else {
+                $fsflags = join( ',', "device=$disk1", "device=$disk2", $fsflags );
+            }
         }
-
         push(
             $ff->@*,
             join( '',

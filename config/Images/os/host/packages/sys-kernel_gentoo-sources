@@ -26,7 +26,7 @@ echo "metal kernel"
 # this works because the kernel can be configured via environment variables, and this whole section is run in a single shell
 [% images.templates.os_host.kernelmetal %]
 
-# --microcode enables microcode updates in kernel and for the initramfs we through away. dracut is used instead
+# --microcode enables microcode updates in kernel and for the initramfs we throw away. dracut is used instead
 genkernel kernel --microcode --menuconfig --no-btrfs --no-zfs --kernel-filename=kernel-metal-`date +%y%m%d%H`-%%KV%% --systemmap-filename=System.map-metal-`date +%y%m%d%H`-%%KV%% --no-clean
 # this is to retrieve the config for reintegration
 cp -f /usr/src/linux/.config /root/kernel-metal-`cat /usr/src/linux/.config | head | grep "Kernel Configuration" | sed -e 's/.* \([^ ]\+gentoo[^\ ]*\) .*/\1/'`
