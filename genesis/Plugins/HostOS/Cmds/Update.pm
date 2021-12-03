@@ -34,8 +34,8 @@ sub _extract_tarball ( $tarball, $mtype, $target ) {
     foreach my $file ( $tar->list_files ) {
 
         # ignore files that should not be in the tarball in the first place
-        next if ( $file =~ m/initramfs|lost|lilo[.]conf|grub/x );
-        if ( $file =~ m/\/(System.map|kernel)-(.*)/x ) {
+        next if ( $file =~ m/initramfs|lost|lilo[.]conf|grub|EFI/x );
+        if ( $file =~ m/[\/]*(System.map|kernel)-(.*)/x ) {
 
             my $syskern = $1;
             my $rest    = $2;
@@ -48,7 +48,7 @@ sub _extract_tarball ( $tarball, $mtype, $target ) {
         }
 
         # only install the dracut file for the target system
-        if ( $file =~ m/\/dracut-(system.)[.]img/x ) {
+        if ( $file =~ m/[\/]*dracut-(system.).*[.]img/x ) {
 
             my $system = $1;
             next unless ( $system eq $target );
@@ -56,7 +56,6 @@ sub _extract_tarball ( $tarball, $mtype, $target ) {
 
         push @files, $file;
     }
-
     die "ERROR: Too many/few ($filecount) kernel/System.map entries for machine type $mtype in tarball. don't know wich to choose"
       unless ( $filecount == 2 );
     die 'ERROR: No System.map/Kernel Pair found' unless ( scalar keys $latest->%* == 2 );
@@ -160,7 +159,7 @@ sub update_boot ( $query, @ ) {
     _delete_old_kernel($curkernel);
 
     $grub->{$tarsys}->{kernel} = _extract_tarball( $image, $mtype, $target_system );
-
+    
     # write new genesis to disk
     write_grub(
         {

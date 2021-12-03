@@ -25,7 +25,8 @@
                     './lost+found/*',
                     './lilo.conf',
                     './grub*',
-                    './initramfs*'
+                    './initramfs*',
+                    './EFI'
                 ],
 
             },

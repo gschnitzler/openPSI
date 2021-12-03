@@ -24,7 +24,8 @@ slax got rebased on debian and is just the wrong tool for the job
 archie could not install packages because its root fs was too small
 manjaro architect. does the job:
 
-systemrescue 7.x boot copy to ram
+systemrescue boot copy to ram. always download newest version, as its rolling release and installing packages will have strange results without updating.
+ie if you update the kernel, the current modules might get removed and it will fail to load required modules (like vfat) later on.
 
 iptables -P INPUT ACCEPT
 
@@ -34,8 +35,10 @@ passwd
 
 (connect via ssh)
 
+# you may want to remove stuff from /etc/pacman.d/mirrorlist
+pacman -Syu --ignore linux-lts # update the system, but ignore the kernel. update is needed as the new packages might rely on updated *.so
+pacman -S gcc make parted tmux lftp vim glibc linux-headers linux-api-headers libxcrypt 
 
-pacman -Sy && pacman -S gcc make parted tmux lftp vim glibc linux-headers linux-api-headers libxcrypt # you may want to remove stuff from /etc/pacman.d/mirrorlist
 
 - use the kernel parameter net.ifnames=0 with systemrescuecd (outdated) 
 - set password with 'passwd'
