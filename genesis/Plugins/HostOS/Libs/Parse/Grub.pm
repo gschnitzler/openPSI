@@ -214,6 +214,7 @@ sub write_grub( $p ) {
     }
 
     say 'OK';
+    #say Dumper \@conf;
     _grub_write_disk( \@conf, $grub_f );
     return;
 }

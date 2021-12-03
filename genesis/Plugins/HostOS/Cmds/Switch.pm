@@ -29,11 +29,12 @@ sub _switch_system ( $query, @ ) {
     print_table 'Switching System', ' ', ": \n";
 
     my $grub = read_grub($grub_f);
-
+#say Dumper $grub;
     die 'ERROR: switch to nonexisting system'
         unless ( exists( $grub->{$fullsys} ) );
 
     $grub->{current} = $fullsys;
+#say Dumper $grub;
 
     write_grub(
         {   template => $grub_template,

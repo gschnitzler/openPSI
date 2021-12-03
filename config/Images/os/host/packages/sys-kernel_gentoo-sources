@@ -16,6 +16,9 @@ echo sys-firmware/intel-microcode intel-ucode  >> /etc/portage/package.license/k
 
 emerge sys-kernel/gentoo-sources sys-kernel/genkernel sys-kernel/linux-firmware sys-firmware/intel-microcode
 
+# seems like the symlink is not always setup correctly
+ln -s /usr/src/linux-*/ /usr/src/linux
+
 ##################################################################
 # set this to yes to change kernel config in bootstrap
 echo "setting menuconfig: "
