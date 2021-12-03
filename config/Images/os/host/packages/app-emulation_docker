@@ -104,7 +104,7 @@ rc-update add container default
 #echo "sys-libs/libseccomp ~amd64" >> /etc/portage/package.accept_keywords
 
 echo 'app-emulation/containerd  btrfs' > /etc/portage/package.use/docker
-echo "sys-libs/libseccomp static-libs" > /etc/portage/package.use/docker
+echo "sys-libs/libseccomp static-libs" >> /etc/portage/package.use/docker
 echo "app-emulation/docker btrfs overlay seccomp -device-mapper" >> /etc/portage/package.use/docker
 echo "sys-process/tini static" >> /etc/portage/package.use/docker
 

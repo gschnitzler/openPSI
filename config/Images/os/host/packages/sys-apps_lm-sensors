@@ -1,0 +1,14 @@
+#@description
+
+temperatur sensors for monitoring
+
+#@flags
+enabled=1
+
+#@package
+sys-apps/lm-sensors
+
+#@pre
+
+#@post
+

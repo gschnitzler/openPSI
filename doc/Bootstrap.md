@@ -24,10 +24,15 @@ slax got rebased on debian and is just the wrong tool for the job
 archie could not install packages because its root fs was too small
 manjaro architect. does the job:
 
-pacman -Sy && pacman -S gcc make parted tmux lftp # you may want to remove stuff from /etc/pacman.d/mirrorlist
-systemctl restart sshd
+systemrescue 7.x boot copy to ram
+iptables -P INPUT ACCEPT
+iptables -F INPUT
+passwd
+(connect via ssh)
+pacman -Sy && pacman -S gcc make parted tmux lftp vim glibc linux-headers linux-api-headers libxcrypt # you may want to remove stuff from /etc/pacman.d/mirrorlist
+# systemctl restart sshd
 
-- use the kernel parameter net.ifnames=0 with systemrescuecd
+#- use the kernel parameter net.ifnames=0 with systemrescuecd
 - set password with 'passwd'
 - config network ( to an IP known to genesis)
 
