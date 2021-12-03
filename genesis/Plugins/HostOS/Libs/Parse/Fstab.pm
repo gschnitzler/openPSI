@@ -45,13 +45,18 @@ sub _struct_fstab ( $struct, $heap, $flush_heap, $line ) {
 }
 
 #############################################################################
+sub _add_partition($disk) {
+    $disk =~ /nvme/
+      ? return join( '', $disk, 'p3' )
+      : return join( '', $disk, '3' );
+}
 
 sub write_fstab ( $p ) {
 
     my $fstab      = $p->{fstab};
     my $fstab_f    = $p->{path};
-    my $disk1      = $p->{disk1};
-    my $disk2      = $p->{disk2};
+    my $disk1      = _add_partition( $p->{disk1} );
+    my $disk2      = _add_partition( $p->{disk2} );
     my $raid_level = $p->{raid_level};
     my $ff         = [];
 

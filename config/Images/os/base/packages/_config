@@ -81,10 +81,10 @@ CURL_SSL="openssl"
 
 # might be a good idea to put cores and gentoo mirrors into config
 GENTOO_MIRRORS="ftp://ftp.wh2.tu-dresden.de/pub/mirrors/gentoo/ http://mirror.netcologne.de/gentoo/ http://de-mirror.org/gentoo/"
-MAKEOPTS="-j48 -l48" # number of cores of the build system (including HT)
+MAKEOPTS="-j28 -l28" # number of cores of the build system (including HT)
 ACCEPT_KEYWORDS="amd64"
 GRUB_PLATFORMS="pc" # change this to efi-64 for efi
-EMERGE_DEFAULT_OPTS="--keep-going=y --jobs=48 --load-average=48.00" # number of (HT)
+EMERGE_DEFAULT_OPTS="--keep-going=y --jobs=28 --load-average=28.00" # number of (HT)
 PORT_LOGDIR="/var/log/portage"
 FEATURES="${FEATURES} parallel-fetch parallel-install sandbox candy xattr"
 # countdown of unmerge

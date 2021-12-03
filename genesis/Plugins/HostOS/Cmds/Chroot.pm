@@ -14,6 +14,12 @@ our @EXPORT_OK = qw(import_chroot);
 # if you are in the process of redesigning, get rid of this
 #################################################################
 
+sub _add_partition($disk) {
+    $disk =~ /nvme/
+      ? return join( '', $disk, 'p3' )
+      : return join( '', $disk, '3' );
+}
+
 sub _write_file ( $path, @data ) {
 
     write_file(
@@ -85,7 +91,7 @@ sub _enter_shell ( $action, $query, @ ) {
     my $bashinit2 = join( '', $bashinit, '_2' );
     my $mount     = $query->('mount');
     my $genesis   = $query->('genesis');
-    my $disk      = $query->('disk');
+    my $disk      = _add_partition $query->('disk');
     my $target    = $query->('target');
     my $data_root = $query->('data_root');
 
@@ -146,7 +152,7 @@ sub _umount_dev ( $query, @ ) {
 sub _mount_target ( $query, @ ) {
 
     my $mount  = $query->('mount');
-    my $disk   = $query->('disk');
+    my $disk   = _add_partition $query->('disk');
     my $target = $query->('target');
     say "mounting $target to $mount ...";
     run_system "mkdir -p $mount";    # using mount with system always throws an exception. so don't check
@@ -168,7 +174,7 @@ sub _mount_genesis ( $query, @ ) {
 sub _mount_databoot ( $query, @ ) {
 
     my $mount       = $query->('mount');
-    my $disk        = $query->('disk');
+    my $disk        = _add_partition $query->('disk');
     my $data_root   = $query->('data_root');
     my $target_data = "$mount$data_root";
     my $target_boot = "$mount/boot";
@@ -183,7 +189,7 @@ sub _mount_databoot ( $query, @ ) {
 sub _mount_boot ( $query, @ ) {
 
     my $mount       = $query->('mount');
-    my $disk        = $query->('disk');
+    my $disk        = _add_partition $query->('disk');
     my $target_boot = "$mount/boot";
     say 'mounting /boot ...';
     run_system "mkdir -p $target_boot";    # using mount with system always throws an exception. so don't check
