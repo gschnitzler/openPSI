@@ -41,7 +41,7 @@ chmod u+x /root/startup.sh
 
 # switched over to seafile 7.1.x to escape python 2.7
 echo "downloading seafile server..."
-cd /root/ && wget https://s3.eu-central-1.amazonaws.com/download.seadrive.org/seafile-server_7.1.4_x86-64.tar.gz
+cd /root/ && wget https://s3.eu-central-1.amazonaws.com/download.seadrive.org/seafile-server_7.1.5_x86-64.tar.gz
 cd /root/ && tar zfx *.tar.gz
 rm -rf /root/*.tar.gz
 mkdir -p /root/seafile && mv /root/seafile-server*/* /root/seafile

@@ -3,7 +3,7 @@
         root    => './amp/fbpdf',
         scripts => './os/base/scripts',
         from    => 'amp73_base',
-        build   => 'yes',
+        build   => 'no',
         docker  => 'yes',
         add     => {
             portage => {
