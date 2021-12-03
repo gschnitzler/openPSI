@@ -13,8 +13,10 @@ use IO::Config::Check qw(file_exists);
 
 our @EXPORT_OK = qw(read_grub write_grub gen_grub);
 
-Readonly my $GRUB_LINUX         => qr{\s+linux\s+};
-Readonly my $GRUB_KERNEL_PATH   => qr{/boot/};
+Readonly my $GRUB_LINUX => qr{\s+linux\s+};
+
+#Readonly my $GRUB_KERNEL_PATH   => qr{/boot/};
+Readonly my $GRUB_KERNEL_PATH   => qr{/};
 Readonly my $GRUB_KERNEL        => qr{[^\s]+};
 Readonly my $GRUB_ROOT_PREFIX   => qr{root=};
 Readonly my $GRUB_ROOT          => qr{[^\s]+};
@@ -196,7 +198,9 @@ sub write_grub( $p ) {
         $subvol =~ s/-.*//x;
         $subst->{plugin}->{grub}->{system} = $system;
         $subst->{plugin}->{grub}->{kernel} = $grub->{$system}->{kernel};
-        $subst->{plugin}->{grub}->{root}   = $grub->{$system}->{root};
+        my $root = $grub->{$system}->{root};
+        $root =~ s/3//; # if we feed read_grub back into write_grub, the partition needs to be removed, as its hardcoded in the template.. quick workaround. fixing this would mean to rewrite the whole thing
+        $subst->{plugin}->{grub}->{root}   = $root;
         $subst->{plugin}->{grub}->{subvol} = $subvol;
 
         push( @grubcfg, check_and_fill_template( $template->{$menuentry_f}->{CONTENT}, $subst ) );

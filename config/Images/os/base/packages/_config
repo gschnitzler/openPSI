@@ -74,8 +74,8 @@ USE="-ipv6 -X -gtk -gnome -kde -qt4 -alsa -emacs -xemacs -systemd -cups -libress
 # the dep packages often do not support all python 3 targets.
 # see https://wiki.gentoo.org/wiki/Project:Python/PYTHON_TARGETS
 # and https://www.gentoo.org/support/news-items/2020-04-22-python3-7.html
-PYTHON_TARGETS="python3_7"
-PYTHON_SINGLE_TARGET="python3_7"
+PYTHON_TARGETS="python3_8"
+PYTHON_SINGLE_TARGET="python3_8"
 
 CURL_SSL="openssl"
 

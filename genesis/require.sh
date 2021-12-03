@@ -45,7 +45,7 @@ fi
 modules+=" Proc::ProcessTable"
 
 cpanm $modules;
-cpanm -n Forks::Super
+cpanm -nf Forks::Super
 
 
 # dont carry the cruft along

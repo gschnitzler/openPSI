@@ -5,21 +5,12 @@ This Document covers bootstrapping of machines
 
 #### Hyper-V Setup:
 - gen2
-
-#### VirtualBox Setup:
-
-- Chipset: ICH9
-- IO-APIC
-- all Cores
-- PAE/NX
-- VT-x/AMD-V
-- disks: 2x10gb SATA/AHCI or 1x15gb
 - network1: bridge
-- network2: Virtualbox Host Only Ethernet Adapter 192.168.222.1/24
+- network2: Host Only Ethernet Adapter 192.168.222.1/24
 
 #### Bare Metal:
 
-- Hetzner PX60-SSD (2015), PX61-SSD (2016), PX61-NVMe (2017) and AX160-NVMe (2018) machines are supported. Similar machines might work as well.
+EFI capable machines
 
 #### Preparations
 
