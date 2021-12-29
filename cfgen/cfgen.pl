@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-use lib '../Libs', '.';
+use lib '/data/psi/Libs', '.';
 use ModernStyle;
 use Data::Dumper;
 

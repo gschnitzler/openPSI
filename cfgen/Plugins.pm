@@ -10,13 +10,13 @@ our @EXPORT_OK = qw(plugin_config);
 
 ########################
 
-my $psi         = '/data/psi';
-my $config_path = "$psi/config";
-my $cache_path  = '/tmp/cfgen_cache';
-my $config      = {
+my $config_path         = "/data/psi/config";
+my $private_config_path = "/data/psi/config-private";
+my $cache_path          = '/tmp/cfgen_cache';
+my $config              = {
     Accounts => {
         path => 'Plugins/Config/Accounts',
-        data => { CONFIG_PATH => "$config_path/Accounts" },
+        data => { CONFIG_PATH => "$private_config_path/Accounts" },
     },
     Bootstrap => {
         path => 'Plugins/Config/Bootstrap',
@@ -29,15 +29,16 @@ my $config      = {
     Cluster => {
         path => 'Plugins/Config/Cluster',
         data => {
-            CONFIG_PATH => "$config_path/Cluster",
+            CONFIG_PATH => "$private_config_path/Cluster",
             CACHE       => "$cache_path/Cluster",
         },
     },
     Container => {
         path => 'Plugins/Config/Container',
         data => {
-            CONFIG_PATH => "$config_path/Container",
-            CACHE       => "$cache_path/Container",
+            CONFIG_PATH         => "$config_path/Container",
+            PRIVATE_CONFIG_PATH => "$private_config_path/Container",
+            CACHE               => "$cache_path/Container",
         },
     },
     Genesis => {
@@ -79,7 +80,11 @@ my $config      = {
 my $check = {
     '*' => {
         path => [ qr/^(.*)/x, 'dircheck' ],
-        data => { CONFIG_PATH => [ qr/(.*)/x, 'dircheck' ], CACHE => [ qr/(.*)/x, 'dircheck' ] },
+        data => {
+            CONFIG_PATH         => [ qr/(.*)/x, 'dircheck' ],
+            PRIVATE_CONFIG_PATH => [ qr/(.*)/x, 'dircheck' ],
+            CACHE               => [ qr/(.*)/x, 'dircheck' ]
+        },
     }
 };
 

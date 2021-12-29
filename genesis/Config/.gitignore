@@ -1,6 +1,0 @@
-# git does not add empty dirs. lets fix that with a gitignore file
-# Ignore everything in this directory
-*
-# Except this file
-!.gitignore
-

@@ -4,15 +4,15 @@
 use lib '/data/psi/Libs';
 use ModernStyle;
 use PSI::RunCmds qw(run_cmd);
-my $use_config = $ARGV[0];
 
-die 'ERROR: need a valid argument' unless ($use_config);
+my $local_config   = '/data/local_config/genesis';
+my $genesis_config = '/data/psi/genesis/Config';
 
-my ( $cluster, $machine ) = split( /\//, $use_config );
-die "ERROR: invalid argument: $use_config" if ( !$cluster || !$machine );
+my ( $cluster, $machine ) = split( /\//, $ARGV[0] );
+die "ERROR: invalid argument" if ( !$cluster || !$machine );
 
-my $config_path = "/data/local_config/genesis/$cluster/$machine/genesis/Config";
-die "ERROR: no such config $use_config" if ( !-e $config_path || !-d $config_path );
+my $config_path = "$local_config/$cluster/$machine/files/genesis/Config";
+die "ERROR: no such config" if ( !-e $config_path || !-d $config_path );
 
-run_cmd( 'rm ./Config', "ln -s $config_path ./Config" );
+run_cmd( "rm -f $genesis_config", "ln -s $config_path $genesis_config" );
 

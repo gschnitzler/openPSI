@@ -11,10 +11,10 @@ our @EXPORT_OK = qw(plugin_config);
 
 ########################
 
-my $psi               = '/data/psi';
-my $config_path       = "$psi/config";
-my $local_config_path = '/data/local_config';
-my $config            = {
+my $psi                 = '/data/psi';
+my $private_config_path = "/data/psi/config-private";
+my $local_config_path   = '/data/local_config';
+my $config              = {
     Secrets => {
         path => '../cfgen/Plugins/Config/Secrets',
         data => { CONFIG_PATH => "$local_config_path/secrets" },
@@ -25,12 +25,12 @@ my $config            = {
     },
     Cloudflare => {
         path => 'Plugins/Cloudflare',
-        data => { CONFIG_PATH => "$config_path/Cloudflare" },
+        data => { CONFIG_PATH => "$private_config_path/Cloudflare" },
     },
     LetsEncrypt => {
         path => 'Plugins/LetsEncrypt',
         data => {
-            CONFIG_PATH  => "$config_path/LetsEncrypt",
+            CONFIG_PATH  => "$private_config_path/LetsEncrypt",
             SECRETS_PATH => "$local_config_path/secrets",
         },
     },

@@ -1,8 +1,6 @@
 #!/usr/bin/perl
 
-# vbox guest additions/CIFS doesn't allow symlinks anymore, so for dev, the real Config::Plugins has to be added here
-# this is edited out in the genesis cfgen Plugin. update the code there if this changes
-use lib '../Libs', '.', '/data/local_config/genesis/op/gschnitzler/files/genesis';
+use lib '/data/psi/Libs', '.';
 use ModernStyle;
 use Data::Dumper;
 use Sys::Hostname;

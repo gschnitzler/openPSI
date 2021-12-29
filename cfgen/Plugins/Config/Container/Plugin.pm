@@ -7,7 +7,7 @@ use Storable qw(dclone);
 
 use InVivo qw(kexists kdelete);
 use PSI::Parse::Dir qw(get_directory_tree);
-use Tree::Merge qw (override_tree);
+use Tree::Merge qw (override_tree add_tree);
 use Tree::Slice qw(slice_tree);
 use IO::Templates::Read qw(read_templates convert_meta_structure);
 use IO::Templates::Parse qw(get_directory_tree_from_templates);
@@ -15,7 +15,7 @@ use IO::Templates::Meta::Parse qw(parse_meta);
 use IO::Templates::Meta::Apply qw(apply_meta);
 use IO::Config::Read qw(read_config load_config);
 use IO::Config::Cache qw(read_cache write_cache);
-use IO::Config::Check qw(check_config);
+use IO::Config::Check qw(check_config dir_exists);
 
 use Plugins::Config::Container::Filter::Double qw(check_double);
 
@@ -117,15 +117,34 @@ my $check = {
     INHERIT => { '*' => [qr/^(yes|no)/x], }                                 # the counterpart to EXPOSE, * is the first * of EXPOSE
 };
 
+sub _get_overlay_path ( $path, @root_paths ) {
+
+    $path =~ s/^.//x;
+    for my $rp (@root_paths) {
+        $path =~ s/^\///;
+        my $fp = join( '/', $rp, $path );
+        return $fp if dir_exists $fp;
+    }
+    say "path: $path, root paths: ", Dumper \@root_paths;
+    die "ERROR: path not found";
+}
+
 sub _read_config_from_source ( $debug, $query ) {
 
-    my $config_path      = $query->('CONFIG_PATH');
-    my $paths            = $query->('map_container_paths');
-    my $config           = load_config( read_config( $debug, $config_path ) );
+    #y $config_path         = $query->('CONFIG_PATH');
+    my $paths   = $query->('map_container_paths');
+    my $configs = {
+        CONFIG_PATH         => [ $query->('CONFIG_PATH'),         load_config( read_config( $debug, $query->('CONFIG_PATH') ) ), ],
+        PRIVATE_CONFIG_PATH => [ $query->('PRIVATE_CONFIG_PATH'), load_config( read_config( $debug, $query->('PRIVATE_CONFIG_PATH') ) ), ]
+    };
+    my @overlay_root_paths = ( $query->('CONFIG_PATH'), $query->('PRIVATE_CONFIG_PATH') );
+
+    #my $config         = load_config( read_config( $debug, $config_path ) );
     my $templates        = {};
     my $known_ips        = {};
     my $known_interfaces = {};
-    my $cache            = {};                                                   # simple caching, to minimize re-reading of overlays
+    my $cache            = {};                # simple caching, to minimize re-reading of overlays
+    my $tree             = {};
     my $get_templates    = sub ( $d, $p ) {
 
         return dclone $cache->{$p} if exists $cache->{$p};
@@ -141,136 +160,136 @@ sub _read_config_from_source ( $debug, $query ) {
         return dclone $t;
     };
 
-    foreach my $container_name ( keys $config->%* ) {
+    for my $config_name ( keys $configs->%* ) {
+        my $config_path = $configs->{$config_name}->[0];
+        my $config      = $configs->{$config_name}->[1];
 
-        foreach my $container_tag ( keys $config->{$container_name}->%* ) {
+        for my $container_name ( keys $config->%* ) {
 
-            my $container         = $config->{$container_name}->{$container_tag};
-            my $container_nametag = join( '_', $container_name, $container_tag );
+            for my $container_tag ( keys $config->{$container_name}->%* ) {
 
-            check_config(
-                $debug,
-                {
-                    name       => $container_nametag,
-                    config     => $container,
-                    definition => $check
-                }
-            );
+                my $container         = $config->{$container_name}->{$container_tag};
+                my $container_nametag = join( '_', $container_name, $container_tag );
 
-            my $interface_name = $container->{NETWORK}->{INTERFACE};
-            $config->{$container_name}->{$container_tag}->{NAME} = $container_nametag;
-
-            check_double( $known_ips, $container_nametag, $container->{NETWORK}->{IP} );
-
-            $known_interfaces->{$interface_name} = $container_nametag unless ( exists( $known_interfaces->{$interface_name} ) );
-            die "ERROR: interface_name $interface_name already in use by $known_interfaces->{$interface_name}"
-              if ( $known_interfaces->{$interface_name} ne $container_nametag );
-
-            # add host paths
-            my $host_paths = $query->("map_host_paths $container_name $container_tag");
-
-            foreach my $k ( keys $host_paths->%* ) {
-                $container->{DOCKER}->{PATHS}->{$k} = $host_paths->{$k} unless exists( $container->{DOCKER}->{PATHS}->{$k} );
-            }
-
-            $container->{CONTAINER}->{PATHS} = $paths;    # add container paths
-
-            # container config belongs to docker datastruct.
-            my $fpath = delete $container->{CONFIG};
-            $fpath =~ s/^.//x;
-            $fpath = join( '', $config_path, $fpath );
-
-            if ( exists( $container->{BACKUP} ) ) {
-
-                my $script_path = kdelete( $container, 'BACKUP', 'SCRIPT' );
-                if ($script_path) {
-
-                    $script_path =~ s/^.//x;
-                    $script_path = join( '', $config_path, $script_path );
-                    $templates->{$container_name}->{$container_tag}->{backup} = read_templates( $debug, $script_path );
-                }
-
-                my $folders = kdelete( $container, 'BACKUP', 'FOLDERS' );
-                if ($folders) {
-                    $container->{BACKUP}->{FOLDERS} = [];
-                    foreach my $folder ( split( /\s+/, $folders ) ) {
-
-                        die "ERROR: $folder not found in docker path definitions" unless exists( $container->{DOCKER}->{PATHS}->{$folder} );
-                        push $container->{BACKUP}->{FOLDERS}->@*, $container->{DOCKER}->{PATHS}->{$folder};
-
+                check_config(
+                    $debug,
+                    {
+                        name       => $container_nametag,
+                        config     => $container,
+                        definition => $check
                     }
+                );
+                check_double( $known_ips, $container_nametag, $container->{NETWORK}->{IP} );
+                $config->{$container_name}->{$container_tag}->{NAME} = $container_nametag;
+
+                my $if_name = $container->{NETWORK}->{INTERFACE};
+                $known_interfaces->{$if_name} = $container_nametag unless ( exists( $known_interfaces->{$if_name} ) );
+                die "ERROR: interface_name $if_name already in use by $known_interfaces->{$if_name}" if ( $known_interfaces->{$if_name} ne $container_nametag );
+
+                # add host paths
+                my $host_paths = $query->("map_host_paths $container_name $container_tag");
+                for my $k ( keys $host_paths->%* ) {
+                    $container->{DOCKER}->{PATHS}->{$k} = $host_paths->{$k} unless exists( $container->{DOCKER}->{PATHS}->{$k} );
                 }
-            }
+                $container->{CONTAINER}->{PATHS} = $paths;    # add container paths
 
-            # now load overlays and join them with container config
-            if ( exists( $container->{CONFIG_OVERLAY} ) ) {
+                # container config belongs to docker datastruct.
+                my $container_path = delete( $container->{CONFIG} );
 
-                my $overlay = delete $container->{CONFIG_OVERLAY};
-                $templates->{$container_name}->{$container_tag} = {} unless exists( $templates->{$container_name}->{$container_tag} );
-                foreach my $layer ( split( /\s+/x, $overlay ) ) {
+                if ( exists( $container->{BACKUP} ) ) {
 
-                    if ( $layer =~ s/^[.]//x ) {    # might be an absolute path
-                        $layer = join( '', $config_path, $layer );
+                    my $script_path = kdelete( $container, 'BACKUP', 'SCRIPT' );
+                    if ($script_path) {
+
+                        $script_path =~ s/^.//x;
+                        $script_path = join( '', $config_path, $script_path );
+                        $templates->{$container_name}->{$container_tag}->{backup} = read_templates( $debug, $script_path );
                     }
 
-                    override_tree( $templates->{$container_name}->{$container_tag}, $get_templates->( $debug, $layer ) );
-                }
+                    my $folders = kdelete( $container, 'BACKUP', 'FOLDERS' );
+                    if ($folders) {
+                        $container->{BACKUP}->{FOLDERS} = [];
+                        for my $folder ( split( /\s+/, $folders ) ) {
 
-                override_tree( $templates->{$container_name}->{$container_tag}, $get_templates->( $debug, $fpath ) );
-            }
-            else {
-                $templates->{$container_name}->{$container_tag} = $get_templates->( $debug, $fpath );
-            }
+                            die "ERROR: $folder not found in docker path definitions" unless exists( $container->{DOCKER}->{PATHS}->{$folder} );
+                            push $container->{BACKUP}->{FOLDERS}->@*, $container->{DOCKER}->{PATHS}->{$folder};
 
-            # load permission overlays
-            if ( exists( $container->{OVERLAY_PERMISSIONS} ) ) {
-
-                my $l = $container->{OVERLAY_PERMISSIONS};
-                foreach my $overlay ( keys $l->%* ) {
-
-                    my $overlay_path = $l->{$overlay};
-
-                    if ( $overlay_path =~ s/^[.]//x ) {    # might be an absolute path
-                        $overlay_path = join( '', $config_path, $overlay_path );
+                        }
                     }
-                    $l->{$overlay} = $get_permissions->($overlay_path);
                 }
-            }
 
-            # load pre init files
-            if ( exists( $container->{PRE_INIT} ) ) {
+                # now load overlays and join them with container config
+                if ( exists( $container->{CONFIG_OVERLAY} ) ) {
 
-                my $path = $container->{PRE_INIT};
-                if ( $path =~ s/^[.]//x ) {                # might be an absolute path
-                    $path = join( '', $config_path, $path );
+                    my $overlay = delete $container->{CONFIG_OVERLAY};
+                    $templates->{$container_name}->{$container_tag} = {} unless exists( $templates->{$container_name}->{$container_tag} );
+                    for my $layer ( split( /\s+/x, $overlay ) ) {
+
+                        if ( $layer =~ s/^[.]//x ) {    # might be an absolute path
+                            $layer = _get_overlay_path( $layer, @overlay_root_paths );
+                        }
+                        #say $layer;
+                        override_tree( $templates->{$container_name}->{$container_tag}, $get_templates->( $debug, $layer ) );
+                    }
+
+                    override_tree( $templates->{$container_name}->{$container_tag},
+                        $get_templates->( $debug, _get_overlay_path( $container_path, @overlay_root_paths ) ) );
                 }
-                $container->{PRE_INIT} = read_templates( $debug, $path );
-            }
+                else {
+                    $templates->{$container_name}->{$container_tag} = $get_templates->( $debug, $container_path );
+                }
 
-            # update config overlay permissions now, others are applied at runtime
-            if ( kexists( $container, 'OVERLAY_PERMISSIONS', 'CONFIG' ) ) {
-                my $permission_overlay = delete $container->{OVERLAY_PERMISSIONS}->{CONFIG};
-                my $meta_tree = apply_meta( get_directory_tree_from_templates( $templates->{$container_name}->{$container_tag} ), $permission_overlay );
-                override_tree( $templates->{$container_name}->{$container_tag}, convert_meta_structure($meta_tree) );
-            }
+                # load permission overlays
+                if ( exists( $container->{OVERLAY_PERMISSIONS} ) ) {
 
-            # check maps. this is not a complete check. the rest is done during build,
-            # when we know what containers are actually on a machine
-            if ( kexists( $container, 'DOCKER', 'MAP' ) ) {
-                my $cond = sub ($b) {
-                    return 1 unless ref $b->[0];
-                    return 0;
-                };
-                for my $e ( slice_tree( $container->{DOCKER}->{MAP}, $cond ) ) {
-                    my ( $cn, $real_ct, $cv, $p ) = $e->[1]->@*;
-                    my ($ct) = ( keys $config->{$cn}->%* ) if ( $real_ct eq 'any' );    # if any, use a random one to check
-                    die "ERROR: MAP container '$cn' does not exists (in $container_nametag)" unless exists $config->{$cn};
-                    die "ERROR: MAP container tag '$ct' does not exist (in $container_nametag -> $cn:$real_ct)" unless exists $config->{$cn}->{$ct};
+                    my $l = $container->{OVERLAY_PERMISSIONS};
+                    for my $overlay ( keys $l->%* ) {
+
+                        my $overlay_path = $l->{$overlay};
+
+                        if ( $overlay_path =~ s/^[.]//x ) {    # might be an absolute path
+                            $overlay_path = join( '', $config_path, $overlay_path );
+                        }
+                        $l->{$overlay} = $get_permissions->($overlay_path);
+                    }
+                }
+
+                # load pre init files
+                if ( exists( $container->{PRE_INIT} ) ) {
+
+                    my $path = $container->{PRE_INIT};
+                    if ( $path =~ s/^[.]//x ) {                # might be an absolute path
+                        $path = _get_overlay_path( $container_path, @overlay_root_paths );
+                    }
+                    $container->{PRE_INIT} = read_templates( $debug, $path );
+                }
+
+                # update config overlay permissions now, others are applied at runtime
+                if ( kexists( $container, 'OVERLAY_PERMISSIONS', 'CONFIG' ) ) {
+                    my $permission_overlay = delete $container->{OVERLAY_PERMISSIONS}->{CONFIG};
+                    my $meta_tree = apply_meta( get_directory_tree_from_templates( $templates->{$container_name}->{$container_tag} ), $permission_overlay );
+                    override_tree( $templates->{$container_name}->{$container_tag}, convert_meta_structure($meta_tree) );
+                }
+
+                # check maps. this is not a complete check. the rest is done during build,
+                # when we know what containers are actually on a machine
+                if ( kexists( $container, 'DOCKER', 'MAP' ) ) {
+                    my $cond = sub ($b) {
+                        return 1 unless ref $b->[0];
+                        return 0;
+                    };
+                    for my $e ( slice_tree( $container->{DOCKER}->{MAP}, $cond ) ) {
+                        my ( $cn, $real_ct, $cv, $p ) = $e->[1]->@*;
+                        my ($ct) = ( keys $config->{$cn}->%* ) if ( $real_ct eq 'any' );    # if any, use a random one to check
+                        die "ERROR: MAP container '$cn' does not exists (in $container_nametag)" unless exists $config->{$cn};
+                        die "ERROR: MAP container tag '$ct' does not exist (in $container_nametag -> $cn:$real_ct)" unless exists $config->{$cn}->{$ct};
+                    }
                 }
             }
         }
+        add_tree $tree, $config;
     }
-    return ( $config, $templates );
+    return ( $tree, $templates );
 }
 
 sub import_loader ( $debug, $query ) {
@@ -314,6 +333,7 @@ sub import_hooks($self) {
         loader  => \&import_loader,
         data    => {
             CONFIG_PATH         => 'CONFIG_PATH',
+            PRIVATE_CONFIG_PATH => 'PRIVATE_CONFIG_PATH',
             CACHE               => 'CACHE',
             paths               => 'state paths container',
             map_host_paths      => 'state map_container_host_paths',
