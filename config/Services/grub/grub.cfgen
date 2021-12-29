@@ -1,7 +1,0 @@
-{
-    grub => {
-        REQUIRE   => [],
-        TEMPLATES => './grub/Templates',
-    }
-};
-

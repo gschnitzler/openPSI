@@ -1,8 +1,0 @@
-#@flags
-
-enabled=1
-
-#@post group=15
-touch /test_root/leaf2
-
-

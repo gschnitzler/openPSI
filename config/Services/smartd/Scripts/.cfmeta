@@ -1,7 +1,0 @@
-{
-  './smartd_init' => {
-  	LOCATION => '/runonce/smartd_init',
-	CHMOD => '550'
-  },
-}
-

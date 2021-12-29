@@ -1,8 +1,0 @@
-{
-  './smartd.conf' => 
-  {
-  LOCATION => '/etc/smartd.conf',
-  CHMOD => 644
-  },
-}
-

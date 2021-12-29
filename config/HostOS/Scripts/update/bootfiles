@@ -1,7 +1,0 @@
-#!/bin/bash
-#
-#echo "installing Boot files to [% paths.hostos.MOUNT %]/boot using  [% state.images.image.boot.latest %]"
-#mkdir -p [% paths.hostos.MOUNT %]/boot && tar xpf [% state.images.image.boot.latest %] --xattrs -C [% paths.hostos.MOUNT %]/boot > /dev/null
-
-echo "installing Boot files to /boot using  [% state.images.image.boot.latest %]"
-mkdir -p /boot && tar xpf [% state.images.image.boot.latest %] --xattrs -C /boot > /dev/null

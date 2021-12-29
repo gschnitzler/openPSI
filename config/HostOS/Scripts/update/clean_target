@@ -1,4 +1,0 @@
-echo "cleaning target disk"
-mkdir -p [% paths.hostos.MOUNT %] 
-rm -rf [% paths.hostos.MOUNT %]/*
-

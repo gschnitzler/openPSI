@@ -1,4 +1,0 @@
-}
-for index, dir in next, sources do
-        sync {initSync, source=dir}
-end

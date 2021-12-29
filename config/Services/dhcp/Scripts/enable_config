@@ -1,2 +1,0 @@
-# this is relative to the runonce local_config directory
-echo "conf-file=/etc/dnsmasq.dhcp.conf" >> ../etc/dnsmasq.conf

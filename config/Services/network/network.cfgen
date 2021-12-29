@@ -1,7 +1,0 @@
-{
-    network => {
-        REQUIRE   => [],
-        TEMPLATES => './network/Templates',
-    }
-};
-

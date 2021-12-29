@@ -1,8 +1,0 @@
-#@flags
-
-enabled=1
-
-#@package
-
-dev-php/PEAR-Mail
-

@@ -1,7 +1,0 @@
-{
-  './ssh_init' => {
-  	LOCATION => '/runonce/ssh_init',
-	CHMOD => '550',
-  },
-}
-

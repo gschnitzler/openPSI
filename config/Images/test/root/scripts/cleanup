@@ -1,7 +1,0 @@
-echo "cleaning up"
-emerge --depclean
-revdep-rebuild 
-eclean -d distfiles 
-rm -rf /usr/portage/distfiles/*
-find /var/log/ -type f | xargs rm -f
-echo "cleanup finished"

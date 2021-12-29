@@ -1,6 +1,0 @@
-{ './node_exporter' => {
-	LOCATION => '/etc/conf.d/node_exporter',
-	CHMOD => 644
-}
-}
-

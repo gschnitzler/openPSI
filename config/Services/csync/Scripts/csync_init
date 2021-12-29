@@ -1,2 +1,0 @@
-rc-update add csync2 default
-rc-update add lsyncd default

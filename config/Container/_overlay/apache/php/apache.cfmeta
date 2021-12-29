@@ -1,8 +1,0 @@
-{
-    './apache/modules.d/70_mod_php.conf' => {
-        CHMOD => 440,
-        UID   => 81,
-        GID   => 81,
-    },
-}
-

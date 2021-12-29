@@ -1,8 +1,0 @@
-{
-    csync => {
-        REQUIRE   => [],
-        SCRIPTS   => './csync/Scripts',
-        TEMPLATES => './csync/Templates',
-    }
-};
-

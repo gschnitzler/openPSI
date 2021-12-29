@@ -1,7 +1,0 @@
-{
-    ssmtp => {
-        REQUIRE   => [],
-        TEMPLATES => './ssmtp/Templates',
-    }
-};
-

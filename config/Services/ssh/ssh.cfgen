@@ -1,8 +1,0 @@
-{
-    ssh => {
-        REQUIRE => [],
-        SCRIPTS => './ssh/Scripts',
-	TEMPLATES => './ssh/Templates'
-    }
-};
-

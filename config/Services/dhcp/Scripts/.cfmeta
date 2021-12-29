@@ -1,7 +1,0 @@
-{
-  './enable_config' => {
-  	LOCATION => '/runonce/enable_config',
-	CHMOD => '550'
-  },
-}
-

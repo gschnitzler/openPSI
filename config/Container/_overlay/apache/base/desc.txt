@@ -1,1 +1,0 @@
-this is the base configuration for apache_proxy image

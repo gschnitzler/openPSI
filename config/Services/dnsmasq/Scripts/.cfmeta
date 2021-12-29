@@ -1,7 +1,0 @@
-{
-  './dnsmasq_init' => {
-	LOCATION => '/runonce/dnsmasq_init',
-	CHMOD => '550',
-  },
-}
-

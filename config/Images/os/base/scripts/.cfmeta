@@ -1,9 +1,0 @@
-{
-
-  # must be its own meta file, as its included by other images
-  './*' => {},
-  _default_meta => {
-    CHMOD => '644'
-  }
-}
-
