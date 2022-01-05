@@ -369,6 +369,7 @@ sub _bm_create_chroot_files ( $p) {
         'exit $1;',
         'fi',
         '}',
+        'source /etc/profile',
         'touch /failflag',
         "rm $bashinit",
         "/bin/bash  --init-file $bashinit2 -i",
@@ -380,33 +381,21 @@ sub _bm_create_chroot_files ( $p) {
         #
         'error(){',
         'if [ $1 != 0 ]; then',
-
-        #"umount -lf $psi",
         'exit $1;',
         'fi',
         '}',
+        'source /etc/profile',
         'mkdir -p /etc/portage/repos.conf && mkdir -p /var/db/repos/gentoo',
         'if ! test -e /etc/portage/repos.conf/gentoo.conf; then cp /usr/share/portage/config/repos.conf /etc/portage/repos.conf/gentoo.conf; fi',
         'env-update',
-        'source /etc/profile',
         'export PS1="(chroot) $PS1"',
         "rm $bashinit2",
-
-        #'DONT_MOUNT_BOOT=1 && export DONT_MOUNT_BOOT',
-        #"mkdir -p $data_root && mkdir -p $psi",
-        #"mount /genesis.img $psi",
-        #'error $?',
     );
 
     push @data_bashinit2, "echo nameserver 8.8.8.8 > /etc/resolv.conf && cd $genesis && ./require.sh" if ($bootstrap);
     push @data_bashinit2, "cd $genesis && ./genesis.pl image build $name";
     push @data_bashinit2, 'error $?';
-
-    #push @data_bashinit2, "cd / && umount -lf $psi";
-
     push @data_bashinit2, 'rm /failflag';
-
-    #push @data_bashinit2, 'rm /genesis.img';
     push @data_bashinit2, 'exit';
 
     $_ .= "\n" for @data_bashinit1;

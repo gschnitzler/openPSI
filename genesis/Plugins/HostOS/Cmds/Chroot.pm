@@ -104,7 +104,14 @@ sub _enter_shell ( $action, $query, @ ) {
     _mount_target($query);
     _create_bashinit( $mount, $bashinit, $bashinit2 );
 
-    my @data = ( 'env-update', 'source /etc/profile', 'export PS1="(chroot) $PS1"', "rm $bashinit2", 'DONT_MOUNT_BOOT=1 && export DONT_MOUNT_BOOT', );
+    my @data = (
+        #
+        'env-update',
+        'source /etc/profile',
+        'export PS1="(chroot) $PS1"',
+        "rm $bashinit2",
+        'DONT_MOUNT_BOOT=1 && export DONT_MOUNT_BOOT',
+    );
     push @data, "cd $genesis && ./require.sh && genesis" if ( $action == 2 );
     _write_file( "$mount/$bashinit2", @data );
     _mount_dev($query);
@@ -131,7 +138,13 @@ sub _enter_shell ( $action, $query, @ ) {
 
 sub _create_bashinit ( $mount, $bashinit, $bashinit2 ) {
     say 'creating chroot entry file...';
-    _write_file( "$mount/$bashinit", "rm $bashinit", "/bin/bash  --init-file $bashinit2 -i", 'exit' );
+    _write_file(
+        #
+        "$mount/$bashinit",
+        "rm $bashinit",
+        "/bin/bash  --init-file $bashinit2 -i",
+        'exit'
+    );
     return;
 }
 

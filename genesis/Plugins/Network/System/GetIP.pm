@@ -47,6 +47,7 @@ sub _get_ips () {
             \s+
             $IPEX       # address
             \s*
+            .*
             $
             }x
           );
