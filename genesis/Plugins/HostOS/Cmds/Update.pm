@@ -155,11 +155,10 @@ sub update_boot ( $query, @ ) {
     my $tarsys    = join( '-', $target_system, $mtype );
 
     die 'ERROR: grub.cfg seems to be in the wrong state. reinstall it.' unless ( exists( $grub->{$tarsys} ) );
-
     _delete_old_kernel($curkernel);
 
     $grub->{$tarsys}->{kernel} = _extract_tarball( $image, $mtype, $target_system );
-    
+
     # write new genesis to disk
     write_grub(
         {

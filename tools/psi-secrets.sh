@@ -7,7 +7,7 @@ gpg --allow-secret-key-import --import /data/psi-secrets.gpg.priv > /dev/null 2>
 gpg --import /data/psi-secrets.gpg.pub > /dev/null 2>&1
 gpg --import-ownertrust /data/psi-secrets.gpg.trust > /dev/null 2>&1
 mkdir -p /root/.password-store
-ln -s /data/psi/config/Secrets/ /root/.password-store/psi-secrets
+ln -s /data/psi/config-private/Secrets/ /root/.password-store/psi-secrets
 
 # patch pass to disabe git.
 # pass wants to git commit if it finds a git repo in the parent dirs, and there is no way of disabling that. 

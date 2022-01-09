@@ -21,9 +21,11 @@ ie if you update the kernel, the current modules might get removed and it will f
 
 ```
 setkmap
+passwd 
+systemctl stop iptables
+# or
 iptables -P INPUT ACCEPT
 iptables -F INPUT
-passwd 
 # (connect via ssh)
 # you may want to remove stuff from /etc/pacman.d/mirrorlist
 pacman -Syu --ignore linux-lts # update the system, but ignore the kernel. update is needed as the new packages might rely on updated *.so

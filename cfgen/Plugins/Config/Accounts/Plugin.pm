@@ -21,8 +21,7 @@ my $generic_user = {
 };
 
 my $generic_user_auth = {
-
-    # ssh-keygen -t rsa -C username -f ssh.user.username.key
+    # ssh-keygen -t ed25519 -f ssh.user.$username.key -C $username
     # send resulting ssh.username.key to user and delete it afterwards
     # move the ssh.username.key.pub to the secrets volume and enter a reference here
     SSH => { PUB => [qr/(.+)/x] },
