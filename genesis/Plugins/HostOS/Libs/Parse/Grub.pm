@@ -125,7 +125,7 @@ sub gen_grub ($query) {
 
     {
         local ( $?, $! );
-        if ( file_exists $grub_path && !-z $grub_path ) {
+        if ( file_exists($grub_path) && !-z $grub_path ) {
             say 'skipped (file exists)';
             return;
         }
@@ -199,7 +199,8 @@ sub write_grub( $p ) {
         $subst->{plugin}->{grub}->{system} = $system;
         $subst->{plugin}->{grub}->{kernel} = $grub->{$system}->{kernel};
         my $root = $grub->{$system}->{root};
-        $root =~ s/3//; # if we feed read_grub back into write_grub, the partition needs to be removed, as its hardcoded in the template.. quick workaround. fixing this would mean to rewrite the whole thing
+        $root =~ s/3//
+          ; # if we feed read_grub back into write_grub, the partition needs to be removed, as its hardcoded in the template.. quick workaround. fixing this would mean to rewrite the whole thing
         $subst->{plugin}->{grub}->{root}   = $root;
         $subst->{plugin}->{grub}->{subvol} = $subvol;
 
@@ -214,6 +215,7 @@ sub write_grub( $p ) {
     }
 
     say 'OK';
+
     #say Dumper \@conf;
     _grub_write_disk( \@conf, $grub_f );
     return;
