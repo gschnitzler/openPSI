@@ -23,9 +23,14 @@ sub get_hostos_macros() {
         },
         bootstrap => {
             node => {
-                MACRO => [ 'pull bootstrap image_hostos §source', 'pull bootstrap image_boot §source', 'bootstrap target system' ],
-                HELP  => ['setup new node'],
-                DESC  => 'setup new node',
+                MACRO => [
+                    #
+                    'pull bootstrap image_hostos §source',
+                    'pull bootstrap image_boot §source',
+                    'bootstrap target system'
+                ],
+                HELP => ['setup new node'],
+                DESC => 'setup new node',
             },
             target => {
                 system => {
