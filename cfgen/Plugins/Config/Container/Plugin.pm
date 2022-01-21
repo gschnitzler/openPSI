@@ -259,7 +259,7 @@ sub _read_config_from_source ( $debug, $query ) {
 
                     my $path = $container->{PRE_INIT};
                     if ( $path =~ s/^[.]//x ) {                # might be an absolute path
-                        $path = _get_overlay_path( $container_path, @overlay_root_paths );
+                        $path = _get_overlay_path( $path, @overlay_root_paths );
                     }
                     $container->{PRE_INIT} = read_templates( $debug, $path );
                 }

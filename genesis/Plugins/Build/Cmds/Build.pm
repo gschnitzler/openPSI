@@ -339,7 +339,7 @@ sub _bm_copy_genesis ( $p ) {
     my $source_path = $images->{genesis}->{$genesis_name}->{latest};
 
     run_cmd("cp $source_path $path/genesis.img.xz && cd $path && xz -d genesis.img.xz");
-    run_cmd("yes | btrfstune -u $path/genesis.img || true> /dev/null 2>&1");    # a recent change in hetzners rescuecd disallowed mounting the 'same' image twice
+    run_cmd("yes | btrfstune -u $path/genesis.img > /dev/null 2>&1 || true");    # a recent change in hetzners rescuecd disallowed mounting the 'same' image twice
     say 'OK';
     return;
 }

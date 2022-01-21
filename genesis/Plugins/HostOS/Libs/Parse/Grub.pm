@@ -199,8 +199,11 @@ sub write_grub( $p ) {
         $subst->{plugin}->{grub}->{system} = $system;
         $subst->{plugin}->{grub}->{kernel} = $grub->{$system}->{kernel};
         my $root = $grub->{$system}->{root};
-        $root =~ s/3//
-          ; # if we feed read_grub back into write_grub, the partition needs to be removed, as its hardcoded in the template.. quick workaround. fixing this would mean to rewrite the whole thing
+
+        # if we feed read_grub back into write_grub, the partition needs to be removed, as its hardcoded in the template..
+        # quick workaround. fixing this would mean to rewrite the whole thing
+        $root =~ s/3//; # general root partition number
+        $root =~ s/p$//; # for nvme drives, there is also an extra p
         $subst->{plugin}->{grub}->{root}   = $root;
         $subst->{plugin}->{grub}->{subvol} = $subvol;
 
