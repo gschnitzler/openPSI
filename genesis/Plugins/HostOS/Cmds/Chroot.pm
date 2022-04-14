@@ -155,6 +155,7 @@ sub _mount_dev ( $query, @ ) {
     run_system "mount -t proc proc $mount/proc";    # using mount with system always throws an exception. so don't check
     run_system "mount --rbind /sys $mount/sys";
     run_system "mount --rbind /dev $mount/dev";
+    run_system "mount --bind /run $mount/run";
     return;
 }
 
@@ -165,6 +166,7 @@ sub _umount_dev ( $query, @ ) {
     run_system \&_nop, "umount -lf $mount/proc";
     run_system \&_nop, "umount -lf $mount/sys";
     run_system \&_nop, "umount -lf $mount/dev";
+    run_system \&_nop, "umount -lf $mount/run";
     return;
 }
 

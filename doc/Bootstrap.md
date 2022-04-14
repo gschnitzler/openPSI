@@ -12,7 +12,7 @@ This Document covers bootstrapping of machines
 
 boot a suitable rescue system (hetzner, systemrescuecd) on target machine. 
 - use the kernel parameter net.ifnames=0 if needed 
-- config network ( to an IP known to genesis)
+- config network (to an IP known to genesis)
 
 ##### SystemRescueCD
 - always download newest version, as its rolling release and installing packages will have strange results without updating.
