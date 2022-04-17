@@ -43,6 +43,8 @@ sub _wait_finished ( $data, $container_name ) {
 
     print_table( 'Waiting on', $container_name, ': ' );
     say scalar keys $waitfor->%*;
+    
+    local ( $!, $? );
 
   GETOUT: while (1) {
 
@@ -50,11 +52,11 @@ sub _wait_finished ( $data, $container_name ) {
         # foreach my $msg ( get_msg( readline( STDIN ) ) ) {    ## no critic
         # which started to emit 'Resource temporarily unavailable' (EAGAIN) in $! after years of no issues.
         # ... and on the next machine it threw out illegal seeks. did not even bother looking. as long as there is no error, suppress it.
-        local ($!, $?);
-        while ( !eof(STDIN) ) {
-            defined( $_ = readline STDIN ) or die "readline failed: $!";
-            my $msg = get_msg($_);
-
+        #while ( !eof(STDIN) ) {
+        #    defined( $_ = readline STDIN ) or die "readline failed: $!";
+        #    my $msg = get_msg($_);
+        # and changed back again as it suddenly stopped working
+        foreach my $msg ( get_msg( readline(STDIN) ) ) {    ## no critic
             delete $waitfor->{ $msg->{from} } if ( $msg->{msg} eq 'FINISHED' );
 
             #say "$container_name waitfor to go:", scalar keys $waitfor->%*;
@@ -96,6 +98,9 @@ sub _get_pid ( $running_after_start, $container_name ) {
 
 sub _do_container_start ( $query, $data ) {
 
+    # Forks::Super does not clear this, so invoking anything that checks that will break ( like run_cmd)
+    local $? = 0;
+    local $! = 0;
     my $container_name         = $data->{config}->{NAME};
     my $data_path              = $data->{config}->{DOCKER}->{PATHS}->{DATA};
     my $pdata_path             = $data->{config}->{DOCKER}->{PATHS}->{PERSISTENT};
@@ -151,7 +156,7 @@ sub _do_container_start ( $query, $data ) {
 
              # devs might find it useful to have access to logs emitted by init scripts. op work is speed up by having access to the log directly on the machine
              # with the -s switch, logger emits its messages on stderr, which we then redirect into a local file for that purpose.
-                run_system "docker exec $container_name $line 2>&1 | logger -e -s -t '$container_name init_$script_name' 2>$init_log";
+                run_system "docker exec $container_name $line 2>&1 | logger -e -s -t '$container_name init_$script_name' 2>>$init_log";
             }
             say 'OK';
         }
@@ -176,6 +181,9 @@ sub _do_container_start ( $query, $data ) {
 
 sub _do_container_stop($data) {
 
+    # Forks::Super does not clear this, so invoking anything that checks that will break ( like run_cmd)
+    local $? = 0;
+    local $! = 0;
     my @network_stop   = $data->{network}->@*;
     my @docker_stop    = $data->{docker}->@*;
     my $container_name = $data->{config}->{NAME};

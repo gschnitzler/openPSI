@@ -73,7 +73,7 @@ sub _clean_builddir ( $image_tree, $builddir ) {
 
 sub _mount_dev ($mount) {
 
-    print_table( 'Mounting /proc /sys /dev genesis', "$mount ", ': ' );
+    print_table( 'Mounting /proc /sys /dev /run genesis', "$mount ", ': ' );
     run_system "mount --types proc /proc $mount/proc";
     run_system "mount --rbind /sys $mount/sys";
     run_system "mount --make-rslave $mount/sys";
@@ -89,7 +89,7 @@ sub _mount_dev ($mount) {
 sub _umount_dev ($mount) {
 
     my $nop = sub(@) { };    # using mount with system always throws an exception. so don't check
-    print_table( 'Unmounting /proc /sys /dev genesis', "$mount ", ': ' );
+    print_table( 'Unmounting /proc /sys /dev /run genesis', "$mount ", ': ' );
     run_system $nop, "umount -lf $mount/proc > /dev/null 2>&1";
     run_system $nop, "umount -lf $mount/sys > /dev/null 2>&1";
     run_system $nop, "umount -lf $mount/dev > /dev/null 2>&1";

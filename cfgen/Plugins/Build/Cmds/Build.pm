@@ -248,6 +248,9 @@ sub _build ( $query, @args ) {
 
             $workers->{"$cluster_name/$machine_name"} = {
                 TASK => sub($data) {
+                    # Forks::Super does not clear this, so invoking anything that checks that will break
+                    local $? = 0;
+                    local $! = 0;
                     return _write_to_disk($data);
                 },
                 DATA => {
