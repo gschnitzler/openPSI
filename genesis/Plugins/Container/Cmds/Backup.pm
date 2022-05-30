@@ -105,6 +105,7 @@ sub _backup ( $query, @ ) {
     my $borg_create_options = '--verbose --stats --show-rc --compression lz4 --exclude-caches';
     my $backup_command      = "$borg_key_env; borg create $borg_create_options $borg_base_dir/backup::$tag $include_string";
     my $remove_command      = "$borg_key_env; borg prune --list --prefix '{hostname}-' --show-rc --keep-daily 7 --keep-weekly 3 $borg_base_dir/backup";
+    my $compact_command     = "$borg_key_env; borg compact --cleanup-commits $borg_base_dir/backup";
     my $keyscan             = "ssh-keyscan $backup_target 2>&1 | grep -v '^#'";
     my $ec_handler          = sub($p) {
         say Dumper $p;
@@ -121,6 +122,8 @@ sub _backup ( $query, @ ) {
       "$backup_command >> $maillog 2>&1",
       "echo borg prune >> $maillog",
       "$remove_command >> $maillog 2>&1",
+      "echo borg compact >> $maillog",
+      "$compact_command >> $maillog 2>&1",
       "fusermount -u $borg_base_dir/backup >> $maillog 2>&1",
       "cat $maillog | mail -s 'Backup $group/$self' $mail",
       "rm -f $maillog";
