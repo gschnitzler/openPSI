@@ -452,20 +452,6 @@ sub _generate_iptables ( $template, $config ) {
             push $f_rules->@*, '# PROMETHEUS', "[0:0] -A input_TCP -i $intern_interface -d $intern_address -p tcp -m tcp --dport 9100 -j ACCEPT", '';
             return;
         },
-        csync => sub ($service) {
-            return if ( !exists( $service->{ENABLE} ) || $service->{ENABLE} ne 'yes' );
-            my $intern_address = $networks->{INTERN}->{ADDRESS};
-
-            # csync2 via ipsec
-            # the connect is directed to a real host interface (docker0 ip) and thus actually leaving the tunnel on the remote (this) side via eth0
-            # not sure how to counter this. could be handled with tricky racoon config, more tricky kernel sysctl and policy routing magic,
-            # or by stuffing csync and lsyncd into a container.
-            # none of the options is trivial.. so here is the quick and dirty fix...: just allow ipsec connects from eth0
-            # there is something wrong with this... no interface specified... check this
-            push $f_rules->@*, '# CSYNC', "[0:0] -A input_TCP -p tcp -m tcp -d $intern_address --dport 30865 -j ACCEPT", '';
-
-            return;
-        },
         dhcp => sub ($service) {
             return if ( !exists( $service->{ENABLE} ) || $service->{ENABLE} ne 'yes' );
             my $allowed_interface = $service->{INTERFACE};

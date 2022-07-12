@@ -33,11 +33,6 @@ my $backup = {
     BORG_KEY        => [qr/^(SECRETS:.+)/x],
 };
 
-my $csync = {
-    KEY => [qr/^(\/.*)/x],
-    CA  => [qr/(.+)/x],
-};
-
 my $dhcp = {
 
     # the interface name to serve (not the actual interface name, but the section name from NETWORK. this gets translated in cfgen)
@@ -134,7 +129,6 @@ my $check = {
 
     archive    => { $archive->%* },
     backup     => { $backup->%* },
-    csync      => { $csync->%* },
     dhcp       => { $dhcp->%* },
     dio        => {},
     dnsmasq    => {},

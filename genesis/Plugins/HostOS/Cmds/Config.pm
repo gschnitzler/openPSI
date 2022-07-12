@@ -11,7 +11,6 @@ use Plugins::HostOS::Libs::Parse::DHCP qw(gen_dhcp);
 use Plugins::HostOS::Libs::Parse::Strongswan qw(gen_strongswan);
 use Plugins::HostOS::Libs::Parse::Network qw(gen_network);
 use Plugins::HostOS::Libs::Parse::Grub qw(gen_grub);
-use Plugins::HostOS::Libs::Parse::Csync qw(gen_csync);
 use Plugins::HostOS::Libs::Parse::Dio qw(gen_dio);
 use Plugins::HostOS::Libs::Parse::Ssmtp qw(gen_ssmtp);
 use Plugins::HostOS::Libs::Parse::SSH qw(gen_ssh);
@@ -208,34 +207,6 @@ sub import_config ($config) {
                 templates     => { strongswan => 'service strongswan TEMPLATES' },
                 scripts       => { strongswan => 'service strongswan SCRIPTS' },
                 substitutions => { strongswan => { state => { network => 'state network' }, } }
-            }
-        },
-        csync => {
-            ENABLE => 'yes',
-            CMD    => sub (@arg) { _generate_config( [ \&gen_csync ], @arg ) },
-            DESC   => 'Generate csync config',
-            HELP   => ['Generate csync config'],
-            DATA   => {
-                paths  => { local_config => 'paths data LOCAL_HOST_CONFIG' },
-                config => {
-                    csync => {
-                        nodes => 'machine nodes',
-                        self  => {
-                            CSYNC => {
-                                KEY => 'machine self COMPONENTS SERVICE csync KEY',
-                                CA  => 'machine self COMPONENTS SERVICE csync CA',
-
-                            },
-                            CONTAINER => 'machine self COMPONENTS CONTAINER',
-                            GROUP     => 'machine self GROUP',
-                            NAMES     => { SHORT => 'machine self NAMES SHORT' },
-                        },
-                        container_config => 'container',
-                    }
-                },
-                templates     => { csync => 'service csync TEMPLATES' },
-                scripts       => { csync => 'service csync SCRIPTS' },
-                substitutions => { csync => {} }
             }
         },
         dio => {
