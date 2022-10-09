@@ -1,9 +1,9 @@
 #!/bin/bash
 
-cluster_dir="/data/psi/config/Cluster/"
+cluster_dir="/data/openPSI/openPSI-config-dotz/Cluster/"
 
 # generate CA
-openssl req -nodes -days 1000 -new -x509 -subj "/C=US/ST=SomeState/L=Location/O=Company/CN=domain.com" -keyout syslog.ca.priv -out syslog.ca.cert
+openssl req -nodes -days 1000 -new -x509 -subj "/C=US/ST=SomeState/L=Location/O=Company/CN=dotz.xyz" -keyout syslog.ca.priv -out syslog.ca.cert
 
 # generate host keys and certs for mutual auth for each machine
 for item in $(find $cluster_dir -type f | sed -e 's/.*Cluster\///' | grep / | sed -e 's/.cfgen$//'); do
@@ -28,14 +28,8 @@ done
 
 # in addition, the syslog container (the server/receiver) also needs a pair
 
-container="ps-syslog.monitor.production"
-fqdn="logs.domain.com"
-openssl req -nodes -days 1000 -new -x509 -subj "/C=US/ST=State/L=Location/O=Company/CN=$fqdn" -keyout container.$container.priv -out container.$container.cert
-openssl x509 -x509toreq -in container.$container.cert -signkey container.$container.priv -out container.$container.csr
-openssl x509 -req -days 1000 -CA syslog.ca.cert -CAkey syslog.ca.priv -CAcreateserial -CAserial syslog.ca.serial -in container.$container.csr -out container.$container.cert.signed
-
-container="d-syslog.d.production"
-fqdn="logs.d.xyz"
+container="dotz-syslog.dotz.production"
+fqdn="logs.dotz.xyz"
 openssl req -nodes -days 1000 -new -x509 -subj "/C=US/ST=State/L=Location/O=Company/CN=$fqdn" -keyout container.$container.priv -out container.$container.cert
 openssl x509 -x509toreq -in container.$container.cert -signkey container.$container.priv -out container.$container.csr
 openssl x509 -req -days 1000 -CA syslog.ca.cert -CAkey syslog.ca.priv -CAcreateserial -CAserial syslog.ca.serial -in container.$container.csr -out container.$container.cert.signed

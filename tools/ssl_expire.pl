@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-use lib '../Libs';
+use lib '../openPSI-Libs';
 use ModernStyle;
 use Data::Dumper;
 
