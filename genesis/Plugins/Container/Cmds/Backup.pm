@@ -124,7 +124,7 @@ sub _backup ( $query, @ ) {
       "$remove_command >> $maillog 2>&1",
       "echo borg compact >> $maillog",
       "$compact_command >> $maillog 2>&1",
-      "fusermount -u $borg_base_dir/backup >> $maillog 2>&1",
+      "fusermount3 -u $borg_base_dir/backup >> $maillog 2>&1",
       "cat $maillog | mail -s 'Backup $group/$self' $mail",
       "rm -f $maillog";
     say 'OK';
