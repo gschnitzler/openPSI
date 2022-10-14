@@ -17,6 +17,7 @@ use Plugins::HostOS::Libs::Parse::SSH qw(gen_ssh);
 use Plugins::HostOS::Libs::Parse::Smartd qw(gen_smartd);
 use Plugins::HostOS::Libs::Parse::Backup qw(gen_backup);
 use Plugins::HostOS::Libs::Parse::Syslog qw(gen_syslog);
+use Plugins::HostOS::Libs::Parse::Fail2Ban qw(gen_fail2ban);
 use Plugins::HostOS::Libs::Parse::Prometheus qw(gen_prometheus);
 
 use InVivo qw(kexists);
@@ -128,7 +129,7 @@ sub import_config ($config) {
                 paths  => { local_config => 'paths data LOCAL_HOST_CONFIG' },
                 config => {
                     dnsmasq => {
-                        dhcp             => 'machine self COMPONENTS SERVICE dhcp', # dhcp hostnames need to be incorporated into hosts config
+                        dhcp             => 'machine self COMPONENTS SERVICE dhcp',    # dhcp hostnames need to be incorporated into hosts config
                         nodes            => 'machine nodes',
                         container        => 'machine self COMPONENTS CONTAINER',
                         container_config => 'container',
@@ -256,6 +257,18 @@ sub import_config ($config) {
                 templates     => { syslog       => 'service syslog TEMPLATES' },
                 config        => { syslog       => 'machine self COMPONENTS SERVICE syslog' },
                 substitutions => { syslog       => {} }
+            }
+        },
+        fail2ban => {
+            ENABLE => 'yes',
+            CMD    => sub (@arg) { _generate_config( [ \&gen_fail2ban ], @arg ) },
+            DESC   => 'Generate fail2ban config',
+            HELP   => ['Generate fail2ban config'],
+            DATA   => {
+                paths         => { local_config => 'paths data LOCAL_HOST_CONFIG' },
+                templates     => { fail2ban     => 'service fail2ban TEMPLATES' },
+                config        => { fail2ban     => 'machine self COMPONENTS SERVICE fail2ban' },
+                substitutions => { fail2ban     => {} }
             }
         },
         smartd => {

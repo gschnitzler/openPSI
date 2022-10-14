@@ -136,6 +136,7 @@ my $check = {
     network    => {},
     prometheus => {},
     smartd     => {},
+    fail2ban   => {},
     ssh        => { $ssh->%* },
     ssmtp      => { $ssmtp->%* },
     strongswan => { $strongswan->%* },
