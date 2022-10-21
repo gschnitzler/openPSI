@@ -18,12 +18,13 @@ my $check = {
             '*' => {
                 '*' => {
                     'proxied'   => [qr/^([01])/x],
-                    'type'      => [qr/^((?:A|TXT))/x],
+                    'type'      => [qr/^((?:A|TXT|MX|CAA))/x],
                     'name'      => [qr/^(.+)/x],
                     'content'   => [qr/^(.+)/x],
                     'zone_id'   => [qr/^(.+)/x],
                     'id'        => [qr/^(.+)/x],
-                    'zone_name' => [qr/^(.+)/x]
+                    'zone_name' => [qr/^(.+)/x],
+                    'priority'  => [qr/^(\d+)/x]
                 },
             }
         }
@@ -35,7 +36,8 @@ sub import_loader ( $debug, $query ) {
     my $config_path = $query->('CONFIG_PATH');
     my $dns         = check_config(
         $debug,
-        {   name       => 'DNS',
+        {
+            name       => 'DNS',
             config     => load_config( read_config( $debug, $config_path ) ),
             definition => $check,
         }

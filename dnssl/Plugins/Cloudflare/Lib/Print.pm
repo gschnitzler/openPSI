@@ -4,19 +4,14 @@ use ModernStyle;
 use Exporter qw(import);
 use Data::Dumper;
 
+use API::Cloudflare qw(supported_types_and_length_cloudflare);
 use PSI::Console qw(print_table pad_string);
 
 our @EXPORT_OK = qw(print_dns);
 
-my @supported_type = ( 'A', 'TXT' );
-my $length = 0;
+my ( $length, @supported_type ) = supported_types_and_length_cloudflare();
 
-foreach my $e (@supported_type) {
-    my $l = length $e;
-    $length = $l if $length < $l;
-}
-
-##########
+#############################################
 
 sub print_dns($t) {
 
@@ -36,21 +31,22 @@ sub print_dns($t) {
 
                     #$type    = $e->{type};
                     $proxied = $e->{proxied};
-                    push @content, $e->{content};
+
+                    if ( exists $e->{priority} ) {
+                        push @content, join( ':', $e->{priority}, $e->{content} );
+                    }
+                    else {
+                        push @content, $e->{content};
+                    }
 
                 }
-                if ( $type_name eq 'TXT' ) {
-
-                    # TXT records are long and might even container ','.
-                    # also, they are normaly standalone.
-                    # so use a line per entry
+                if ( $type_name eq 'A' ) {
+                    print_table "$padded_type_name $proxied $zone_name", $a_name, join( '', ': [ ', join( ',', @content ), " ]\n" );
+                }
+                else {
                     print_table "$padded_type_name $proxied $zone_name", $a_name, join( '', ': [ ', $_, " ]\n" ) for (@content);
 
                 }
-                else {
-                    print_table "$padded_type_name $proxied $zone_name", $a_name, join( '', ': [ ', join( ',', @content ), " ]\n" );
-                }
-
             }
         }
     }

@@ -10,7 +10,6 @@ use API::Cloudflare qw(add_dns_cloudflare del_dns_cloudflare list_dns_cloudflare
 use Plugins::Cloudflare::Lib::Diff qw(diff_dns);
 use Plugins::Cloudflare::Lib::Print qw(print_dns);
 
-# Export
 our @EXPORT_OK = qw(import_update);
 
 #######################################

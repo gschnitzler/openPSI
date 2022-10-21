@@ -80,14 +80,17 @@ my $check = {
         # sometimes you just want that, and there is no need to register or the public ips might just be bogus anyway
         LOCAL => [qr/(.*)/x],
 
-        # TXT records to register in public DNS. so far they play no role outside of public DNS.
+        # TXT/CAA/MX records to register in public DNS. so far they play no role outside of public DNS.
         # some services (like mail) need extra records (like DKIM, SPF)
         # structure is a domain->random->value, where:
-        # - domain is the (sub)domain to put the TXT record
+        # - domain is the (sub)domain to put the record
         # - random is an identifier for the record (might be a name or a digit).
         #   its only use is to circumvent that arrays are not supported
-        # - value is the actual TXT record
-        TXT => { '*' => { '*' => [qr/(.*)/x], } }
+        #   except for MX entries, where its used as MX priority
+        # - value is the actual record
+        TXT => { '*' => { '*' => [qr/(.*)/x], } },
+        CAA => { '*' => { '*' => [qr/(.*)/x], } },
+        MX  => { '*' => { '*' => [qr/(.*)/x], } },
     },
 
     CONFIG_OVERLAY      => [qr/(.+)/x],                  # despite the name, CONFIG_OVERLAY is the 'parent' config
@@ -228,6 +231,7 @@ sub _read_config_from_source ( $debug, $query ) {
                         if ( $layer =~ s/^[.]//x ) {    # might be an absolute path
                             $layer = _get_overlay_path( $layer, @overlay_root_paths );
                         }
+
                         #say $layer;
                         override_tree( $templates->{$container_name}->{$container_tag}, $get_templates->( $debug, $layer ) );
                     }

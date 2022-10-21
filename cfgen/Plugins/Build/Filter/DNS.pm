@@ -30,7 +30,9 @@ sub _filter_config($config) {
 
             # IGNORE is used by the diff module to ignore this entry.
             # so the entry is neither added nor deleted in DNS.
-            if ( kexists( $machine_self, 'NETWORK', 'PUBLIC', 'DHCP') && $machine_self->{NETWORK}->{PUBLIC}->{DHCP} eq 'yes' ) {
+            if ( ( kexists( $machine_self, 'NETWORK', 'PUBLIC', 'DHCP' ) && $machine_self->{NETWORK}->{PUBLIC}->{DHCP} eq 'yes' )
+                || $machine_self->{NETWORK}->{PUBLIC}->{ADDRESS} =~ /^192\.168\./ )
+            {
                 $machine_ips->{IPS}->{main} = 'IGNORE';
             }
             else {
@@ -50,20 +52,6 @@ sub _filter_config($config) {
     }
     return @machines;
 }
-
-# actually no use for that
-# sub _add_txt($dns) {
-#     my $entries = {};
-#     return $entries unless ( exists $dns->{TXT} );
-#     for my $domain_name ( keys $dns->{TXT}->%* ) {
-#         my $domain = $dns->{TXT}->{$domain_name};
-#         for my $name ( keys $domain->%* ) {
-#             my $txt_record = $domain->{$name};
-#             push $entries->{$domain_name}->@*, $txt_record;
-#         }
-#     }
-#     return $entries;
-# }
 
 sub _add_register ( $t, $dns, $ip_names ) {
 
@@ -85,6 +73,8 @@ sub _filter_container($containers) {
     my $container = {
         A   => {},
         TXT => {},
+        MX  => {},
+        CAA => {},
     };
 
     for my $c ( keys $containers->%* ) {
@@ -94,9 +84,9 @@ sub _filter_container($containers) {
 
             _add_register( $container->{A}, $machine_container->{DNS}, $machine_container->{NETWORK}->{IP} );
 
-            #add_tree $container, { TXT => _add_txt( $machine_container->{DNS} ) };
-            add_tree $container, { TXT => $machine_container->{DNS}->{TXT} };
-
+            for my $type ( 'TXT', 'CAA', 'MX' ) {
+                add_tree $container, { $type => $machine_container->{DNS}->{$type} } if exists $machine_container->{DNS}->{$type};
+            }
         }
     }
     return $container;
@@ -132,6 +122,31 @@ sub _get_root_domain($domain) {
 
 }
 
+sub _get_records ( $type, $t ) {
+
+    my $tree = {};
+    for my $domain ( keys $t->%* ) {
+
+        my $zone = _get_root_domain($domain);
+
+        for my $key ( keys $t->{$domain}->%* ) {
+
+            my $v = $t->{$domain}->{$key};
+
+            $tree->{$zone}->{$type}->{$domain}->{$v} = {
+                type      => $type,
+                proxied   => 0,
+                content   => $v,
+                name      => $domain,
+                zone_name => $zone,
+                id        => 'psi-config',
+                zone_id   => 'psi-config',
+            };
+            $tree->{$zone}->{$type}->{$domain}->{$v}->{priority} = $key if $type eq 'MX';
+        }
+    }
+    return $tree;
+}
 ####################################
 
 sub generate_dns ( $config ) {
@@ -147,28 +162,9 @@ sub generate_dns ( $config ) {
         my $machine_name      = $machine->{MACHINE};
         my $machine_ip        = $machine->{IPS}->{main};
 
-        ########## TXT records
-
-        my $mc_txt = $machine_container->{TXT};
-
-        foreach my $domain ( keys $mc_txt->%* ) {
-
-            my $txt_zone = _get_root_domain($domain);
-
-            foreach my $key ( keys $mc_txt->{$domain}->%* ) {
-
-                my $v = $mc_txt->{$domain}->{$key};
-
-                $tree->{$txt_zone}->{TXT}->{$domain}->{$v} = {
-                    type      => 'TXT',
-                    proxied   => 0,
-                    content   => $v,
-                    name      => $domain,
-                    zone_name => $txt_zone,
-                    id        => 'psi-config',
-                    zone_id   => 'psi-config',
-                };
-            }
+        ########## TXT/CAA/MX records
+        for my $type ( 'TXT', 'CAA', 'MX' ) {
+            add_tree $tree, _get_records( $type, $machine_container->{$type} ) if exists $machine_container->{$type};
         }
 
         ########## A records
