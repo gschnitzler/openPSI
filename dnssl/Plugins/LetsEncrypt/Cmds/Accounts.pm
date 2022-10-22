@@ -81,6 +81,10 @@ sub import_accounts () {
 
     $struct->{create}->{ssl}->{accounts} = {
 
+        # add cloudflare api keys.
+        # you need some A record defined for this to work. or add something like this to dns.cfgen
+        # 'domain.tld' => { A => { 'a.domain.tld' => { '1.1.1.1' => {} } } }, or some such that works.
+        # run the command, verify that id and key are in secrets, add the config
         CMD  => \&_create_accounts,
         DESC => 'Creates LetsEncrypt Domain Accounts',
         HELP => [ 'Creates LetsEncrypt Domain Accounts', 'usage:', 'create ssl accounts [root domain]' ],
