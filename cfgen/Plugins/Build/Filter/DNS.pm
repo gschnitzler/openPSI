@@ -203,6 +203,11 @@ sub generate_dns ( $config ) {
                     zone_id   => 'psi-config',
 
                 };
+
+                # could be that a container is enabled on prod and a dev machine. remove IGNORE entries when a real IP is also present
+                if ( exists $tree->{$container_zone}->{A}->{$container_dns_name}->{IGNORE} && $container_ip ne 'IGNORE' ) {
+                    delete $tree->{$container_zone}->{A}->{$container_dns_name}->{IGNORE};
+                }
             }
         }
     }
