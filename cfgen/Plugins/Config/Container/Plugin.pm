@@ -277,18 +277,20 @@ sub _read_config_from_source ( $debug, $query ) {
 
                 # check maps. this is not a complete check. the rest is done during build,
                 # when we know what containers are actually on a machine
-                if ( kexists( $container, 'DOCKER', 'MAP' ) ) {
-                    my $cond = sub ($b) {
-                        return 1 unless ref $b->[0];
-                        return 0;
-                    };
-                    for my $e ( slice_tree( $container->{DOCKER}->{MAP}, $cond ) ) {
-                        my ( $cn, $real_ct, $cv, $p ) = $e->[1]->@*;
-                        my ($ct) = ( keys $config->{$cn}->%* ) if ( $real_ct eq 'any' );    # if any, use a random one to check
-                        die "ERROR: MAP container '$cn' does not exists (in $container_nametag)" unless exists $config->{$cn};
-                        die "ERROR: MAP container tag '$ct' does not exist (in $container_nametag -> $cn:$real_ct)" unless exists $config->{$cn}->{$ct};
-                    }
-                }
+                # sadly, now that container config is read from multiple locations, this check would only work for containers in the same location.
+                # therefor deactivated
+                #if ( kexists( $container, 'DOCKER', 'MAP' ) ) {
+                #    my $cond = sub ($b) {
+                #        return 1 unless ref $b->[0];
+                #        return 0;
+                #    };
+                #    for my $e ( slice_tree( $container->{DOCKER}->{MAP}, $cond ) ) {
+                #        my ( $cn, $real_ct, $cv, $p ) = $e->[1]->@*;
+                #        my ($ct) = ( keys $config->{$cn}->%* ) if ( $real_ct eq 'any' );    # if any, use a random one to check
+                #        die "ERROR: MAP container '$cn' does not exists (in $container_nametag)" unless exists $config->{$cn};
+                #        die "ERROR: MAP container tag '$ct' does not exist (in $container_nametag -> $cn:$real_ct)" unless exists $config->{$cn}->{$ct};
+                #    }
+                #}
             }
         }
         add_tree $tree, $config;
