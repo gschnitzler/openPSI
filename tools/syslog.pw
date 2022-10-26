@@ -3,7 +3,7 @@
 cluster_dir="/data/openPSI/openPSI-config-dotz/Cluster/"
 
 # generate CA
-openssl req -nodes -days 1000 -new -x509 -subj "/C=US/ST=SomeState/L=Location/O=Company/CN=dotz.xyz" -keyout syslog.ca.priv -out syslog.ca.cert
+openssl req -nodes -days 1000 -new -x509 -subj "/C=US/ST=State/L=Location/O=Company/CN=dotz.xyz" -keyout syslog.ca.priv -out syslog.ca.cert
 
 # generate host keys and certs for mutual auth for each machine
 for item in $(find $cluster_dir -type f | sed -e 's/.*Cluster\///' | grep / | sed -e 's/.cfgen$//'); do
