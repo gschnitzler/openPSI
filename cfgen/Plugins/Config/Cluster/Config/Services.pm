@@ -34,21 +34,11 @@ my $backup = {
 };
 
 my $dhcp = {
-
-    # the interface name to serve (not the actual interface name, but the section name from NETWORK. this gets translated in cfgen)
-    INTERFACE => [qr/(.+)/x],
-
-    # dhcp range start
-    START => [qr/(\d{1,3})/x],
-
-    # dhcp range end
-    END => [qr/(\d{1,3})/x],
-
-    # lease time
-    LEASE => [qr/(.+)/x],
-
-    # list of static hosts
-    HOSTS => {
+    INTERFACE => [qr/(.+)/x],    # the interface name to serve (not the actual interface name, but the section name from NETWORK. this gets translated in cfgen)
+    START => [qr/(\d{1,3})/x],   # dhcp range start
+    END   => [qr/(\d{1,3})/x],   # dhcp range end
+    LEASE => [qr/(.+)/x],        # lease time
+    HOSTS => {                   # list of static hosts
         '*' => {
             MAC => => [qr/^((?:[0-9A-Fa-f]{2}[:]){5}[0-9A-Fa-f]{2})$/x],
             IP  => [qr/(\d{1,3})/x],
@@ -75,10 +65,8 @@ my $ssmtp = {
 my $ssh = {
     SSHPORT     => [qr/^(\d+)/x],
     AUTHMETHODS => [qr/(.+)/x],
-
-    # additional MACs, for legacy clients on dev machines
-    ADDMACS  => [qr/(.+)/x],
-    HOSTKEYS => {
+    ADDMACS     => [qr/(.+)/x],     # additional MACs, for legacy clients on dev machines
+    HOSTKEYS    => {
         '*' => {
             PRIVPATH => [qr/^(\/.*)/x],
             PUBPATH  => [qr/^(\/.*)/x],
@@ -86,9 +74,7 @@ my $ssh = {
             PUB      => [qr/^\s*(SECRETS:.+)/x],
         },
     },
-
-    # used for deployment, when the PUBLIC interface is not facing the internet
-    NAT => {
+    NAT => {                        # used for deployment, when the PUBLIC interface is not facing the internet
         ADDRESS        => [qr/(.+)/x],
         NORMAL_PORT    => [qr/(.+)/x],
         BOOTSTRAP_PORT => [qr/(.+)/x]
@@ -113,20 +99,17 @@ my $strongswan = {
 my $syslog = {
     MONITOR    => [qr/^(.+)/x],
     SYSLOGPORT => [qr/^(\d+)/x],
+    CACERT     => [qr/^\s*(SECRETS:.+)/x],    # the certificate of the CA used to sign the server/client certs
+    SERVERCERT => [qr/^\s*(SECRETS:.+)/x],    # the cert of the machine
+    SERVERKEY  => [qr/^\s*(SECRETS:.+)/x],    # and its private key
+};
 
-    # the certificate of the CA used to sign the server/client certs
-    CACERT => [qr/^\s*(SECRETS:.+)/x],
-
-    # the cert of the machine
-    SERVERCERT => [qr/^\s*(SECRETS:.+)/x],
-
-    # and its private key
-    SERVERKEY => [qr/^\s*(SECRETS:.+)/x],
-
+my $fail2ban = {
+    DESTEMAIL => [qr/^(.+)/x],                # destination email
+    SENDER    => [qr/^(.+)/x],                # sender email
 };
 
 my $check = {
-
     archive    => { $archive->%* },
     backup     => { $backup->%* },
     dhcp       => { $dhcp->%* },
@@ -136,7 +119,7 @@ my $check = {
     network    => {},
     prometheus => {},
     smartd     => {},
-    fail2ban   => {},
+    fail2ban   => { $fail2ban->%* },
     ssh        => { $ssh->%* },
     ssmtp      => { $ssmtp->%* },
     strongswan => { $strongswan->%* },
@@ -149,7 +132,6 @@ foreach my $k ( keys $check->%* ) {
 }
 
 sub service_definitions () {
-
     return $check;
 }
 1;
