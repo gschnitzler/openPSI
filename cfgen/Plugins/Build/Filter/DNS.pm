@@ -205,7 +205,7 @@ sub generate_dns ( $config ) {
                 };
 
                 # could be that a container is enabled on prod and a dev machine. remove IGNORE entries when a real IP is also present
-                if ( exists $tree->{$container_zone}->{A}->{$container_dns_name}->{IGNORE} && $container_ip ne 'IGNORE' ) {
+                if ( scalar keys $tree->{$container_zone}->{A}->{$container_dns_name}->%* > 1 && exists $tree->{$container_zone}->{A}->{$container_dns_name}->{IGNORE}) {
                     delete $tree->{$container_zone}->{A}->{$container_dns_name}->{IGNORE};
                 }
             }
