@@ -1,3 +1,5 @@
+#!/bin/bash
+exit 0 # dont run this
 cluster_dir="/data/openPSI/openPSI-config-dotz/Cluster/"
 
 #generate host CAs (key and cert)
@@ -22,11 +24,11 @@ for i in $(find $cluster_dir -type f | sed -e 's/.*Cluster\///' | grep -v '/$' |
 	priv_f="ipsec.$group.$name.priv"
 	cert_f="ipsec.$group.$name.cert"
 	# private key
-        ipsec pki --gen --type rsa --size 2048 --outform pem > $priv_f
-        chmod 600 $priv_f
+    ipsec pki --gen --type rsa --size 2048 --outform pem > $priv_f
+    chmod 600 $priv_f
 
 	# cert
-	fqdn=$(grep -rn FULL $cluster_dir | grep $name | grep $group | sed -e "s/.*'\(.*\)'.*/\1/")
+	fqdn=$(grep -rn FULL $cluster_dir | grep $group.$name | sed -e "s/.*'\(.*\)'.*/\1/")
 	ipsec pki --pub --in $priv_f --type rsa | ipsec pki --issue --lifetime 1100 --cacert ipsec.$group.ca.cert --cakey ipsec.$group.ca.priv --dn "C=AT, O=$group, CN=$fqdn" --san $fqdn --flag serverAuth --outform pem > $cert_f
 
 done
