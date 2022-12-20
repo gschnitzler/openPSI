@@ -231,7 +231,7 @@ sub _start_container ( $query, @args ) {    ## no critic
                 network => create_network_start_script( $e, $net_state->{PUBLIC}, $net_state->{INTERN} ),
                 docker  => create_container_start_script( $e, $docker_images, $images, $running_container ),
             },
-            TASK  => sub(@) { _do_container_start( $query, @_ ) },
+            TASK  => sub(@a) { _do_container_start( $query, @a ) },
             QUEUE => {},
 
             # this is tricky. on container start stuff like image unpacking happens.
