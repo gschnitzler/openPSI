@@ -100,11 +100,10 @@ sub _backup ( $query, @ ) {
     create_btrfs_snapshot_simple( $data_path, $backup_path );
     print_table( 'Running Offsite Backup', ' ', ': ' );
 
-    my $tag                 = get_tag;
     my $borg_key_env        = "export BORG_KEY_FILE=$borg_key_file; export BORG_BASE_DIR=$borg_base_dir";
     my $borg_create_options = '--verbose --stats --show-rc --compression lz4 --exclude-caches';
-    my $backup_command      = "$borg_key_env; borg create $borg_create_options $borg_base_dir/backup::$tag $include_string";
-    my $remove_command      = "$borg_key_env; borg prune --list --prefix '{hostname}-' --show-rc --keep-daily 7 --keep-weekly 3 $borg_base_dir/backup";
+    my $backup_command      = "$borg_key_env; borg create $borg_create_options $borg_base_dir/backup $include_string";
+    my $remove_command      = "$borg_key_env; borg prune --list --show-rc --keep-daily 14 --keep-weekly 10 $borg_base_dir/backup";
     my $compact_command     = "$borg_key_env; borg compact --cleanup-commits $borg_base_dir/backup";
     my $keyscan             = "ssh-keyscan $backup_target 2>&1 | grep -v '^#'";
     my $ec_handler          = sub($p) {
