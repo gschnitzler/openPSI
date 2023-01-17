@@ -20,9 +20,8 @@ our @EXPORT_OK = qw(import_hooks);
 
 ###########################################
 
-my $IPEX = qr/^(\d{1,3}[.]\d{1,3}[.]\d{1,3}[.]\d{1,3})/x;
-
-my $adjacent_check = {    # ADJACENT might empty
+my $IPEX           = qr/^(\d{1,3}[.]\d{1,3}[.]\d{1,3}[.]\d{1,3})/x;
+my $adjacent_check = {                                                # ADJACENT might empty
     '*' => {
         '*' => {
             SSH => {
@@ -35,7 +34,6 @@ my $adjacent_check = {    # ADJACENT might empty
 };
 
 my $component_check = {
-
     CONTAINER => {
         '*' => {    # container name
             '*' => {    # container tag
@@ -50,7 +48,6 @@ my $component_check = {
     },
     ROLES   => { '*' => [qr/^\s*(yes|no)/x] },
     SERVICE => service_definitions(),
-
 };
 
 # the idea here is:
@@ -60,8 +57,7 @@ my $component_check = {
 # this would also work in rings, say DEVTOM on devtom stages to STAGETOM on stagecontrol,
 # which stages to TESTTOM1 in the staging cluster, which stages to STAGING on stagecontrol,
 # which stages to PRODUCTION on de-cluster1
-my $stage_check = { '*' => [qr/^(.+)/x] };
-
+my $stage_check           = { '*' => [qr/^(.+)/x] };
 my $check_machine_network = {
 
     # although the section names are not checked, hardcoded names are used everywhere else (plugins, config, templates, scripts)
@@ -83,7 +79,7 @@ my $check_machine_network = {
         BROADCAST   => [$IPEX],
         ROUTER      => [$IPEX],
         INTERFACE   => [qr/^([a-z0-9]+)/x],
-        EXTRA_ROUTE => [qr/^(.+)/x],          # additional routes. thanks hetzner. you really helped me out at 2am when all servers where down
+        EXTRA_ROUTE => [qr/^(.+)/x],          # additional routes. thanks hetzner. you really helped me out at 2am when all servers were down. not.
 
         # additional ips bound to INTERFACE
         # every port bound in container FORWARD is tied to a host ip <> container ip pair
@@ -104,19 +100,17 @@ my $check_cluster = {
     COMPONENTS  => { $component_check->%* },
     ADJACENT    => { $adjacent_check->%* },
     CLUSTER_GID => [qr/^([0-9]{4})/x],
-
-    # stages may not be overridden by machines
-    STAGE => { $stage_check->%* },
+    STAGE       => { $stage_check->%* },       # stages may not be overridden by machines
 };
 
 my $check_machine = {
     RAID => {
-        BOOT_FIRST => [qr/^(.+)/x], # boot this before grub. used for hetzner rescue
-        # template toolkit does not allow '0' as a value. (it gets replaced by '')
-        # i had so many headaches with TT, maybe its time to switch to something else
-        # anyway, as a quickfix, raidmodes are now defined as strings. possible are:
-        # raid0, raid1, raidS (single disk)
-        LEVEL => [qr/^(raid[01S]{1})/x],
+        BOOT_FIRST => [qr/^(.+)/x],             # boot this before grub. used for hetzner rescue
+                                                # template toolkit does not allow '0' as a value. (it gets replaced by '')
+                                                # i had so many headaches with TT, maybe its time to switch to something else
+                                                # anyway, as a quickfix, raidmodes are now defined as strings. possible are:
+                                                # raid0, raid1, raidS (single disk)
+        LEVEL      => [qr/^(raid[01S]{1})/x],
 
         # with the advent of NVMe, the disks need to be part of the machine config,
         # (global sda/b does not hold true anymore)
@@ -126,9 +120,7 @@ my $check_machine = {
     NAMES => {
         FULL  => [qr/^([a-zA-Z0-9.-]+)/x],
         SHORT => [qr/^([a-zA-Z0-9.-_]+)/x],
-
-        # accountname to use when connection to other machines
-        MRO => [qr/^([a-zA-Z0-9-_]+)/x],
+        MRO   => [qr/^([a-zA-Z0-9-_]+)/x],    # accountname to use when connection to other machines
     },
     GROUP    => [qr/^([a-zA-Z0-9.-_]+)/x],
     HOST_UID => [qr/^([0-9]{4})/x],
@@ -139,9 +131,7 @@ my $check_machine = {
         NAMESERVER3 => [$IPEX],
         DOMAIN      => [qr/^([a-z0-9.-]+)/x]
     },
-
-    # overrides group settings
-    COMPONENTS => { $component_check->%* },
+    COMPONENTS => { $component_check->%* },    # overrides group settings
     ADJACENT   => { $adjacent_check->%* },
 };
 ###################################################
@@ -161,7 +151,6 @@ sub _find_double_ips ( $name, $knownips, $networks ) {
     foreach my $entry (@match) {
 
         my $ip = $entry->[0]->{ADDRESS};
-
         die "ERROR: IP $ip is already used by $knownips->{$ip}" if ( exists( $knownips->{$ip} ) );
         $knownips->{$ip} = $name;
     }
@@ -198,10 +187,7 @@ sub _expand_ipsec_ips ( $network, $ipsec ) {
     if ( exists( $ipsec->{ENABLE} ) && $ipsec->{ENABLE} eq 'yes' ) {
 
         my $interface_name = $ipsec->{INTERFACE};
-
-        die "ERROR: IPSEC pool termination interface $interface_name not found in interface definitions"
-          unless exists $network->{$interface_name};
-
+        die "ERROR: IPSEC pool termination interface $interface_name not found in interface definitions" unless exists $network->{$interface_name};
         $ipsec->{INTERFACE} = $network->{$interface_name}->{INTERFACE};
     }
     return;
@@ -213,11 +199,9 @@ sub _expand_network ($network_cfg) {
 
         my $network = $network_cfg->{$network_name};
 
-        # dont add NETWORK if the interface is set to DHCP
-        next if ( exists( $network->{DHCP} ) && $network->{DHCP} eq 'yes' );
-
-        # die if insufficient information presdent
-        die 'ERROR: interface does not have ADDRESS or NETMASK' if ( !exists( $network->{ADDRESS} ) || !exists( $network->{NETMASK} ) );
+        next if ( exists( $network->{DHCP} ) && $network->{DHCP} eq 'yes' );    # dont add NETWORK if the interface is set to DHCP
+        die 'ERROR: interface does not have ADDRESS or NETMASK'
+          if ( !exists( $network->{ADDRESS} ) || !exists( $network->{NETMASK} ) );    # insufficient information
 
         # 'new' belongs to Net::Netmask. critic complains and is probably right, but its straight out of Net::Netmasks docs
         my $block = new Net::Netmask( join( '/', $network->{ADDRESS}, $network->{NETMASK} ) );    ## no critic
@@ -235,13 +219,12 @@ sub _expand_dhcp_ips ( $networks, $dhcp ) {
     my $start  = $dhcp->{START};
     my $end    = $dhcp->{END};
     my $hosts  = $dhcp->{HOSTS};
-
     my $router = $networks->{$ifname}->{ADDRESS};
-    $ifname = $networks->{$ifname}->{INTERFACE};
-    die "ERROR: interface $ifname not found in NETWORK definition" unless ($ifname);
-
-    my $net = $router;
+    my $net    = $router;
     $net =~ s/(.*)[.]\d+$/$1./x;
+    $ifname = $networks->{$ifname}->{INTERFACE};
+
+    die "ERROR: interface $ifname not found in NETWORK definition" unless ($ifname);
 
     $dhcp->{INTERFACE} = $ifname;
     $dhcp->{START}     = join( '', $net, $start );
@@ -273,7 +256,6 @@ sub _load_machines ( $debug, $path, $cluster_config ) {
     my $knownips     = {};
     my $machine_list = {};
 
-    # say Dumper $machines;
     foreach my $machine_name ( keys $machines->%* ) {
 
         my $machine = $machines->{$machine_name};
@@ -299,7 +281,6 @@ sub _load_machines ( $debug, $path, $cluster_config ) {
         $machine_list->{$machine_name} = $machine;
     }
 
-    #   say Dumper $machine_config;
     return $machine_list;
 }
 
@@ -310,9 +291,7 @@ sub _read_config_from_source ( $debug, $query ) {
 
     foreach my $cluster_name ( keys $cluster->%* ) {
 
-        my $machine_path = join( '/', $config_path, $cluster_name );
-
-        #   say Dumper $cluster_name, $cluster->{$cluster_name}, $check_cluster;
+        my $machine_path   = join( '/', $config_path, $cluster_name );
         my $cluster_config = check_config(
             $debug,
             {
