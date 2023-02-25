@@ -8,6 +8,7 @@ Gentoo Linux
 Support for init systems, system and service managers  --->
      [*] OpenRC, runit and other script based systems and managers
      [*] systemd     
+[*] Kernel Self Protection Project  ---- 
 
 
 ########################
@@ -185,6 +186,10 @@ Generic Driver Options  --->
 # gigabyte n3150n-d3v router board
 <*>     Realtek 8169 gigabit ethernet support
 
+
+[*] Network device support  --->
+    [*] Network core driver support
+    <*>   WireGuard secure network tunnel
 
 x       -> Character devices
 x         -> Enable TTY (TTY [=y])                       
