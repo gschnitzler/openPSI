@@ -11,7 +11,7 @@ This Document covers bootstrapping of machines
 #### Preparations
 
 boot a suitable rescue system (hetzner, systemrescuecd) on target machine. 
-- use the kernel parameter net.ifnames=0 if needed 
+- use the kernel parameter net.ifnames=0 if needed # on machines utilzing DHCP
 - config network (to an IP known to genesis)
 
 ##### SystemRescueCD
@@ -29,7 +29,7 @@ iptables -F INPUT
 # (connect via ssh)
 # you may want to remove stuff from /etc/pacman.d/mirrorlist
 pacman -Syu --ignore linux-lts # update the system, but ignore the kernel. update is needed as the new packages might rely on updated *.so
-pacman -S gcc make parted tmux lftp vim glibc linux-headers linux-api-headers libxcrypt 
+pacman -S gcc make glibc linux-headers linux-api-headers libxcrypt # prior to 10.0 also: parted tmux lftp vim 
 ```
 
 #### op machine 
