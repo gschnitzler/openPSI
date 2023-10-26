@@ -35,10 +35,10 @@ my $backup = {
 
 my $dhcp = {
     INTERFACE => [qr/(.+)/x],    # the interface name to serve (not the actual interface name, but the section name from NETWORK. this gets translated in cfgen)
-    START => [qr/(\d{1,3})/x],   # dhcp range start
-    END   => [qr/(\d{1,3})/x],   # dhcp range end
-    LEASE => [qr/(.+)/x],        # lease time
-    HOSTS => {                   # list of static hosts
+    START     => [qr/(\d{1,3})/x],    # dhcp range start
+    END       => [qr/(\d{1,3})/x],    # dhcp range end
+    LEASE     => [qr/(.+)/x],         # lease time
+    HOSTS     => {                    # list of static hosts
         '*' => {
             MAC => => [qr/^((?:[0-9A-Fa-f]{2}[:]){5}[0-9A-Fa-f]{2})$/x],
             IP  => [qr/(\d{1,3})/x],
@@ -79,6 +79,12 @@ my $ssh = {
         NORMAL_PORT    => [qr/(.+)/x],
         BOOTSTRAP_PORT => [qr/(.+)/x]
     },
+};
+
+my $wireguard = {
+    PORT => [qr/^(\d+)/x],
+    PRIV => [qr/^\s*(SECRETS:.+)/x],
+    PUB  => [qr/^\s*(SECRETS:.+)/x],
 };
 
 my $strongswan = {
@@ -124,6 +130,7 @@ my $check = {
     ssmtp      => { $ssmtp->%* },
     strongswan => { $strongswan->%* },
     syslog     => { $syslog->%* },
+    wireguard  => { $wireguard->%* },
 };
 
 # every service should have an enable switch

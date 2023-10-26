@@ -19,7 +19,7 @@ our @EXPORT_OK = qw(gen_network);
 #     my $parsed    = {};
 #     my $table     = '';
 
-#     foreach my $line ( $arptables->@* ) {
+#     for my $line ( $arptables->@* ) {
 
 #         $line =~ s/#.*//x;
 #         $line =~ s/^\s*//x;
@@ -51,12 +51,12 @@ our @EXPORT_OK = qw(gen_network);
 #     my $arp  = shift;
 #     my @file = ();
 
-#     foreach my $table_name ( keys( $arp->%* ) ) {
+#     for my $table_name ( keys( $arp->%* ) ) {
 
 #         my $table = $arp->{$table_name};
 #         push @file, "*$table_name";
 
-#         foreach my $c ( $table->{chains}->@* ) {
+#         for my $c ( $table->{chains}->@* ) {
 #             push @file, join( '', ':', $c );
 #         }
 
@@ -82,7 +82,7 @@ our @EXPORT_OK = qw(gen_network);
 #     my $f_rules   = $arptables->{filter}->{rules};
 
 #     # standard rules
-#     foreach my $network_name ( keys( $networks->%* ) ) {
+#     for my $network_name ( keys( $networks->%* ) ) {
 
 #         my $network    = $networks->{$network_name};
 #         my $dhcp       = $network->{DHCP};
@@ -110,7 +110,7 @@ our @EXPORT_OK = qw(gen_network);
 #         }
 
 #         # allow each interfaces additional ips
-#         foreach my $add_name ( keys( $additional->%* ) ) {
+#         for my $add_name ( keys( $additional->%* ) ) {
 #             my $additional_ip        = $additional->{$add_name}->{ADDRESS};
 #             my $additional_interface = $additional->{$add_name}->{INTERFACE};
 
@@ -123,9 +123,8 @@ our @EXPORT_OK = qw(gen_network);
 
 #     # ipsec rules
 #     #   my @client_ips = _get_roadwarrior_range( $roadwarrior_base, $roadwarrior_size );
-#     #   foreach my $client (@client_ips) {
+#     #   for my $client (@client_ips) {
 #     #       push $f_rules->@*, "-A ipsec -j ACCEPT -i $roadwarrior_interface -d $client";
-#     #
 #     #   }
 
 #     return ( _create_arptables($arptables) );
@@ -169,16 +168,13 @@ sub _get_network ( $interface, $config ) {
 
 sub _generate_interfaces ($config) {
 
-    my $networks = $config->{state}->{network};
-
+    my $networks   = $config->{state}->{network};
     my @interfaces = ();
 
-    foreach my $key ( keys $networks->%* ) {
-
+    for my $key ( keys $networks->%* ) {
         my $interface = $networks->{$key}->{INTERFACE};
 
-        # the interface init.d symlink
-        push @interfaces,
+        push @interfaces,    # the interface init.d symlink
           {
             LOCATION => "/etc/init.d/net.$interface",
             SYMLINK  => '/etc/init.d/net.lo',
@@ -186,8 +182,7 @@ sub _generate_interfaces ($config) {
             CONTENT  => [],
           };
 
-        # the rc-update symlink
-        push @interfaces,
+        push @interfaces,    # the rc-update symlink
           {
             LOCATION => "/etc/runlevels/default/net.$interface",
             SYMLINK  => "/etc/init.d/net.$interface",
@@ -202,34 +197,34 @@ sub _generate_interfaces ($config) {
 sub _generate_network ( $template, $config ) {
 
     my $networks = $config->{state}->{network};
+    my @content  = ();
 
-    my @content = ();
-
-    foreach my $key ( keys $networks->%* ) {
-
+    for my $key ( keys $networks->%* ) {
         my $network   = $networks->{$key};
         my $interface = $network->{INTERFACE};
         my $address   = $network->{ADDRESS};
         my $netmask   = $network->{NETMASK};
         my $bcast     = $network->{BROADCAST};
 
-        # the newline in config is intentional. this format is used for multiple IPs
         if ( exists $network->{DHCP} && $network->{DHCP} eq 'yes' ) {
             push @content, join( '', 'config_', $interface, '="dhcp"' );
+            next;
         }
-        else {
-            push @content, join( '', 'config_', $interface, '="', $address, '/', $netmask, ' brd ', $bcast );
-            foreach my $k ( keys $network->{ADDITIONAL}->%* ) {
 
-                my $additional  = $network->{ADDITIONAL}->{$k};
-                my $add_address = $additional->{ADDRESS};
-                my $add_bcast   = $additional->{BROADCAST};
-                my $add_netmask = $additional->{NETMASK};
-                push @content, join( '', $add_address, '/', $add_netmask, ' brd ', $add_bcast );
-
-            }
-            push @content, '"';
+        if ( $key eq 'WIREGUARD' ) {
+            push @content, join( '', 'wireguard_', $interface, '="/etc/wireguard/', $interface, '.conf"' );
         }
+
+        # the newline in config is intentional. this format is used for multiple IPs
+        push @content, join( '', 'config_', $interface, '="', $address, '/', $netmask, ' brd ', $bcast );
+        for my $k ( keys $network->{ADDITIONAL}->%* ) {
+            my $additional  = $network->{ADDITIONAL}->{$k};
+            my $add_address = $additional->{ADDRESS};
+            my $add_bcast   = $additional->{BROADCAST};
+            my $add_netmask = $additional->{NETMASK};
+            push @content, join( '', $add_address, '/', $add_netmask, ' brd ', $add_bcast );
+        }
+        push @content, '"';
     }
 
     my $dns_name         = $config->{domainname};
@@ -249,14 +244,14 @@ sub _generate_network ( $template, $config ) {
 
     # upstream changed config systax https://wiki.gentoo.org/wiki/Netifrc/Brctl_Migration
     #push @content, join( '', 'brctl_',  $intern_interface, '="setfd 0 sethello 10 stp off"' );
-    push @content, join( '', 'bridge_forward_delay_', $intern_interface, '=0' );
-    push @content, join( '', 'bridge_hello_time_',    $intern_interface, '=1000' );
-    push @content, join( '', 'bridge_stp_state_',     $intern_interface, '=0 # stp off' );
-    push @content, join( '', 'bridge_',               $intern_interface, '=""' );
-    push @content, join( '', 'dns_domain_lo="',       $dns_name,         '"' );
+    push @content,
+      join( '', 'bridge_forward_delay_', $intern_interface, '=0' ),
+      join( '', 'bridge_hello_time_',    $intern_interface, '=1000' ),
+      join( '', 'bridge_stp_state_',     $intern_interface, '=0 # stp off' ),
+      join( '', 'bridge_',               $intern_interface, '=""' ),
+      join( '', 'dns_domain_lo="',       $dns_name,         '"' );
 
     return \@content;
-
 }
 
 sub _parse_iptables ($iptables) {
@@ -264,8 +259,7 @@ sub _parse_iptables ($iptables) {
     my $parsed = {};
     my $table  = '';
 
-    foreach my $line ( $iptables->@* ) {
-
+    for my $line ( $iptables->@* ) {
         $line =~ s/#.*//x;
         $line =~ s/^\s*//x;
 
@@ -282,7 +276,6 @@ sub _parse_iptables ($iptables) {
         elsif ( $line =~ /^COMMIT/x ) {
             die 'ERROR: COMMIT without table' unless ($table);
             $table = '';
-
         }
         elsif ( $line =~ /.*-A[ ].+[ ]-j[ ]/x ) {
             push $parsed->{$table}->{rules}->@*, $line;
@@ -296,16 +289,15 @@ sub _create_iptables ($ipt) {
 
     my @file = ();
 
-    foreach my $table_name ( keys( $ipt->%* ) ) {
-
+    for my $table_name ( keys( $ipt->%* ) ) {
         my $table = $ipt->{$table_name};
+
         push @file, "*$table_name";
-        foreach my $c ( $table->{chains}->@* ) {
+        for my $c ( $table->{chains}->@* ) {
             push @file, join( '', ':', $c );
         }
         push @file, $table->{rules}->@*;
         push @file, 'COMMIT', '';
-
     }
 
     return \@file;
@@ -317,39 +309,29 @@ sub _generate_iptables ( $template, $config ) {
     my $services         = $config->{services};
     my $public_interface = $networks->{PUBLIC}->{INTERFACE};
     my $intern_interface = $networks->{INTERN}->{INTERFACE};
-
-    my $iptables = _parse_iptables($template);
-    my $f_rules  = $iptables->{filter}->{rules};
-    my $n_rules  = $iptables->{nat}->{rules};
+    my $iptables         = _parse_iptables($template);
+    my $f_rules          = $iptables->{filter}->{rules};
+    my $n_rules          = $iptables->{nat}->{rules};
 
     ### standard rules
-    foreach my $network_name ( keys( $networks->%* ) ) {
+    for my $network_name ( keys( $networks->%* ) ) {
 
         my $network    = $networks->{$network_name};
         my $interface  = $network->{INTERFACE};
         my $ip_network = $network->{NETWORK};
 
         push $f_rules->@*, "# Standard rules for $interface";
-
-        push $f_rules->@*,
-
-          # local connection tracking. RELATED and ESTABLISHED connection rule is already in the template
+        push $f_rules->@*,    # local connection tracking. RELATED and ESTABLISHED connection rule is already in the template
           "[0:0] -A input_hooks -i $interface -p udp -m conntrack --ctstate NEW -j input_UDP",
           "[0:0] -A input_hooks -i $interface -p tcp --syn -m conntrack --ctstate NEW -j input_TCP";
 
-        push $f_rules->@*,
-
-          # forward connection tracking
+        push $f_rules->@*,    # forward connection tracking
           "[0:0] -A forward_hooks -i $interface -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT";
 
-        push $f_rules->@*,
-
-          # accept any connection coming from non-public
+        push $f_rules->@*,    # accept any connection coming from non-public
           "[0:0] -A forward_hooks -i $interface -s $ip_network -j ACCEPT" if ( $network_name ne 'PUBLIC' );
 
-        push $f_rules->@*,
-
-          # local connection tracking. RELATED and ESTABLISHED connection rule is already in the template
+        push $f_rules->@*,    # local connection tracking. RELATED and ESTABLISHED connection rule is already in the template
           "[0:0] -A forward_hooks -i $interface -p udp -m conntrack --ctstate NEW -j forward_UDP",
           "[0:0] -A forward_hooks -i $interface -p tcp --syn -m conntrack --ctstate NEW -j forward_TCP";
 
@@ -360,16 +342,11 @@ sub _generate_iptables ( $template, $config ) {
   # i don't know if there is a scenario where one internal network would talk to another internal network via the external interface because of ipsec
   # in that case, multiple $ip_network would have to be exempt in the ! -d clause...
   # also in the previous hardcoded setup, for INTERN the clause was ! -d 10.0.0.0/8 ... not sure if this was a hack, or traffic from other nodes was the reason.
-  #
   # the 10.0.0.0/8 is a hack, would be better to have all the node networks exempt
-          "[0:0] -A POSTROUTING -o $public_interface -s $ip_network  ! -d 10.0.0.0/8 -j MASQUERADE" unless ( $network_name eq 'PUBLIC' );
+          "[0:0] -A POSTROUTING -o $public_interface -s $ip_network ! -d 10.0.0.0/8 -j MASQUERADE" unless ( $network_name eq 'PUBLIC' );
 
-        push $f_rules->@*,
-
-          # this should only apply to PUBLIC, should be triggert by a LISTEN setting in the IPSEC SERVICE config
-          "[0:0] -A input_hooks -i $interface -p esp -m conntrack --ctstate NEW -j ACCEPT"
-          if ( $network_name eq 'PUBLIC' );
-
+        push $f_rules->@*,    # this should only apply to PUBLIC, should be triggert by a LISTEN setting in the IPSEC SERVICE config
+          "[0:0] -A input_hooks -i $interface -p esp -m conntrack --ctstate NEW -j ACCEPT" if ( $network_name eq 'PUBLIC' );
         push $f_rules->@*,
 
           # ICMP types accepted on any interface
@@ -377,13 +354,10 @@ sub _generate_iptables ( $template, $config ) {
           "[0:0] -A input_hooks -i $interface -p icmp -m icmp --icmp-type 3 -m conntrack --ctstate NEW -j ACCEPT",
           "[0:0] -A input_hooks -i $interface -p icmp -m icmp --icmp-type 5 -m conntrack --ctstate NEW -j ACCEPT",
           "[0:0] -A input_hooks -i $interface -p icmp -m icmp --icmp-type 8 -m conntrack --ctstate NEW -j ACCEPT",
-          "[0:0] -A input_hooks -i $interface -p icmp -m icmp --icmp-type 11 -m conntrack --ctstate NEW -j ACCEPT";
-
-        push $f_rules->@*, '';
+          "[0:0] -A input_hooks -i $interface -p icmp -m icmp --icmp-type 11 -m conntrack --ctstate NEW -j ACCEPT", '';    # newline
     }
 
     ### per service rules
-
     my $service_dispatch = {
         strongswan => sub ($service) {
 
@@ -411,14 +385,12 @@ sub _generate_iptables ( $template, $config ) {
 
             #    my @client_ips = _get_roadwarrior_range( $roadwarrior_base, $roadwarrior_size );
 
-            #   foreach my $client (@client_ips) {
+            #   for my $client (@client_ips) {
             #       push $f_rules->@*, "[0:0] -A vpn_road -d $client -i $roadwarrior_interface -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT";
             #       push $f_rules->@*, "[0:0] -A vpn_road -s $client -i $public_interface -j ACCEPT";
 
             #   }
-
             return;
-
         },
         syslog => sub ($service) {
 
@@ -436,6 +408,11 @@ sub _generate_iptables ( $template, $config ) {
         ssh => sub ($service) {
             my $sshport = $service->{SSHPORT};
             push $f_rules->@*, '# SSH', "[0:0] -A input_TCP -p tcp -m tcp --dport $sshport -j ACCEPT", '';
+            return;
+        },
+        wireguard => sub ($service) {
+            my $wireguardport = $service->{PORT};
+            push $f_rules->@*, '# WIREGUARD', "[0:0] -A input_UDP -p udp -m udp --dport $wireguardport -j ACCEPT", '';
             return;
         },
         prometheus => sub ($service) {
@@ -463,16 +440,13 @@ sub _generate_iptables ( $template, $config ) {
               "[0:0] -A input_UDP -i $allowed_interface -p udp -m udp --dport 53 -j ACCEPT",
               "[0:0] -A input_TCP -i $allowed_interface -p tcp -m tcp --dport 53 -j ACCEPT", '';
 
-            foreach my $host_name ( keys $service->{HOSTS}->%* ) {
-
-                my $host = $service->{HOSTS}->{$host_name};
+            for my $host_name ( keys $service->{HOSTS}->%* ) {
+                my $host    = $service->{HOSTS}->{$host_name};
+                my $host_ip = $host->{IP};
 
                 next unless exists( $host->{NAT} );
 
-                my $host_ip = $host->{IP};
-
-                foreach my $nat_name ( keys $host->{NAT}->%* ) {
-
+                for my $nat_name ( keys $host->{NAT}->%* ) {
                     my $nat_rule         = $host->{NAT}->{$nat_name};
                     my $source           = $nat_rule->{SOURCE};
                     my $source_interface = $nat_rule->{SOURCE_INTERFACE};
@@ -483,8 +457,7 @@ sub _generate_iptables ( $template, $config ) {
                     push $f_rules->@*, "# DHCP client $host_name rule $nat_name";
                     push $n_rules->@*, "# DHCP client $host_name rule $nat_name";
 
-                    foreach my $proto (@protos) {
-
+                    for my $proto (@protos) {
                         my $chain_name = '';
                         $chain_name = 'forward_UDP' if ( $proto eq 'udp' );
                         $chain_name = 'forward_TCP' if ( $proto eq 'tcp' );
@@ -493,30 +466,23 @@ sub _generate_iptables ( $template, $config ) {
                         push $f_rules->@*, "[0:0] -A $chain_name -i $source_interface -s $source -p $proto -m $proto --dport $nat_port -j ACCEPT";
                         push $n_rules->@*,
                           "[0:0] -A PREROUTING -i $source_interface -p $proto -m $proto -s $source --dport $port -j DNAT --to-destination $host_ip:$nat_port";
-
                     }
                     push $f_rules->@*, '';
                     push $n_rules->@*, '';
                 }
-
             }
-
             return;
         },
     };
 
-    # dnsmasq DNS for docker
     push $f_rules->@*, '# DNSMASQ for docker',
       "[0:0] -A input_UDP -i $intern_interface -p udp -m udp --dport 53 -j ACCEPT",
       "[0:0] -A input_TCP -i $intern_interface -p tcp -m tcp --dport 53 -j ACCEPT", '';
 
-    foreach my $service_name ( keys $services->%* ) {
-
+    for my $service_name ( keys $services->%* ) {
         next unless $services->{$service_name}->{ENABLE} eq 'yes';
         $service_dispatch->{$service_name}->( $services->{$service_name} ) if exists $service_dispatch->{$service_name};
-
     }
-
     return ( _create_iptables($iptables) );
 }
 
@@ -535,6 +501,7 @@ sub gen_network ($query) {
     $filled_templates->{network}->{CONTENT}  = _generate_network( $filled_templates->{network}, $substitutions );
     push @cf, _generate_interfaces($substitutions);
     say 'OK';
+
     return $filled_templates, @cf;
 }
 

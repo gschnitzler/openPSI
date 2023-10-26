@@ -16,15 +16,17 @@ my $generic_user = {
     GID    => [qr/^(\d+)/x],
     HOME   => [qr/^(\/.*)/x],
     SHELL  => [qr/^(\/.*)/x],
-    GROUPS => [qr/^(.*)/x], # can be empty
+    GROUPS => [qr/^(.*)/x],     # can be empty
 
 };
 
 my $generic_user_auth = {
+
     # ssh-keygen -t ed25519 -f ssh.user.$username.key -C $username
     # send resulting ssh.username.key to user and delete it afterwards
     # move the ssh.username.key.pub to the secrets volume and enter a reference here
-    SSH => { PUB => [qr/(.+)/x] },
+    SSH       => { PUB => [qr/(.+)/x] },
+    WIREGUARD => { PUB => [qr/(.+)/x] },
 
     # google-authenticator -t -f -D -u -w 10 -s gauth.username.key
     # and hand the codes to the user
@@ -66,7 +68,7 @@ sub _get_gids ($group) {
     return $gids;
 }
 
-sub _validate_accounts ( $accounts ) {
+sub _validate_accounts ($accounts) {
 
     my $groups    = delete $accounts->{group};
     my $used_uids = {};
@@ -94,7 +96,7 @@ sub _validate_accounts ( $accounts ) {
     return ($accounts);
 }
 
-sub _assemble_accounts ( $accounts) {
+sub _assemble_accounts ($accounts) {
 
     my $groups             = delete $accounts->{group};
     my $assembled_accounts = {};
@@ -111,8 +113,8 @@ sub _assemble_accounts ( $accounts) {
 
             foreach my $machine_name ( keys $machines->%* ) {
 
-                $assembled_accounts->{$cluster_name}->{$machine_name}->{USER_ACCOUNTS}->{USERS}->{$account_name}
-                    = { $account->%*, $clusters->{$cluster_name}->{$machine_name}->%* };
+                $assembled_accounts->{$cluster_name}->{$machine_name}->{USER_ACCOUNTS}->{USERS}->{$account_name} =
+                  { $account->%*, $clusters->{$cluster_name}->{$machine_name}->%* };
 
                 # groups are considered system accounts, as there is no point to handle user groups different.
                 # also, all clusters gain all the groups, as IDs are global
@@ -129,9 +131,11 @@ sub import_loader ( $debug, $query ) {
     my $config_path     = $query->('CONFIG_PATH');
     my $loaded_accounts = load_config( read_config( $debug, $config_path ) );
     my $accounts        = _validate_accounts(
-        {   group => check_config(
+        {
+            group => check_config(
                 $debug,
-                {   name       => 'Groups',
+                {
+                    name       => 'Groups',
                     config     => $loaded_accounts->{group},
                     definition => $check_group,
                     force_all  => 1
@@ -139,7 +143,8 @@ sub import_loader ( $debug, $query ) {
             ),
             user => check_config(
                 $debug,
-                {   name       => 'User Accounts',
+                {
+                    name       => 'User Accounts',
                     config     => $loaded_accounts->{user},
                     definition => $check_user
                 }
@@ -161,7 +166,7 @@ sub import_loader ( $debug, $query ) {
     };
 }
 
-sub import_hooks($self) {
+sub import_hooks ($self) {
 
     return {
         name    => 'Accounts',

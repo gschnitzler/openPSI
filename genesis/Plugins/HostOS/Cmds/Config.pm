@@ -18,6 +18,7 @@ use Plugins::HostOS::Libs::Parse::Smartd qw(gen_smartd);
 use Plugins::HostOS::Libs::Parse::Backup qw(gen_backup);
 use Plugins::HostOS::Libs::Parse::Syslog qw(gen_syslog);
 use Plugins::HostOS::Libs::Parse::Fail2Ban qw(gen_fail2ban);
+use Plugins::HostOS::Libs::Parse::Wireguard qw(gen_wireguard);
 use Plugins::HostOS::Libs::Parse::Prometheus qw(gen_prometheus);
 
 use InVivo qw(kexists);
@@ -269,6 +270,24 @@ sub import_config ($config) {
                 templates     => { fail2ban     => 'service fail2ban TEMPLATES' },
                 config        => { fail2ban     => 'machine self COMPONENTS SERVICE fail2ban' },
                 substitutions => { fail2ban     => {} }
+            }
+        },
+        wireguard => {
+            ENABLE => 'yes',
+            CMD    => sub (@arg) { _generate_config( [ \&gen_wireguard ], @arg ) },
+            DESC   => 'Generate wireguard config',
+            HELP   => ['Generate wireguard config'],
+            DATA   => {
+                paths     => { local_config => 'paths data LOCAL_HOST_CONFIG' },
+                templates => { wireguard    => 'service wireguard TEMPLATES' },
+                config    => {
+                    wireguard => {
+                        wireguard => 'machine self COMPONENTS SERVICE wireguard',
+                        users     => 'machine self USER_ACCOUNTS USERS',
+                        network   => 'state network',
+                    }
+                },
+                substitutions => { wireguard => {} }
             }
         },
         smartd => {
