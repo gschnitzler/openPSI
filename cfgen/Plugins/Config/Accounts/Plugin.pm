@@ -26,7 +26,11 @@ my $generic_user_auth = {
     # send resulting ssh.username.key to user and delete it afterwards
     # move the ssh.username.key.pub to the secrets volume and enter a reference here
     SSH       => { PUB => [qr/(.+)/x] },
-    WIREGUARD => { PUB => [qr/(.+)/x] },
+    WIREGUARD => {
+        PUB     => [qr/(.+)/x],
+        PRIV   => [qr/(.+)/x],
+        ADDRESS => [qr/(.+)/x],
+    },
 
     # google-authenticator -t -f -D -u -w 10 -s gauth.username.key
     # and hand the codes to the user

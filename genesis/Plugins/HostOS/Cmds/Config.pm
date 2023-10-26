@@ -284,6 +284,7 @@ sub import_config ($config) {
                     wireguard => {
                         wireguard => 'machine self COMPONENTS SERVICE wireguard',
                         users     => 'machine self USER_ACCOUNTS USERS',
+                        host_name => 'machine self NAMES FULL',
                         network   => 'state network',
                     }
                 },
