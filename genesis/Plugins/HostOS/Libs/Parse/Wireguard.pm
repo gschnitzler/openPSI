@@ -40,7 +40,8 @@ sub gen_wireguard ($query) {
     my $host_pub         = $config->{PUB};                                                            # Interface PublicKey
     my $host_port        = $config->{PORT};                                                           # Interface ListenPort
     my $host_network     = $network->{WIREGUARD}->{NETWORK};                                          # Peer AllowedIPs
-    my $host_interface   = $network->{WIREGUARD}->{INTERFACE};
+    my $host_interface   = $network->{WIREGUARD}->{INTERFACE};                                        # Peer AllowedIPs
+    my $host_address     = $network->{WIREGUARD}->{ADDRESS};
     my $template         = check_and_fill_template_tree( $templates, $substitutions )->{'wg.conf'};
     my $filled_templates = { host => dclone $template };
 
@@ -64,10 +65,11 @@ sub gen_wireguard ($query) {
                 '[Interface]',
                 join( ' = ', 'PrivateKey', $user_priv ),
                 join( ' = ', 'Address',    _update_network( $host_network, $user_address ) ),
+                join( ' = ', 'DNS', $host_address),
                 '',
                 '[Peer]',
                 join( ' = ', 'PublicKey',  $host_pub ),
-                join( ' = ', 'AllowedIPs', '0.0.0.0/0' ),
+                join( ' = ', 'AllowedIPs', '0.0.0.0/0' ), 
                 join( ' = ', 'Endpoint',   "$host_name:$host_port" ),
 
             ],
