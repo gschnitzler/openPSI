@@ -5,13 +5,13 @@ use Exporter qw(import);
 use Data::Dumper;
 use Storable qw(dclone);
 
-use InVivo qw(kexists);
+use InVivo               qw(kexists);
 use PSI::Parse::Packages qw(assemble_packages);
-use Tree::Merge qw(add_tree);
+use Tree::Merge          qw(add_tree);
 
-use IO::Config::Cache qw(read_cache write_cache);
-use IO::Config::Check qw(check_config);
-use IO::Config::Read qw(read_config load_config);
+use IO::Config::Cache   qw(read_cache write_cache);
+use IO::Config::Check   qw(check_config);
+use IO::Config::Read    qw(read_config load_config);
 use IO::Templates::Read qw(read_templates);
 
 our @EXPORT_OK = qw(import_hooks);
@@ -117,7 +117,7 @@ sub _transform_buildscripts ( $debug, $path, $config ) {
     my $scripts_dir = $config->{scripts};
 
     die 'ERROR: build flag not set' unless ($build);
-    return {} unless ( $build eq 'yes' );
+    return {}                       unless ( $build eq 'yes' );
 
     $pkg_dir =~ s/^[.]//x;
     $pkg_dir = join( '', $path, $pkg_dir );
@@ -148,11 +148,10 @@ sub _read_config_from_source ( $debug, $query ) {
     # would be nicer to just have a 'definition.cf' file in every folder, read in the directory and assemble as needed.
     # this is just the result of quick merging old code after redesign
     # anyway it works
+    # 13.11.2023: mhh. 'definition.cf' sounds just like cfmeta. try to decypher the meaning of the above and utilize cfmeta
     my $config    = load_config( read_config( $debug, $config_path ) );
     my $scripts   = {};
     my $templates = {};
-
-    #  say Dumper $config;
 
     foreach my $image ( keys $config->%* ) {
 
@@ -180,20 +179,11 @@ sub _read_config_from_source ( $debug, $query ) {
             my $temp = read_templates( $debug, $template_path );
 
             foreach my $k ( keys $temp->%* ) {
-
-                #heredocs dont work, so here is the super primitive take
-                my @padded = ('rm -f /usr/src/linux/.config');
-
-                foreach my $line ( $temp->{$k}->{CONTENT}->@* ) {
-
-                    push @padded, join( q{'}, 'echo ', $line, ' >> /usr/src/linux/.config' );
-                }
-                $templates->{$image}->{$k} = join( "\n", @padded );
+                $templates->{$image}->{$k} = join( "\n", $temp->{$k}->{CONTENT}->@* );
             }
         }
         $scripts->{$image} = _transform_buildscripts( $debug, $config_path, $image_def );
         delete $scripts->{$image} if ( scalar keys $scripts->{$image}->%* == 0 );
-
     }
     return ( $config, $scripts, $templates, $paths );
 }
@@ -239,7 +229,7 @@ sub import_loader ( $debug, $query ) {
     };
 }
 
-sub import_hooks($self) {
+sub import_hooks ($self) {
     return {
         name    => 'Images',
         require => ['Paths'],
