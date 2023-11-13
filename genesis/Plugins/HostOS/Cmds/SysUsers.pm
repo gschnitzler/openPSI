@@ -160,7 +160,8 @@ sub _add_accounts ( $type, $accounts, $known_hosts ) {
                 CONTENT => [ join( "\n", $known_hosts->@*, '' ) ],
                 CHMOD   => 600
             }
-        );
+        ) if  ( kexists( $user, 'SSH', 'PUB' ) );
+        
         write_file(
             {
                 PATH    => $gauth,
