@@ -189,7 +189,7 @@ sub ssh_stage ( $query, @args ) {
 
         die 'ERROR: mounted image does not exist' unless kexists( $images, 'data', $container_fullname, 'latest' );
         my $old_image = $images->{data}->{$container_fullname}->{latest};
-        my $new_image = join '', $archive_name, '.xz';
+        my $new_image = join '', $archive_name, '.zst';
         run_system "cp -fp $old_image $new_image";
         return $new_image;
     };

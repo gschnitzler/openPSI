@@ -37,9 +37,9 @@ sub make_image ( $source, $target, $guid ) {
     run_cmd("rsync -aHAX --exclude '.git' $source/ /mnt/");
     run_cmd("chown -R $guid /mnt/") if ($guid);
     run_cmd('sync && sleep 1 && umount /mnt');
-    run_cmd("xz -z -1 -f $target");
+    run_cmd("zstd -qzf -6 $target");
 
-    $target = join '', $target, '.xz';
+    $target = join '', $target, '.zst';
     say 'OK';
 
     return ($target);

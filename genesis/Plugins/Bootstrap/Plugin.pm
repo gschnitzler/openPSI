@@ -17,7 +17,7 @@ sub import_loader ( $debug, $query ) {
             machine => {
                 MACRO => [
                     'push bootstrap bootstrap §machine',
-                    'remote bootstrap §machine \'cd /tmp && rm -f bootstrap.tar.xz && mv bootstrap*.tar.xz bootstrap.tar.xz && tar xf bootstrap.tar.xz && ./mkfs.sh && ./mkfolder.sh && ./mount_data.sh\'',
+                    'remote bootstrap §machine \'cd /tmp && rm -f bootstrap.tar.zst && mv bootstrap*.tar.zst bootstrap.tar.zst && tar xf bootstrap.tar.zst && ./mkfs.sh && ./mkfolder.sh && ./mount_data.sh\'',
                     'push bootstrap genesis §machine',
                     # mount -t efivarfs efivarfs /sys/firmware/efi/efivars
                     "remote bootstrap §machine 'cd /tmp && ./install_genesis.sh && cd $paths_psi_genesis && rm -rf /tmp/bootstrap* && rm -rf /tmp/*.sh && source /etc/profile && ./require.sh'",

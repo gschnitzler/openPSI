@@ -46,9 +46,9 @@ sub build_image ( $p ) {
         'sync',
         'sleep 1',
         "umount -lf $mount",
-        "xz -z -1 -k -f $tmp_fp",
-        "mv $tmp_fp.xz $to_fp.xz",
-        "chmod 400 $to_fp.xz",
+        "zstd -qfzk -6 $tmp_fp",
+        "mv $tmp_fp.zst $to_fp.zst",
+        "chmod 400 $to_fp.zst",
     );
     say 'OK';
     return;

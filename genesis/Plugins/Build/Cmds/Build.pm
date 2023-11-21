@@ -341,7 +341,7 @@ sub _bm_copy_genesis ( $p ) {
     die 'ERROR: genesis not found' unless kexists( $images, 'genesis', $genesis_name, 'latest' );
     my $source_path = $images->{genesis}->{$genesis_name}->{latest};
 
-    run_cmd("cp $source_path $path/genesis.img.xz && cd $path && xz -d genesis.img.xz");
+    run_cmd("cp $source_path $path/genesis.img.zst && cd $path && zstd -qd genesis.img.zst");
     run_cmd("yes | btrfstune -u $path/genesis.img > /dev/null 2>&1 || true");  # a recent change in hetzners rescuecd disallowed mounting the 'same' image twice
     say 'OK';
     return;

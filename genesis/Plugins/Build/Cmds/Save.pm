@@ -177,11 +177,11 @@ sub _save_images ( $query, @args ) {
     say $tosave;
 
     my $datestring = get_tag;
-    my $imgname = join( '', 'docker_', $image, '___', $datestring, '.tar.xz' );
+    my $imgname = join( '', 'docker_', $image, '___', $datestring, '.tar.zst' );
 
     print_table( 'Saving tree', $image, ": $imgdir/$imgname" );
 
-    run_cmd("docker save $tosave | xz -z -1 > $imgdir/$imgname");
+    run_cmd("docker save $tosave | zstd -qz -6 > $imgdir/$imgname");
     say "\nOK";
     #my $di = _get_dockerfiles( $state, $dockerfiles );
     #my $tars = save_images( $di, $state->{paths}->{DATA}->{IMAGES} );

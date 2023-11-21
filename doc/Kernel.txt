@@ -10,6 +10,18 @@ Support for init systems, system and service managers  --->
      [*] systemd     
 [*] Kernel Self Protection Project  ---- 
 
+#######################
+General setup  --->
+   Kernel compression mode (ZSTD)  --->
+      (X) ZSTD
+   [*] Initial RAM filesystem and RAM disk (initramfs/initrd) support
+      [*]   Support initial ramdisk/ramfs compressed using ZSTD
+[*] Enable loadable module support  --->
+   Module compression mode (ZSTD)  --->
+      (X) ZSTD
+Cryptographic API  --->
+   {*}   Zstd compression algorithm
+
 
 ########################
 General setup  --->

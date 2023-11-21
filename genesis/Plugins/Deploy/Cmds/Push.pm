@@ -61,7 +61,7 @@ sub _add_paths ( $machines, $container_cfg, $p ) {
             my $datestring    = get_tag;
             my $source_folder = $container_cfg->{ $p->{container} }->{ $p->{tag} }->{config}->{DOCKER}->{PATHS}->{PERSISTENT};
             my $filename      = join '', $wanted, '_', $p->{container}, '_', $p->{tag};
-            my $archive_name  = join '', $p->{image_path}, $wanted, '_', $p->{container}, '_', $p->{tag}, '___', $datestring, '.tar.xz';
+            my $archive_name  = join '', $p->{image_path}, $wanted, '_', $p->{container}, '_', $p->{tag}, '___', $datestring, '.tar.zst';
 
             print_table( 'packing', $source_folder, ': ' );
             store_image( { source => $source_folder, target => $p->{image_path}, filename => $filename, tag => $datestring } );

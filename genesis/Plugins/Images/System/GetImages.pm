@@ -45,7 +45,7 @@ sub _determine_latest ($images) {
 sub get_images ( $dir, @arguments ) {
 
     my $images = {};
-    my $regex  = qr /^([^_]+)_.*.xz$/x;
+    my $regex  = qr /^([^_]+)_.*.zst$/x;
     my @files  = ();
     my $wanted = sub ( $file, $files, $regex_w ) {
         push $files->@*, $file if $file =~ m/$regex_w/x;
@@ -60,6 +60,7 @@ sub get_images ( $dir, @arguments ) {
         $f =~ s/[.]gz$//x;
         $f =~ s/[.]bz2$//x;
         $f =~ s/[.]xz$//x;
+        $f =~ s/[.]zst$//x;
         $f =~ s/[.]tar$//x;
 
         my @fparts = ();

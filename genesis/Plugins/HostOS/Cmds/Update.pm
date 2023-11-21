@@ -21,7 +21,7 @@ sub _extract_tarball ( $tarball, $mtype, $target ) {
     my $tmp_tarball = '/tmp/boot_update.tar';
 
     print_table 'Unpacking Tarball', ' ', ': ';
-    run_system "xz -f -k -d --stdout $tarball > $tmp_tarball";    # do not die
+    run_system "zstd -qfdk --stdout $tarball > $tmp_tarball";    # do not die
     say 'OK';
 
     print_table 'Reading Tarball', ' ', ': ';

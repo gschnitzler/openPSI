@@ -68,9 +68,9 @@ sub _create_mount ( $images, $container_name, $data_path ) {
     $data_path_parent =~ s/[^\/]+$//x;
 
     return (
-        "rm -f $data_path_parent/data.img.xz > /dev/null 2>&1",
-        "cp -f $cur_data_img $data_path_parent/data.img.xz",
-        "cd $data_path_parent && rm -f data.img && xz -d data.img.xz",
+        "rm -f $data_path_parent/data.img.zst > /dev/null 2>&1",
+        "cp -f $cur_data_img $data_path_parent/data.img.zst",
+        "cd $data_path_parent && rm -f data.img && zstd -qd data.img.zst",
         "mount $data_path_parent/data.img /$data_path",
     );
 }
