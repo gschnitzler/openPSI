@@ -20,7 +20,8 @@ General setup  --->
    Module compression mode (ZSTD)  --->
       (X) ZSTD
 Cryptographic API  --->
-   {*}   Zstd compression algorithm
+   compression -->
+      {*}   Zstd
 
 
 ########################
@@ -79,9 +80,9 @@ Performance monitoring  --->
 [*]     EFI mixed-mode support
 [*] Linux Guest support
 
-
-Firmware Drivers  --->
-    EFI (Extensible Firmware Interface) Support  --->
+Device Drivers --->
+  Firmware Drivers  --->
+      EFI (Extensible Firmware Interface) Support  --->
         <*> EFI Variable Support via sysfs
 
 
