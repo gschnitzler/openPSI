@@ -15,7 +15,6 @@ on production, also take out the node from dns and wait for all connections to c
 # for production machines, push hostos and boot images by hand
 # ie with 
 push normal image_hostos de-cluster2
-push normal image_boot de-cluster2
 # on stagecontrol, then, on the production machine, use
 update local
 # same goes for buildhost (without the prior push of course)

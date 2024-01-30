@@ -175,7 +175,7 @@ sub import_config ($config) {
             }
         },
         grub => {
-            ENABLE => 'yes',
+            ENABLE => 'no',
             CMD    => sub (@arg) { _generate_config( [ \&gen_grub ], @arg ) },
             DESC   => 'Generate grub config',
             HELP   => ['Generate grub config'],

@@ -15,6 +15,7 @@ build os_host
 # attach to the tmux session via 'tmux attach -t os_host' to configure the kernel
 bootstrap target system
 unmount bootstrap
+switch system
 reboot
 # if 'reboot' fails (yes, systemd can fail to do that), use 'kill 1' and 'kill -9 1', then try again.'
 # yeah.. i know

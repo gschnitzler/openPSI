@@ -16,12 +16,11 @@ my $possible_systems = {
         system1 => { root => 'system1' },
         system2 => { root => 'system2' }
     },
-    mtype => {
-
-        #        kvm   => '0',
-        metal => '0',
-        vbox  => '0'
-    }
+    #mtype => {
+    #    #        kvm   => '0',
+    #    metal => '0',
+    #    vbox  => '0'
+    #}
 };
 
 sub _get_chroot ( $print ) {

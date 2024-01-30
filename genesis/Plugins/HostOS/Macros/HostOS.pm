@@ -11,89 +11,87 @@ sub get_hostos_macros() {
     return {
         install => {
             system => {
-                MACRO => [
-                    'mount target',    #
+                HELP  => ['installs root fs'],
+                DESC  => 'installs root fs',
+                MACRO => [                       #
+                    'mount target',
                     'update clean_target',
                     'update root',
                     'unmount target',
                 ],
-                HELP => ['installs root fs'],
-                DESC => 'installs root fs',
             },
         },
         bootstrap => {
             node => {
-                MACRO => [
-                    #
+                HELP  => ['setup new node'],
+                DESC  => 'setup new node',
+                MACRO => [                       #
                     'pull bootstrap image_hostos §source',
-                    'pull bootstrap image_boot §source',
                     'bootstrap target system'
                 ],
-                HELP => ['setup new node'],
-                DESC => 'setup new node',
             },
             target => {
                 system => {
-                    MACRO => [
-                        'install system',    # need to 'unmount system' in parent shell manually
+                    HELP  => ['configures target system'],
+                    DESC  => 'configures target system',
+                    MACRO => [                               #
+                        'install system',                    # need to 'unmount system' in parent shell manually
                         'mount bootstrap',
                         'SAVECHROOT',
                         'enter chroot macro',
                         'CONTINUE',
-                        'init grub_install',
-                        'update bootfiles',
-                        'clean host config',
-                        'generate host config all',
-                        'install host config',
-                        'update fstab',
-                        'config sshd',
-                        'add users',
-                        'system passwd',
+                        'config system'
                     ],
-                    HELP => ['configures target system'],
-                    DESC => 'configures target system'
                 }
             },
         },
         config => {
+            system => {
+                HELP  => ['configures system'],
+                DESC  => 'configures system',
+                MACRO => [                        #
+                    'update boot',
+                    'clean host config',
+                    'generate host config all',
+                    'install host config',
+                    'update fstab',
+                    'config sshd',
+                    'add users',
+                    'system passwd',
+
+                ],
+            },
             target => {
                 system => {
-                    MACRO => [
-                        'mount system',    # need to 'unmount system' in parent shell manually
+                    HELP  => ['configures target system'],
+                    DESC  => 'configures target system',
+                    MACRO => [                               #
+                        'mount system',                      # need to 'unmount system' in parent shell manually
                         'SAVECHROOT',
                         'enter chroot macro',
                         'CONTINUE',
-                        'clean host config',
-                        'generate host config all',
-                        'install host config',
-                        'update fstab',
-                        'config sshd',
-                        'add users',
-                        'system passwd',
+                        'config system'
                     ],
-                    HELP => ['configures target system'],
-                    DESC => 'configures target system'
                 }
             },
         },
         update => {
             system => {
-                MACRO => [
+                HELP  => ['pulls updates from §machine and installs them'],
+                DESC  => 'pulls updates from §machine and installs them',
+                MACRO => [                                                    #
                     'pull normal image_hostos §machine',
-                    'pull normal image_boot §machine',
                     'update local'
                 ],
-                HELP => ['pulls updates from §machine and installs them'],
-                DESC => 'pulls updates from §machine and installs them'
             },
             local => {
-                MACRO => [
+
+                HELP  => ['updates from latest local images'],
+                DESC  => 'updates from latest local images',
+                MACRO => [                                                    #
                     'install system',
-                    'update boot',
                     'config target system',
                 ],
-                HELP => ['updates from latest local images'],
-                DESC => 'updates from latest local images'
             }
         },
     };

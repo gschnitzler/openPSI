@@ -14,6 +14,7 @@ Follow Bootstrap.md, then, on the machine in question
 set source build/buildhost # or any machine that holds images this node knows about
 bootstrap node
 unmount bootstrap
+switch system
 # reboot
 ```
 
@@ -22,10 +23,10 @@ OR, on production machines, do
 ```
 # on stagecontrol
 push bootstrap image_hostos de-cluster1/dec1n01
-push bootstrap image_boot de-cluster1/dec1n01
 # on the machine
 bootstrap target system
 unmount bootstrap
+switch system
 # reboot
 ```
 
