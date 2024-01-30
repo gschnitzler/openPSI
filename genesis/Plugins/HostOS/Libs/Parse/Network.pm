@@ -411,8 +411,11 @@ sub _generate_iptables ( $template, $config ) {
             return;
         },
         wireguard => sub ($service) {
+            
+            return unless kexists($networks, 'WIREGUARD', 'INTERFACE');
             my $wireguardport = $service->{PORT};
-            my $allowed_interface = $service->{INTERFACE};
+            my $allowed_interface = $networks->{WIREGUARD}->{INTERFACE};
+
             push $f_rules->@*, '# WIREGUARD', "[0:0] -A input_UDP -p udp -m udp --dport $wireguardport -j ACCEPT", '';
             push $f_rules->@*, '# DNSMASQ for WIREGUARD interface',
               "[0:0] -A input_UDP -i $allowed_interface -p udp -m udp --dport 53 -j ACCEPT",
