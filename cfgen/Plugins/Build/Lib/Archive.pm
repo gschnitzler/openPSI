@@ -52,7 +52,7 @@ sub build_archive ( $p) {
         unlink($full_archive_path) or die 'unlink failed' if ( file_exists $full_archive_path );
         $tar->write($full_archive_path);    # no xz compression supported
     }
-    run_system "zstd -qfz -6 $full_archive_path";    # -f in case file exists
+    run_system("zstd --rm -qfz -6 $full_archive_path");    # -f in case file exists
 
     say 'OK';
     return;
