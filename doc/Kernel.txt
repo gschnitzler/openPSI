@@ -1,6 +1,7 @@
 Kernel Config
 ##############
 
+# set this first, as it enables many features
 Gentoo Linux
 [*] Gentoo Linux support 
 [*]   Linux dynamic and persistent device naming (userspace devfs) support
@@ -10,20 +11,24 @@ Support for init systems, system and service managers  --->
      [*] systemd     
 [*] Kernel Self Protection Project  ---- 
 
-#######################
+#############
+[*] Enable loadable module support
+#############
+
 General setup  --->
-   Kernel compression mode (ZSTD)  --->
+  Kernel compression mode (ZSTD)  --->
+    (X) ZSTD
+  [*] Initial RAM filesystem and RAM disk (initramfs/initrd) support
+    [*]   Support initial ramdisk/ramfs compressed using ZSTD
+  [*] Enable loadable module support  --->
+  -> Preemption Model (<choice> [=y])                       
+    -> No Forced Preemption (Server) (PREEMPT_NONE [=y])    
+  Module compression mode (ZSTD)  --->
       (X) ZSTD
-   [*] Initial RAM filesystem and RAM disk (initramfs/initrd) support
-      [*]   Support initial ramdisk/ramfs compressed using ZSTD
-[*] Enable loadable module support  --->
-   Module compression mode (ZSTD)  --->
-      (X) ZSTD
-Cryptographic API  --->
+  Cryptographic API  --->
    compression -->
       {*}   Zstd
-
-
+    
 ########################
 General setup  --->
 [*] Configure standard kernel features (expert users)  --->   
@@ -52,7 +57,6 @@ General setup  --->
 [*]   Group scheduling for SCHED_OTHER
 [*]     CPU bandwidth provisioning for FAIR_GROUP_SCHED
 [*]   Group scheduling for SCHED_RR/FIFO       
-
 
 #######################################
 Processor type and features  ---> 
@@ -100,10 +104,6 @@ Device Drivers --->
 
 
 ####################################
-
-[*] Enable loadable module support
-
-###########################
 
 
 -*- Enable the block layer
@@ -172,7 +172,7 @@ Device Drivers
     [*]   AMD IOMMU support
     <*>     AMD IOMMU Version 2 driver
 NVME Support -->
-<M> NVM Express block device 
+<*> NVM Express block device 
 <M> NVMe Target support  
 
 # needed for early /dev
@@ -221,8 +221,6 @@ Microsoft hyper-v guest support
   [*]   Btrfs will run sanity tests upon loading                     
   [ ]   Btrfs debugging support (NEW)                                
   [*]   Btrfs assert support    
-# optional.... to test it sometimes as btrfs docker alternative
- <*> Overlay filesystem support  
 
 # onetime workaround for missing docs
 #kernel hacking -->
