@@ -23,7 +23,7 @@ sub import_loader ( $debug, $query ) {
 
     my $state_param = {
         fstab_file   => $query->('fstab_file'),
-        grub_file    => $query->('grub_file'),
+        #grub_file    => $query->('grub_file'),
         release_file => $query->('release_file')
 
     };
@@ -57,7 +57,7 @@ sub import_hooks($self) {
         data    => {
             release_file => 'paths hostos RELEASE',
             fstab_file   => 'paths hostos FSTAB',
-            grub_file    => 'paths hostos GRUB',
+            #grub_file    => 'paths hostos GRUB',
             scripts      => 'hostos Scripts',
             services     => 'machine self COMPONENTS SERVICE',
         }
