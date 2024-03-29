@@ -4,8 +4,8 @@ use ModernStyle;
 use Exporter qw(import);
 use Data::Dumper;
 
-use InVivo qw(kexists);
-use PSI::Console qw(print_table);
+use InVivo               qw(kexists);
+use PSI::Console         qw(print_table);
 use IO::Templates::Parse qw(check_and_fill_template_tree);
 
 our @EXPORT_OK = qw(gen_dnsmasq);
@@ -23,14 +23,15 @@ sub _gen_hosts ($config) {
     my $container_config = $config->{container_config};
     my @hosts            = ();
 
-    push @hosts, join( ' ', '127.0.0.1', 'localhost' );    # add loopback
+    push @hosts, join( ' ', '127.0.0.1', 'localhost' );           # add loopback
     push @hosts, join( ' ', $hostip, $ownname, $ownfullname );    # add myself
 
     # dhcp hosts.
     if ( exists $dhcp->{HOSTS} ) {
         my $dhcp_hosts = $dhcp->{HOSTS};
-        foreach my $host_name ( keys $dhcp_hosts->%* ) {          # add nodenames
+        foreach my $host_name ( sort keys $dhcp_hosts->%* ) {     # add nodenames
             my $ip = $dhcp_hosts->{$host_name}->{IP};
+            $host_name = join( ' ', $host_name, $dhcp_hosts->{$host_name}->{ALTNAMES} ) if exists $dhcp_hosts->{$host_name}->{ALTNAMES};
             push @hosts, join( ' ', $ip, $host_name );
         }
     }
@@ -80,7 +81,7 @@ sub gen_dnsmasq ($query) {
     my $scripts          = $query->('scripts dnsmasq');
     my $substitutions    = $query->('substitutions dnsmasq');
     my $hostsfile_config = $query->('config dnsmasq');
-    my $filled_scripts   = check_and_fill_template_tree( $scripts, $substitutions );
+    my $filled_scripts   = check_and_fill_template_tree( $scripts,   $substitutions );
     my $filled_templates = check_and_fill_template_tree( $templates, $substitutions );
     $filled_templates->{'hosts'}->{CONTENT} = _gen_hosts($hostsfile_config);
     say 'OK';

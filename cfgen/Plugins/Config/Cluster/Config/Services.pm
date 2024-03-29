@@ -40,9 +40,10 @@ my $dhcp = {
     LEASE     => [qr/(.+)/x],         # lease time
     HOSTS     => {                    # list of static hosts
         '*' => {
-            MAC => => [qr/^((?:[0-9A-Fa-f]{2}[:]){5}[0-9A-Fa-f]{2})$/x],
-            IP  => [qr/(\d{1,3})/x],
-            NAT => {
+            ALTNAMES => [qr/(.+)/x],
+            MAC      => [qr/^((?:[0-9A-Fa-f]{2}[:]){5}[0-9A-Fa-f]{2})$/x],
+            IP       => [qr/(\d{1,3})/x],
+            NAT      => {
                 '*' => {
                     SOURCE           => [qr/(.+)/x],
                     SOURCE_INTERFACE => [qr/(.+)/x],
