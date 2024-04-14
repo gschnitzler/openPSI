@@ -133,7 +133,7 @@ sub get_system ( $p, $print = 0 ) {
 
     # _get_root returns the root system of the currently used /
     # in chroot, the current system is actually the target system.
-
+    # why is that?
     if ( $system->{chroot} eq 'yes' ) {
         $system->{target} = $current_system;
     }

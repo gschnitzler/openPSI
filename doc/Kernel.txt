@@ -193,6 +193,7 @@ Generic Driver Options  --->
 #<*>     Thin provisioning target       CONFIG_DM_THIN_PROVISIONING
 
 [*] Network device support  ---> 
+ <M>     Virtio network driver 
  [*]   Ethernet driver support  ---> 
  <*>     Broadcom NetXtremeII 10Gb support # Hetzner AX-160
  <*>     Intel(R) 82575/82576 PCI-Express Gigabit Ethernet support  # Hetzner PX-60

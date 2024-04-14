@@ -162,11 +162,18 @@ sub _get_btrfs_device_string ( $disk1, $disk2, $raid_level ) {
 
 sub _get_wanted_system ( $possible_systems, $current_system, $chroot ) {
     my $wanted = {};
+    #for my $pos_sys ( keys $possible_systems->%* ) {
+    #    my $path = "$pos_sys\.efi";
+    #    $wanted->{$pos_sys} = $path;# if ( $current_system ne $pos_sys ); # because the target system is overridden in state, this does not work anymore... default to build all systems until a proper fix is implemented
+    #}
+
+    #return $wanted if ( scalar keys $wanted->%* );
+
+    # add all if the above did not work. This is triggered on buildhost
     for my $pos_sys ( keys $possible_systems->%* ) {
-        my $path = "$pos_sys\.efi";
-        $wanted->{$pos_sys} = $path if ( $current_system ne $pos_sys );
-        $wanted->{$pos_sys} = $path if ( $chroot eq 'yes' );   # add all in chroot. at this stage, the system is not considered to be in bootstrap on buildhost.
+        $wanted->{$pos_sys} = "$pos_sys\.efi";
     }
+
     return $wanted;
 }
 
