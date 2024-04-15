@@ -16,12 +16,6 @@ my $possible_systems = {
         system1 => { root => 'system1' },
         system2 => { root => 'system2' }
     },
-
-    #mtype => {
-    #    #        kvm   => '0',
-    #    metal => '0',
-    #    vbox  => '0'
-    #}
 };
 
 sub _get_chroot ($print) {
@@ -30,12 +24,11 @@ sub _get_chroot ($print) {
 
     # i tried a lot of things. so far, it seems the internet is right
     # http://unix.stackexchange.com/questions/14345/how-do-i-tell-im-running-in-a-chroot
-    my $chroot = 'yes';
     my ( $root_device_number, $root_inode ) = stat('/');
     my ( $proc_device_number, $proc_inode ) = stat('/proc/1/root/.');
-
+    my $chroot = 'yes';
     $chroot = 'no' if ( $proc_device_number && $proc_inode && $root_device_number eq $proc_device_number && $root_inode eq $proc_inode );
-    say $chroot    if $print;
+    say $chroot if $print;
 
     return $chroot;
 }
@@ -49,53 +42,46 @@ sub _get_root ($print) {
 
     if ( $subvol && $subvol =~ /\s*Name:\s+([^\s]+)/x ) {
 
-        my $curvol = $1;
-        my $tarvol = '';
-        my $pos    = 0;
+        my $current_volume = $1;
+        my $target_volume  = '';
+        my $pos            = 0;
 
         foreach my $system ( keys $possible_systems->{system}->%* ) {
 
-            if ( $possible_systems->{system}->{$system}->{root} eq $curvol ) {
+            if ( $possible_systems->{system}->{$system}->{root} eq $current_volume ) {
                 $pos = 1;
+                next;
             }
-            else {
-                $tarvol = $possible_systems->{system}->{$system}->{root};
-            }
+            $target_volume = $possible_systems->{system}->{$system}->{root};
         }
 
         die 'ERROR: Mounted / is not known in config' unless $pos;
-        say $curvol if $print;
+        say $current_volume if $print;
 
-        return ( $curvol, $tarvol );
+        return ( $current_volume, $target_volume );
     }
-    else {
-        say 'rootfs' if $print;
 
-        # in bootstrap, its always system1
-        return ( 'system1', 'system1' );
-    }
+    say 'rootfs' if $print;
+    return ( 'system1', 'system1' );    # in bootstrap, its always system1
 }
 
 sub _get_release ( $release_f, $print ) {
 
+    print_table( 'Reading release file ', $release_f, ': ' ) if $print;
     my $release_h = {};
 
-    print_table( 'Reading release file ', $release_f, ': ' ) if $print;
-    if ( file_exists $release_f ) {
-
-        my $release = read_files($release_f);
-
-        foreach ( $release->{CONTENT}->@* ) {
-
-            if (m/^([^ ]+)[ ]([^:]+):\s*(\d+)$/x) {
-                $release_h->{ join( '_', $1, $2 ) } = $3;
-            }
-        }
-        say 'OK' if $print;
-    }
-    else {
+    if ( !file_exists $release_f ) {
         say 'Not Found' if $print;
+        return $release_h;
     }
+
+    foreach ( read_files($release_f)->{CONTENT}->@* ) {
+        if (m/^([^ ]+)[ ]([^:]+):\s*(\d+)$/x) {
+            $release_h->{ join( '_', $1, $2 ) } = $3;
+        }
+    }
+
+    say 'OK' if $print;    # when the match did not work, the result is the same as 'Not Found', but the printed 'OK' is misleading
     return $release_h;
 }
 
