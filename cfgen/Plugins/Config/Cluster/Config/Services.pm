@@ -122,7 +122,6 @@ my $check = {
     dhcp       => { $dhcp->%* },
     dio        => {},
     dnsmasq    => {},
-    grub       => {},
     network    => {},
     prometheus => {},
     smartd     => {},

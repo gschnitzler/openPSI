@@ -4,9 +4,9 @@ use ModernStyle;
 use Exporter qw(import);
 use Data::Dumper;
 
-use PSI::Parse::File qw(read_files);
-use PSI::RunCmds qw(run_open);
-use PSI::Console qw(print_table);
+use PSI::Parse::File  qw(read_files);
+use PSI::RunCmds      qw(run_open);
+use PSI::Console      qw(print_table);
 use IO::Config::Check qw(file_exists);
 
 our @EXPORT_OK = qw(get_system get_switched);
@@ -16,6 +16,7 @@ my $possible_systems = {
         system1 => { root => 'system1' },
         system2 => { root => 'system2' }
     },
+
     #mtype => {
     #    #        kvm   => '0',
     #    metal => '0',
@@ -23,7 +24,7 @@ my $possible_systems = {
     #}
 };
 
-sub _get_chroot ( $print ) {
+sub _get_chroot ($print) {
 
     print_table( 'Checking for chroot ', ' ', ': ' ) if $print;
 
@@ -34,17 +35,17 @@ sub _get_chroot ( $print ) {
     my ( $proc_device_number, $proc_inode ) = stat('/proc/1/root/.');
 
     $chroot = 'no' if ( $proc_device_number && $proc_inode && $root_device_number eq $proc_device_number && $root_inode eq $proc_inode );
-    say $chroot if $print;
+    say $chroot    if $print;
 
     return $chroot;
 }
 
-sub _get_root( $print ) {
+sub _get_root ($print) {
 
     print_table( 'Determining /', ' ', ': ' ) if $print;
 
     # sometimes mount does not work in chroot, so we use that
-    my ( $subvol, @rest ) = run_open 'btrfs subvolume show / 2>&1 | grep Name', sub(@) { }; # btrfs fails when not used on a btrfs fs. ignore that
+    my ( $subvol, @rest ) = run_open 'btrfs subvolume show / 2>&1 | grep Name', sub(@) { };    # btrfs fails when not used on a btrfs fs. ignore that
 
     if ( $subvol && $subvol =~ /\s*Name:\s+([^\s]+)/x ) {
 
@@ -112,12 +113,6 @@ sub _get_bootstrap ( $system, $print ) {    #
 #################################
 
 sub get_system ( $p, $print = 0 ) {
-
-    # $p is {
-    #fstab_file => '',
-    #grub_file =>'',
-    #release_file=>'',
-    #};
 
     $print = 1 if $print eq 'print';
     my $release_file = $p->{release_file};

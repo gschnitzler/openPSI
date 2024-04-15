@@ -4,7 +4,6 @@ use ModernStyle;
 use Exporter qw(import);
 use Data::Dumper;
 
-#use Plugins::HostOS::Libs::Parse::Grub qw(read_grub write_grub);
 use PSI::Console    qw(print_table);
 use PSI::RunCmds    qw(run_open run_cmd);
 use PSI::Parse::Dir qw(get_directory_list);
@@ -19,7 +18,7 @@ sub _parse_efibootmgr() {
     for my $line ( run_open('efibootmgr') ) {
         $line =~ s/\t.*//;    # with version 18 they introduced this: https://github.com/rhboot/efibootmgr/commit/8ec3e9dedb3cb62f19847794012420b90f475398
                               # bananas that they did not hide this behind a switch. RH is so full of it. so lets remove the added line noise.
-        my ( $key, @values ) = split /\s+/, $line; # remove padding
+        my ( $key, @values ) = split /\s+/, $line;    # remove padding
         $key =~ s/://;
         $cf->{$key} = join ' ', @values;
     }
@@ -107,26 +106,10 @@ sub _switch_system ( $query, @ ) {
     my $boot_first     = $query->('boot_first');
     my $boot_disk      = $query->('boot_disk');
 
-    #my $mtype          = $query->('state machine_type');
-    #my $grub_f        = $query->('grub');
-    #my $grub_template = $query->('grub_template');
-
     if ( $chroot eq 'yes' ) {
         say 'can\'t use switch while in chroot.';
         return 1;
     }
-
-    #my $fullsys = join( '-', $target_system, $mtype );
-    #my $grub = read_grub($grub_f);
-    #die 'ERROR: switch to nonexisting system'
-    #    unless ( exists( $grub->{$fullsys} ) );
-    #$grub->{current} = $fullsys;
-    #write_grub(
-    #    {   template => $grub_template,
-    #        grub     => $grub,
-    #        path     => $grub_f,
-    #    }
-    #);
 
     print_table 'Switching System', ' ', ": $current_system -> $target_system\n";    # remove n and say aold -> new system
 
@@ -158,19 +141,13 @@ sub import_switch () {
                     state => {
                         bootstrap => 'state bootstrap',
                         chroot    => 'state chroot',
-
-                        #machine_type => 'state machine_type',
-                        root => {
+                        root      => {
                             target  => 'state root_target',
                             current => 'state root_current'
                         },
                     },
                     boot_first => 'machine self RAID BOOT_FIRST',
-                    boot_disk  => 'machine self RAID DISK1'
-
-                    #grub          => 'paths hostos GRUB',
-                    #grub_template => 'service grub TEMPLATES'
-
+                    boot_disk  => 'machine self RAID DISK1',
                 }
             }
         }

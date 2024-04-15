@@ -105,7 +105,7 @@ my $check_cluster = {
 
 my $check_machine = {
     RAID => {
-        BOOT_FIRST => [qr/^(.+)/x],             # boot this before grub. used for hetzner rescue
+        BOOT_FIRST => [qr/^(.+)/x],             # boot this before system. used for hetzner rescue
                                                 # template toolkit does not allow '0' as a value. (it gets replaced by '')
                                                 # i had so many headaches with TT, maybe its time to switch to something else
                                                 # anyway, as a quickfix, raidmodes are now defined as strings. possible are:

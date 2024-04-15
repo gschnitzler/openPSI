@@ -7,7 +7,6 @@ use File::Find;
 use Archive::Tar;
 
 use Plugins::HostOS::Libs::Parse::Fstab qw(read_fstab write_fstab);
-use Plugins::HostOS::Libs::Parse::Grub  qw(read_grub write_grub);
 
 use PSI::Parse::Dir qw(get_directory_list);
 use PSI::RunCmds    qw(run_system run_cmd);
@@ -29,8 +28,6 @@ sub _extract_tarball ( $tarball, $targets ) {
     my $tar   = Archive::Tar->new($tmp_tarball);
     my @files = ();
 
-    #my $filecount = 0;
-    #my $latest    = {};
     say 'OK';
 
     foreach my $file ( $tar->list_files ) {
@@ -40,24 +37,6 @@ sub _extract_tarball ( $tarball, $targets ) {
             next unless $file =~ /$path$/;
             push @files, $file;
         }
-
-        #next if ( $file =~ m/initramfs|lost|lilo[.]conf|grub|EFI/x );
-        #if ( $file =~ m/[\/]*(System.map|kernel)-(.*)/x ) {
-        #    my $syskern = $1;
-        #    my $rest    = $2;
-        #next if ( $rest !~ /^$mtype/x );    # ignore wrong mtype
-        #my $fullfile = $file;
-        #$fullfile =~ s/^[.]\///x;
-        #$filecount++;
-        #$latest->{$syskern} = $fullfile;
-        #}
-
-        # only install the dracut file for the target system
-        #if ( $file =~ m/[\/]*dracut-(system.).*[.]img/x ) {
-        #    my $system = $1;
-        #    next unless ( $system eq $target );
-        #}
-        #push @files, $file;
     }
     die 'ERROR: Not all required entries for machine type in tarball.' unless ( scalar @files == scalar keys $targets->%* );
 
@@ -121,20 +100,6 @@ sub _delete_old_kernel ($curkernel) {
     return;
 }
 
-# there is a reason this is not included in hostos state:
-# during bootstrap, there is either none or the rescue systems grub config in place
-# calling read_grub() will result in an error.
-sub _get_switched ( $grub_path, $current_sys ) {
-
-    my $switched           = 'no';
-    my $grub               = read_grub($grub_path);
-    my $grub_curent_kernel = $grub->{current};
-    my $grub_current_root  = $grub->{$grub_curent_kernel}->{subvol};
-    $switched = 'yes' if ( $current_sys ne $grub_current_root );
-
-    return $switched;
-}
-
 sub _get_latest ($h) {
     for my $key ( sort { $b <=> $a } keys $h->%* ) {
         return $key;
@@ -162,10 +127,11 @@ sub _get_btrfs_device_string ( $disk1, $disk2, $raid_level ) {
 
 sub _get_wanted_system ( $possible_systems, $current_system, $chroot ) {
     my $wanted = {};
-    #for my $pos_sys ( keys $possible_systems->%* ) {
-    #    my $path = "$pos_sys\.efi";
-    #    $wanted->{$pos_sys} = $path;# if ( $current_system ne $pos_sys ); # because the target system is overridden in state, this does not work anymore... default to build all systems until a proper fix is implemented
-    #}
+
+#for my $pos_sys ( keys $possible_systems->%* ) {
+#    my $path = "$pos_sys\.efi";
+#    $wanted->{$pos_sys} = $path;# if ( $current_system ne $pos_sys ); # because the target system is overridden in state, this does not work anymore... default to build all systems until a proper fix is implemented
+#}
 
     #return $wanted if ( scalar keys $wanted->%* );
 
@@ -291,9 +257,7 @@ sub import_update () {
                 DESC => 'rewrites fstab',
                 HELP => ['used for node installation, when the system still has the original fstab'],
                 DATA => {
-                    fstab => 'paths hostos FSTAB',
-
-                    #grub             => 'paths hostos GRUB',
+                    fstab      => 'paths hostos FSTAB',
                     disk1      => 'machine self RAID DISK1',
                     disk2      => 'machine self RAID DISK2',
                     raid_level => 'machine self RAID LEVEL',
@@ -314,20 +278,9 @@ sub import_update () {
                     raid_level => 'machine self RAID LEVEL',
                     state      => {
                         possible_systems => 'state possible_systems',
-
-                        #bootstrap        => 'state bootstrap',
-                        current => 'state root_current',
-                        chroot  => 'state chroot',
-
-                        #image            => 'state images image boot latest'
-
-                        #target           => 'state root_target',
-
-                        #machine_type     => 'state machine_type',
+                        current          => 'state root_current',
+                        chroot           => 'state chroot',
                     },
-
-                    #grub          => 'paths hostos GRUB',
-                    #grub_template => 'service grub TEMPLATES',
                 }
             }
         }

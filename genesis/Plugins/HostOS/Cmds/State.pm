@@ -13,7 +13,6 @@ our @EXPORT_OK = qw(import_state);
 sub _state ( $query, @args ) {
 
     my $chroot = $query->('state chroot');
-    my $mtype  = $query->('state machine_type');
     my $cursys = $query->('state root current');
     my $tarsys = $query->('state root target');
 
@@ -36,7 +35,6 @@ sub _state ( $query, @args ) {
     print_table( 'Myself:',          ' ',         ": $name\n" );
     print_table( 'Group:',           ' ',         ": $group\n" );
     print_table( 'Others in Group:', ' ',         ": $others\n" );
-    print_table( 'Machine Type:',    ' ',         ": $mtype\n" );
     print_table( 'System:',          '(current)', ": $cursys\n" );
     print_table( 'System:',          '(target)',  ": $tarsys\n" );
 
@@ -70,9 +68,8 @@ sub import_state () {
                 HELP => ['prints HostOS state information'],
                 DATA => {
                     state => {
-                        chroot       => 'state chroot',
-                        machine_type => 'state machine_type',
-                        root         => {
+                        chroot => 'state chroot',
+                        root   => {
                             current => 'state root_current',
                             target  => 'state root_target',
                         },

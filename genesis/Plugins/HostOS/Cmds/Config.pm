@@ -10,7 +10,6 @@ use Plugins::HostOS::Libs::Parse::Dnsmasq    qw(gen_dnsmasq);
 use Plugins::HostOS::Libs::Parse::DHCP       qw(gen_dhcp);
 use Plugins::HostOS::Libs::Parse::Strongswan qw(gen_strongswan);
 use Plugins::HostOS::Libs::Parse::Network    qw(gen_network);
-use Plugins::HostOS::Libs::Parse::Grub       qw(gen_grub);
 use Plugins::HostOS::Libs::Parse::Dio        qw(gen_dio);
 use Plugins::HostOS::Libs::Parse::Ssmtp      qw(gen_ssmtp);
 use Plugins::HostOS::Libs::Parse::SSH        qw(gen_ssh);
@@ -172,23 +171,6 @@ sub import_config ($config) {
                         state      => { network => 'state network' }
                     }
                 }
-            }
-        },
-        grub => {
-            ENABLE => 'no',
-            CMD    => sub (@arg) { _generate_config( [ \&gen_grub ], @arg ) },
-            DESC   => 'Generate grub config',
-            HELP   => ['Generate grub config'],
-            DATA   => {
-                paths  => { local_config => 'paths data LOCAL_HOST_CONFIG' },
-                config => {
-                    grub => {
-                        grubfile     => 'paths hostos GRUB',
-                        machine_type => 'state machine_type',
-                        root         => 'machine self RAID DISK1',
-                    }
-                },
-                templates => { grub => 'service grub TEMPLATES' },
             }
         },
         strongswan => {

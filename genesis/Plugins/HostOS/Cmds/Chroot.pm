@@ -63,7 +63,6 @@ sub _chroot_macro ( $action, $query, @ ) {
             'source /etc/profile',
             'export PS1="(chroot) $PS1"',
             "rm $bashinit2",
-            'DONT_MOUNT_BOOT=1 && export DONT_MOUNT_BOOT',    # this is a workaround for grub. grub sucks
             "cd $genesis && ./require.sh",
             'genesis macro load',
             "umount -lf $psi",
@@ -77,7 +76,6 @@ sub _chroot_macro ( $action, $query, @ ) {
             'source /etc/profile',
             'export PS1="(chroot) $PS1"',
             "rm $bashinit2",
-            'DONT_MOUNT_BOOT=1 && export DONT_MOUNT_BOOT',    # this is a workaround for grub. grub sucks
             'genesis macro load',
             'exit',
         );
