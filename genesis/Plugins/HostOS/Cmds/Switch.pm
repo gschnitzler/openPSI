@@ -99,7 +99,6 @@ sub _update_efi_bootorder ( $efi, $boot_first_name, $target_system ) {
 
 sub _switch_system ( $query, @ ) {
 
-    my $bootstrap      = $query->('state bootstrap');
     my $chroot         = $query->('state chroot');
     my $current_system = $query->('state root current');
     my $target_system  = $query->('state root target');
@@ -111,7 +110,7 @@ sub _switch_system ( $query, @ ) {
         return 1;
     }
 
-    print_table 'Switching System', ' ', ": $current_system -> $target_system\n";    # remove n and say aold -> new system
+    print_table 'Switching System', ' ', ": $current_system -> $target_system\n";    # remove n and say old -> new system
 
     # seems like the unmount of target system unmounts efivarfs aswell. at least on buildhost after unmount bootstrap.
     my $efivar_path = '/sys/firmware/efi/efivars';
@@ -139,7 +138,6 @@ sub import_switch () {
                 HELP => ['used after a system update, to switch to the newly installed system'],
                 DATA => {
                     state => {
-                        bootstrap => 'state bootstrap',
                         chroot    => 'state chroot',
                         root      => {
                             target  => 'state root_target',

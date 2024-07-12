@@ -29,14 +29,6 @@ sub get_hostos_state ($get_system_param) {
             my $h = get_system( $get_system_param, @args );
             return $h->{release};
         },
-        bootstrap => sub (@args) {
-            my $h = get_system( $get_system_param, @args );
-            return $h->{bootstrap};
-        },
-        possible_systems => sub (@args) {
-            my $h = get_system( $get_system_param, @args );
-            return $h->{possible_systems};
-        },
     };
 }
 

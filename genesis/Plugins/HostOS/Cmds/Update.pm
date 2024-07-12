@@ -125,23 +125,19 @@ sub _get_btrfs_device_string ( $disk1, $disk2, $raid_level ) {
     return $string;
 }
 
-sub _get_wanted_system ( $possible_systems, $current_system, $chroot ) {
-    my $wanted = {};
-
-#for my $pos_sys ( keys $possible_systems->%* ) {
-#    my $path = "$pos_sys\.efi";
-#    $wanted->{$pos_sys} = $path;# if ( $current_system ne $pos_sys ); # because the target system is overridden in state, this does not work anymore... default to build all systems until a proper fix is implemented
+#sub _get_wanted_system ( $possible_systems, $current_system, $chroot ) {
+#    my $wanted = {};
+##for my $pos_sys ( keys $possible_systems->%* ) {
+##    my $path = "$pos_sys\.efi";
+##    $wanted->{$pos_sys} = $path;# if ( $current_system ne $pos_sys ); # because the target system is overridden in state, this does not work anymore... default to build all systems until a proper fix is implemented
+##}
+#    #return $wanted if ( scalar keys $wanted->%* );
+#    # add all if the above did not work. This is triggered on buildhost
+#    for my $pos_sys ( keys $possible_systems->%* ) {
+#        $wanted->{$pos_sys} = "$pos_sys\.efi";
+#    }
+#    return $wanted;
 #}
-
-    #return $wanted if ( scalar keys $wanted->%* );
-
-    # add all if the above did not work. This is triggered on buildhost
-    for my $pos_sys ( keys $possible_systems->%* ) {
-        $wanted->{$pos_sys} = "$pos_sys\.efi";
-    }
-
-    return $wanted;
-}
 
 sub _get_kernels ($kernel_source_path) {
 
@@ -160,58 +156,60 @@ sub _get_kernels ($kernel_source_path) {
 sub update_boot ( $query, @ ) {
 
     print_table 'Updating /boot', ' ', ":\n";
-    my $chroot           = $query->('state chroot');
-    my $current_system   = $query->('state current');
-    my $possible_systems = $query->('state possible_systems')->{system};
-    my $disk1            = $query->('disk1');
-    my $disk2            = $query->('disk2');
-    my $raid_level       = $query->('raid_level');
-    my $disk1_root       = _get_root_partition($disk1);
-    my $disk2_root       = _get_root_partition($disk2);
-    my $btrfs_dev        = _get_btrfs_device_string( $disk1_root, $disk2_root, $raid_level );
-    my $wanted           = _get_wanted_system( $possible_systems, $current_system, $chroot );
-    my $kernels          = _get_kernels('/usr/kernel');
-    my $kernel_latest    = $kernels->{ _get_latest($kernels) }->{kernel};
-    my $efi_path         = '/boot';
-    my $modules_path     = '/lib/modules';
+
+    my $target_system = $query->('state target');
+    my $disk1         = $query->('disk1');
+    my $disk2         = $query->('disk2');
+    my $raid_level    = $query->('raid_level');
+    my $disk1_root    = _get_root_partition($disk1);
+    my $disk2_root    = _get_root_partition($disk2);
+    my $btrfs_dev     = _get_btrfs_device_string( $disk1_root, $disk2_root, $raid_level );
+    my $kernels       = _get_kernels('/usr/kernel');
+    my $kernel_latest = $kernels->{ _get_latest($kernels) }->{kernel};
+    my $modules_path  = '/lib/modules';
 
     die "ERROR: no kernel found" unless $kernel_latest->{path};
 
-    for my $system ( keys $wanted->%* ) {
-        my $target_path         = join( '/', $efi_path,     $wanted->{$system} );
-        my $hostos_modules_path = join( '',  $modules_path, '/', $kernel_latest->{version}, '-', $kernel_latest->{rest} );
-        my @cmd                 = (
+    #my $chroot        = $query->('state chroot');
+    #my $possible_systems = $query->('state possible_systems')->{system};
+    #my $current_system = $query->('state current');
+    #my $wanted           = _get_wanted_system( $possible_systems, $current_system, $chroot );
+    #my $efi_path      = '/boot';
+    #for my $system ( keys $wanted->%* ) {
 
-            #'DRACUT_KMODDIR_OVERRIDE=1',
-            'dracut --hostonly --force --uefi --zstd --early-microcode -m "btrfs base rootfs-block kernel-modules fs-lib img-lib usrmount udev-rules i18n"',
+    my $target_path         = join( '', '/boot/', $target_system, '.efi' );
+    my $hostos_modules_path = join( '', $modules_path, '/', $kernel_latest->{version}, '-', $kernel_latest->{rest} );
+    my @cmd                 = (
 
-            #"--kmoddir $hostos_modules_path",
-            "--mount \"$disk1_root / btrfs subvol=$system\"",
-            "--kernel-image $kernel_latest->{path}",
-            "--kernel-cmdline \"net.ifnames=0 ipv6.disable=1 ro root=$disk1_root rootflags=degraded,$btrfs_dev$system\"",
-            $target_path
-        );
+        #'DRACUT_KMODDIR_OVERRIDE=1',
+        'dracut --hostonly --force --uefi --zstd --early-microcode -m "btrfs base rootfs-block kernel-modules fs-lib img-lib usrmount udev-rules i18n"',
 
-        print_table "writing $system", $kernel_latest->{path}, ": $target_path\n";
+        #"--kmoddir $hostos_modules_path",
+        "--mount \"$disk1_root / btrfs subvol=$target_system\"",
+        "--kernel-image $kernel_latest->{path}",
+        "--kernel-cmdline \"net.ifnames=0 ipv6.disable=1 ro root=$disk1_root rootflags=degraded,$btrfs_dev$target_system\"",
+        $target_path
+    );
 
-        #run_cmd("mkdir -p $efi_path"); # not needed now that its just /boot
-        {
-            local $!;
-            unlink $target_path or print "$? $!" if ( -e $target_path );
-        }
-        {
-            # the running kernel is most likely not the same version as the modules in chroot (and the kernel to boot).
-            # there is the dracut --kmoddir $modules_path switch, that requires the DRACUT_KMODDIR_OVERRIDE=1 env variable to work
-            # however, without diving into the code, I am not entirely sure there are no side effects (it being redhat code and having observed boot issues)
-            # this is a tried and tested approach:
-            # run_cmd('ln -s /lib/modules/$(ls /lib/modules/ | head -n1) /lib/modules/$(uname -r) > /dev/null 2>&1 || true');
-            # as the correct modules dir is known, lets simplify to:
-            local $!;
-            run_cmd( join( '', "ln -s $hostos_modules_path $modules_path/", '$(uname -r) > /dev/null 2>&1 || true' ) );
-        }
+    print_table "writing $target_system", $kernel_latest->{path}, ": $target_path\n";
 
-        run_cmd( join( ' ', @cmd ) );
+    #run_cmd("mkdir -p $efi_path"); # not needed now that its just /boot
+    {
+        local $!;
+        unlink $target_path or print "$? $!" if ( -e $target_path );
     }
+    {
+        # the running kernel is most likely not the same version as the modules in chroot (and the kernel to boot).
+        # there is the dracut --kmoddir $modules_path switch, that requires the DRACUT_KMODDIR_OVERRIDE=1 env variable to work
+        # however, without diving into the code, I am not entirely sure there are no side effects (it being redhat code and having observed boot issues)
+        # this is a tried and tested approach:
+        # run_cmd('ln -s /lib/modules/$(ls /lib/modules/ | head -n1) /lib/modules/$(uname -r) > /dev/null 2>&1 || true');
+        # as the correct modules dir is known, lets simplify to:
+        local $!;
+        run_cmd( join( '', "ln -s $hostos_modules_path $modules_path/", '$(uname -r) > /dev/null 2>&1 || true' ) );
+    }
+
+    run_cmd( join( ' ', @cmd ) );
 
     return;
 }
@@ -224,7 +222,6 @@ sub update_fstab ( $query, @ ) {
     my $raid_level     = $query->('raid_level');
     my $target_system  = $query->('target');
     my $current_system = $query->('current');
-    my $bootstrap      = $query->('bootstrap');
     my $chroot         = $query->('chroot');
 
     print_table 'Updating fstab', ' ', ": \n";
@@ -264,7 +261,6 @@ sub import_update () {
                     target     => 'state root_target',
                     current    => 'state root_current',
                     chroot     => 'state chroot',
-                    bootstrap  => 'state bootstrap',
                 }
             },
             boot => {
@@ -277,9 +273,11 @@ sub import_update () {
                     disk2      => 'machine self RAID DISK2',
                     raid_level => 'machine self RAID LEVEL',
                     state      => {
-                        possible_systems => 'state possible_systems',
-                        current          => 'state root_current',
-                        chroot           => 'state chroot',
+
+                        #current => 'state root_current',
+                        target => 'state root_target',
+
+                        #chroot => 'state chroot',
                     },
                 }
             }

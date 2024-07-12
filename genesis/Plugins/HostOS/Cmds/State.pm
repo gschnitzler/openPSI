@@ -10,35 +10,37 @@ our @EXPORT_OK = qw(import_state);
 
 #############################################
 
-sub _state ( $query, @args ) {
+sub _get_accounts ($shadow) {
 
-    my $chroot    = $query->('state chroot');
-    my $cursys    = $query->('state root current');
-    my $tarsys    = $query->('state root target');
-    my $bootstrap = $query->('state bootstrap');
-    my $name      = $query->('name');
-    my $group     = $query->('group');
-    my $releases  = $query->('state release');
-    my $user      = $query->('state user');
-    my $others    = scalar keys $query->('nodes')->%*;
-    my $shadow    = $user->{shadow};
-    my @accounts  = ();
+    my @accounts = ();
 
-    foreach my $k ( keys $shadow->%* ) {
+    foreach my $k ( sort keys $shadow->%* ) {
         push @accounts, $k if ( $shadow->{$k}->{PW} ne '!' && $shadow->{$k}->{PW} ne '*' );
     }
-    my $sysacc = join( ' ', @accounts );
+    return join( ' ', @accounts );
+}
+
+sub _state ( $query, @args ) {
+
+    my $chroot   = $query->('state chroot');
+    my $cursys   = $query->('state root current');
+    my $tarsys   = $query->('state root target');
+    my $name     = $query->('name');
+    my $group    = $query->('group');
+    my $releases = $query->('state release');
+    my $user     = $query->('state user');
+    my $others   = scalar keys $query->('nodes')->%*;
+    my $sysacc   = _get_accounts( $user->{shadow} );
 
     print_line('HostOS System State');
-    print_table( 'Myself:',          ' ',             ": $name\n" );
-    print_table( 'Group:',           ' ',             ": $group\n" );
-    print_table( 'Others in Group:', ' ',             ": $others\n" );
-    print_table( 'System:',          '(current)',     ": $cursys\n" );
-    print_table( 'System:',          '(target)',      ": $tarsys\n" );
-    print_table( 'System:',          '(is Chrooted)', ": $chroot\n" );
-    print_table( 'System:',          '(non HostOS)',  ": $bootstrap\n" );
-    print_table( 'System:',          '(users)',       ": $sysacc\n\n" );
-    print_table( 'Image Releases:',  ' ',             "\n" );
+    print_table( 'Myself:',          ' ',           ": $name\n" );
+    print_table( 'Group:',           ' ',           ": $group\n" );
+    print_table( 'Others in Group:', ' ',           ": $others\n" );
+    print_table( 'System:',          'current',     ": $cursys\n" );
+    print_table( 'System:',          'target',      ": $tarsys\n" );
+    print_table( 'System:',          'is Chrooted', ": $chroot\n" );
+    print_table( 'System:',          'users',       ": $sysacc\n\n" );
+    print_table( 'Image Releases:',  ' ',           "\n" );
 
     foreach my $key ( keys $releases->%* ) {
         my $value = $releases->{$key};
@@ -68,9 +70,8 @@ sub import_state () {
                             current => 'state root_current',
                             target  => 'state root_target',
                         },
-                        release   => 'state release',
-                        bootstrap => 'state bootstrap',
-                        user      => 'state user'
+                        release => 'state release',
+                        user    => 'state user'
                     },
                     name  => 'machine self NAMES SHORT',
                     group => 'machine self GROUP',
