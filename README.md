@@ -69,10 +69,11 @@ before a new iteration:
 rm -rf /tmp/cfgen_cache && ./cfgen.pl build
 # in dnssl dir
 ./dnssl.pl update dns 
-./dnssl.pl update ssl certs 
+./dnssl.pl update ssl certs # On Wait for DNS hangs, change resolv.conf to 1.1.1.1 and restart dnsmasq
 tmux
 ./dnssl.pl update git secrets # update repo secrets
 rm -rf /tmp/cfgen_cache && ./cfgen.pl build build # rebuild
+# update calendar with expiry dates
 ```
 
 in a genesis shell, set target machine:
