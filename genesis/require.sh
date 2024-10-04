@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 ###
 ### These modules are the minimal requirements to run genesis on the buildserver

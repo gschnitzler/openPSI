@@ -84,7 +84,7 @@ sub _chroot_macro ( $action, $query, @ ) {
     _write_file( "$mount/$bashinit2", @data );
 
     say 'spawning new shell...';
-    run_system "exec chroot $mount /bin/bash --init-file $bashinit";
+    run_system "exec chroot $mount /usr/bin/bash --init-file $bashinit";
 
     return;
 }
@@ -123,7 +123,7 @@ sub _enter_shell ( $action, $query, @ ) {
     }
 
     say 'spawning new shell...';
-    run_system "exec chroot $mount /bin/bash --init-file $bashinit";
+    run_system "exec chroot $mount /usr/bin/bash --init-file $bashinit";
 
     _umount_dev($query);
     _umount_databoot($query);
@@ -140,7 +140,7 @@ sub _create_bashinit ( $mount, $bashinit, $bashinit2 ) {
         #
         "$mount/$bashinit",
         "rm $bashinit",
-        "/bin/bash  --init-file $bashinit2 -i",
+        "/usr/bin/bash  --init-file $bashinit2 -i",
         'exit'
     );
     return;

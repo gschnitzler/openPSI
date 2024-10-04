@@ -62,7 +62,7 @@ sub _add_node_accounts ( $machine, $nodes ) {
         my $mro_account = $node->{NAMES}->{MRO};
 
         $t->{MACHINE_ACCOUNTS}->{USERS}->{$mro_account} = {
-            SHELL  => '/bin/bash',
+            SHELL  => '/usr/bin/bash',
             GROUPS => 'wheel',
             GID    => $node->{CLUSTER_GID},
             UID    => $node->{HOST_UID},
@@ -115,7 +115,7 @@ sub _add_mro_accounts ( $machine, $adjacent_to ) {
             MACHINE_ACCOUNTS => {
                 USERS => {
                     $other_machine_mro => {
-                        SHELL  => '/bin/bash',
+                        SHELL  => '/usr/bin/bash',
                         GROUPS => 'wheel,machines',
                         GID    => $other_machine_cf->{CLUSTER_GID},
                         UID    => $other_machine_cf->{HOST_UID},
@@ -136,7 +136,7 @@ sub _add_mro_accounts ( $machine, $adjacent_to ) {
         MACHINE_ACCOUNTS => {
             USERS => {
                 $own_mro => {
-                    SHELL  => '/sbin/nologin',
+                    SHELL  => '/usr/bin/nologin',
                     GROUPS => 'machines,wheel',          # machines is the base for all the machines. wheel needed as this user runs dio
                     GID    => $machine->{CLUSTER_GID},
                     UID    => $machine->{HOST_UID},

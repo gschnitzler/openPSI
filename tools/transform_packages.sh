@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 for d in $(find . -type d| grep packages | grep -v packages/ |  sed -e 's/\/packages//'); do
 

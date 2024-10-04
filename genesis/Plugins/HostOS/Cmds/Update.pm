@@ -166,7 +166,7 @@ sub update_boot ( $query, @ ) {
     my $btrfs_dev     = _get_btrfs_device_string( $disk1_root, $disk2_root, $raid_level );
     my $kernels       = _get_kernels('/usr/kernel');
     my $kernel_latest = $kernels->{ _get_latest($kernels) }->{kernel};
-    my $modules_path  = '/lib/modules';
+    my $modules_path  = '/usr/lib/modules';
 
     die "ERROR: no kernel found" unless $kernel_latest->{path};
 
@@ -203,7 +203,7 @@ sub update_boot ( $query, @ ) {
         # there is the dracut --kmoddir $modules_path switch, that requires the DRACUT_KMODDIR_OVERRIDE=1 env variable to work
         # however, without diving into the code, I am not entirely sure there are no side effects (it being redhat code and having observed boot issues)
         # this is a tried and tested approach:
-        # run_cmd('ln -s /lib/modules/$(ls /lib/modules/ | head -n1) /lib/modules/$(uname -r) > /dev/null 2>&1 || true');
+        # run_cmd('ln -s /usr/lib/modules/$(ls /usr/lib/modules/ | head -n1) /usr/lib/modules/$(uname -r) > /dev/null 2>&1 || true');
         # as the correct modules dir is known, lets simplify to:
         local $!;
         run_cmd( join( '', "ln -s $hostos_modules_path $modules_path/", '$(uname -r) > /dev/null 2>&1 || true' ) );

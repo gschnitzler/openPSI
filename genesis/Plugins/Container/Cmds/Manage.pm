@@ -306,7 +306,7 @@ sub import_manage () {
                     'usage:',
                     'start container <container> [args]: starts <container>',
                     'start container: starts all containers',
-                    '[args] are passed to docker run (ie /bin/bash)',
+                    '[args] are passed to docker run (ie /usr/bin/bash)',
                     'note that you can only pass [args] to a single container'
                 ],
                 DATA => {%start}

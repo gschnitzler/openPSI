@@ -11,7 +11,7 @@ to start up all the nodes manually and initialize database:
 ```
 # copy a portage image over to the db cluster container
 genesis stop container mariadb
-genesis start container mariadb /bin/bash
+genesis start container mariadb /usr/bin/bash
 docker attach mariadb
 # disable CoW for the database, note that this only takes effect for files that are CREATED AFTER chattr
 mkdir /data/pdata/db && chattr +C /data/pdata/db/
@@ -35,7 +35,7 @@ then:
 
 ```
 
-bash -c '/bin/mkdir -p /var/run/mysqld && chown mysql.mysql /var/run/mysqld && exec /usr/sbin/mysqld  --defaults-file="/data/config/mysql/my.cnf" --wait_timeout=1000 --log-basename=mariadb_node' &
+bash -c '/usr/bin/mkdir -p /var/run/mysqld && chown mysql.mysql /var/run/mysqld && exec /usr/bin/mysqld  --defaults-file="/data/config/mysql/my.cnf" --wait_timeout=1000 --log-basename=mariadb_node' &
 mysql -p #password is empty
 DELETE FROM mysql.user WHERE user='';
 # the config script added the containers hostname for root, remove them
@@ -58,14 +58,14 @@ then proceed with the next step
 - now on the first node, still inside the docker container, run the startup cmd and append --wsrep-new-cluster
 
 ```
-bash -c '/bin/mkdir -p /var/run/mysqld && chown mysql.mysql /var/run/mysqld && exec /usr/sbin/mysqld  --defaults-file="/data/config/mysql/my.cnf" --wait_timeout=1000 --log-basename=mariadb_node --wsrep-new-cluster' &
+bash -c '/usr/bin/mkdir -p /var/run/mysqld && chown mysql.mysql /var/run/mysqld && exec /usr/bin/mysqld  --defaults-file="/data/config/mysql/my.cnf" --wait_timeout=1000 --log-basename=mariadb_node --wsrep-new-cluster' &
 tail -f -n100 /data/pdata/db/mariadb_node.err
 ```
 
 start the other containers normally, or, for debugging, inside the container run
 
 ```
-bash -c '/bin/mkdir -p /var/run/mysqld && chown mysql.mysql /var/run/mysqld && exec /usr/sbin/mysqld  --defaults-file="/data/config/mysql/my.cnf" --wait_timeout=1000 --log-basename=mariadb_node' &
+bash -c '/usr/bin/mkdir -p /var/run/mysqld && chown mysql.mysql /var/run/mysqld && exec /usr/bin/mysqld  --defaults-file="/data/config/mysql/my.cnf" --wait_timeout=1000 --log-basename=mariadb_node' &
 tail -f -n100 /data/pdata/db/mariadb_node.err
 ``` 
 

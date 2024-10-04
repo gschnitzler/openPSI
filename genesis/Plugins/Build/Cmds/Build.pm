@@ -375,7 +375,7 @@ sub _bm_create_chroot_files ( $p) {
         'source /etc/profile',
         'touch /failflag',
         "rm $bashinit",
-        "/bin/bash  --init-file $bashinit2 -i",
+        "/usr/bin/bash  --init-file $bashinit2 -i",
         'error $?',
         'exit',
 
@@ -530,13 +530,13 @@ sub _bm_start_task ( $task, $state, $paths ) {
     if ( $task->{bootstrap} ) {
 
         say 'BOOTSTRAP';
-        run_cmd("chroot $folder /bin/bash --init-file $task->{bashinit}");         # if its the only task, keep it in foreground
+        run_cmd("chroot $folder /usr/bin/bash --init-file $task->{bashinit}");         # if its the only task, keep it in foreground
     }
     else {
         # the \" is needed for old tmux version (hetzner)
         # unset TMUX is required for nested tmux calls.
         # I need this because the builds can run for hours and the peer is not always my friend :)
-        run_cmd("unset TMUX && tmux new-session -d -s $name \"chroot $folder /bin/bash --init-file $task->{bashinit}\"");
+        run_cmd("unset TMUX && tmux new-session -d -s $name \"chroot $folder /usr/bin/bash --init-file $task->{bashinit}\"");
         say 'OK';
     }
     return 1;

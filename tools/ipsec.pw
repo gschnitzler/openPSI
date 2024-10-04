@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 exit 0 # dont run this
 cluster_dir="/data/openPSI/openPSI-config-dotz/Cluster/"
 

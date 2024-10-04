@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/bash
 
 # create a local repo, export the key and repo
 # borg idiots only allow init with a key generated on spot. so pack it and deploy it as well

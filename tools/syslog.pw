@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 cluster_dir="/data/openPSI/openPSI-config-dotz/Cluster/"
 
