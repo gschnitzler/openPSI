@@ -74,6 +74,7 @@ tmux
 ./dnssl.pl update git secrets # update repo secrets
 rm -rf /tmp/cfgen_cache && ./cfgen.pl build build # rebuild
 # update calendar with expiry dates
+for i in $(ls /data/local_config/secrets/letsencrypt-wildcard.*.crt); do echo $(openssl x509 -enddate -noout -in $i) $i; done
 ```
 
 in a genesis shell, set target machine:
