@@ -4,7 +4,7 @@ use ModernStyle;
 use Exporter qw(import);
 use Data::Dumper;
 
-use PSI::Console qw(print_table);
+use PSI::Console         qw(print_table);
 use IO::Templates::Parse qw(check_and_fill_template_tree);
 
 our @EXPORT_OK = qw(gen_dhcp);
@@ -19,6 +19,7 @@ sub _gen_dhcp ( $content, $config ) {
     my $lease  = $config->{LEASE};
     my $hosts  = $config->{HOSTS};
     my $router = $config->{ROUTER};
+    my $option = exists $config->{OPTION} ? $config->{OPTION} : '';
 
     my @add = ();
 
@@ -28,19 +29,28 @@ sub _gen_dhcp ( $content, $config ) {
     #dhcp-host=kouch,192.168.111.30
     #dhcp-host=00:A0:DE:A3:7E:27,yamaha,192.168.111.29
 
-    push @add, 'dhcp-authoritative', join( '', 'dhcp-range=', $ifname, ',', $start, ',', $end, ',', $lease ), join( '', 'dhcp-option=option:router,', $router );
+    push @add, 'dhcp-authoritative',                                              #
+      join( '', 'dhcp-range=', $ifname, ',', $start, ',', $end, ',', $lease ),    #
+      join( '', 'dhcp-option=option:router,', $router ), #
+      '';   #   newline
 
-    foreach my $host_name ( keys $hosts->%* ) {
+    push @add, join( '', 'dhcp-option=', $option ) if $option;
+
+    foreach my $host_name ( sort keys $hosts->%* ) {
 
         my $host = $hosts->{$host_name};
+        my @line = ();
 
         if ( exists( $host->{MAC} ) ) {
-            my $mac = $host->{MAC};
-            push @add, join( '', 'dhcp-host=', $mac, ',', $host_name, ',', $host->{IP} );
+            push @line, $host->{MAC};
         }
-        else {
-            push @add, join( '', 'dhcp-host=', $host_name, ',', $host->{IP} );
+
+        if ( exists $host->{TAG} ) {
+            push @line, $host->{TAG};
         }
+
+        push @line, join( '', $host_name ), $host->{IP};
+        push @add, join( '', 'dhcp-host=', join( ',', @line ) );
     }
 
     push( $content->@*, @add );
@@ -59,7 +69,7 @@ sub gen_dhcp ($query) {
     my $scripts          = $query->('scripts dhcp');
     my $substitutions    = $query->('substitutions dhcp');
     my $config           = $query->('config dhcp dhcp');
-    my $filled_scripts   = check_and_fill_template_tree( $scripts, $substitutions );
+    my $filled_scripts   = check_and_fill_template_tree( $scripts,   $substitutions );
     my $filled_templates = check_and_fill_template_tree( $templates, $substitutions );
     $filled_templates->{'dnsmasq.dhcp.conf'}->{CONTENT} = _gen_dhcp( $filled_templates->{'dnsmasq.dhcp.conf'}->{CONTENT}, $config );
     say 'OK';
