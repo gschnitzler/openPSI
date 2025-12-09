@@ -1,7 +1,7 @@
 
 ## Node Initial Installation
 
-- a new node needs a cluster configfile first
+- a new node needs a cluster config file first
 - setup all the required certs and credentials, backup, users etc
 - in hetzner robot, activate backup space if required
 

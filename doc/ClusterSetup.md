@@ -1,9 +1,9 @@
 ## Cluster Setup
 
-#### 1st time db cluster setup
+#### 1st time DB cluster setup
 
 - make sure the config is in place and valid on all nodes
-- write down the startup command (from supervisord)
+- write down the start up command (from supervisord)
 
 to start up all the nodes manually and initialize database:
 
@@ -55,7 +55,7 @@ then proceed with the next step
 #### Cluster start
 
 - assuming you just did the steps above, but every cold start of the cluster looks the same
-- now on the first node, still inside the docker container, run the startup cmd and append --wsrep-new-cluster
+- now on the first node, still inside the docker container, run the start up cmd and append --wsrep-new-cluster
 
 ```
 bash -c '/usr/bin/mkdir -p /var/run/mysqld && chown mysql.mysql /var/run/mysqld && exec /usr/bin/mysqld  --defaults-file="/data/config/mysql/my.cnf" --wait_timeout=1000 --log-basename=mariadb_node --wsrep-new-cluster' &

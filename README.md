@@ -6,7 +6,7 @@
 cfgen assembles 'Config' and 'secrets' and builds BTRFS images containing host specific configuration and needed genesis modules. These images are deployed to each machine.
 
 #### dnssl
-used to maintain DNS entries (cloudflare) and SSL certs (letsencrypt)
+used to maintain DNS entries (Cloudflare) and SSL certs (LetsEncrypt)
 
 #### genesis
 
@@ -14,11 +14,11 @@ used to maintain DNS entries (cloudflare) and SSL certs (letsencrypt)
 - './Plugins' provide all the functionality and executable commands.
 
 #### tools
-various devtools 
+various development tools 
 
 ## From Scratch Instructions
 
-There is currently no documentation on howto setup an environment to make use of these tools.
+There is currently no documentation on how to setup an environment to make use of these tools.
 The lack of documentation to generate the required configuration not distributed with openPSI-config might be even more inconvenient. Finally, the complete absence of any other documentation should give a last hint: DO NOT USE THIS.
 
 ## Bootstrap Preparation
@@ -33,12 +33,12 @@ This covers bootstrapping of machines (requires op env and config)
 #### Preparations
 
 boot a suitable rescue system (hetzner, systemrescuecd) on target machine. 
-- use the kernel parameter net.ifnames=0 if needed # on machines utilzing DHCP
+- use the kernel parameter net.ifnames=0 if needed # on machines utilizing DHCP
 - config network (to an IP known to genesis)
 
 ##### SystemRescueCD
 - always download the latest version, as arch' rolling release nature will have strange results without updating.
-ie if you update the kernel, the current modules might get removed and it will fail to load required modules (like vfat) later on.
+i.e. if you update the kernel, the current modules might get removed and it will fail to load required modules (like vfat) later on.
 - boot copy to ram. 
 
 ```
@@ -72,7 +72,7 @@ rm -rf /tmp/cfgen_cache && ./cfgen.pl build
 ./dnssl.pl update ssl certs # On Wait for DNS hangs, change resolv.conf to 1.1.1.1 and restart dnsmasq
 tmux
 ./dnssl.pl update git secrets # update repo secrets
-rm -rf /tmp/cfgen_cache && ./cfgen.pl build build # rebuild
+rm -rf /tmp/cfgen_cache && ./cfgen.pl build # rebuild
 # update calendar with expiry dates
 for i in $(ls /data/local_config/secrets/letsencrypt-wildcard.*.crt); do echo $(openssl x509 -enddate -noout -in $i) $i; done
 ```
@@ -85,7 +85,7 @@ bootstrap machine
 ```
 
 
-## Bootstap Buildhost
+## Bootstrap Buildhost
 
 First, build an image and kernel to boot into.
 kernel options can be manipulated interactively. for required drivers see doc/kernel.txt.
@@ -130,7 +130,7 @@ docker save
 #### System Update
 
 don't update (meaning reboot) all machines in a given group at once to not break (DB) clusters.
-on production, also take out the node from dns and wait for all connections to cease.
+on production, also take out the node from DNS and wait for all connections to cease.
 
 ```
 # genesis
