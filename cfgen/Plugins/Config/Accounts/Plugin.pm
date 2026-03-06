@@ -32,7 +32,7 @@ my $generic_user_auth = {
         ADDRESS => [qr/(.+)/x],
     },
 
-    # google-authenticator -t -f -D -u -w 10 -s gauth.username.key
+    # google-authenticator -t -f -D -u -w 10 -i company -l username -s gauth.username.key
     # and hand the codes to the user
     GAUTH => { PUB => [qr/(.+)/x] },
 
