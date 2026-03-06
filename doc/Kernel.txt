@@ -251,3 +251,13 @@ For a Hyper-V generation 2 system, you'll need certain options enabled in the Ke
     CONFIG_PCI_HYPERV:          Device Drivers > PCI Support > Hyper-V PCI Frontend
     CONFIG_VSOCKETS:            Networking support > Networking options > Virtual Socket protocol
     CONFIG_HYPERV_VSOCKETS:     Networking support > Networking options > Hyper-V transport for Virtual Sockets
+
+Virtio:
+CONFIG_VIRTIO_BLK     Device Drivers -> Block devices -> Virtio block driver 
+CONFIG_SCSI_VIRTIO    Device Drivers -> SCSI device support  -> SCSI low-level drivers (SCSI_LOWLEVEL [=y])   -> virtio-scsi support (SCSI_VIRTIO [=y])
+CONFIG_VIRTIO_NET     Device Drivers -> Network device support -> Network core driver support -> Virtio network driver
+CONFIG_HW_RANDOM_VIRTIO 
+CONFIG_I2C_VIRTIO       
+CONFIG_GPIO_VIRTIO      
+CONFIG_VIRTIO_PMEM      
+CONFIG_VIRTIO_FS        

@@ -30,11 +30,14 @@ This covers bootstrapping of machines (requires op env and config)
 - network1: bridge
 - network2: Host Only Ethernet Adapter 192.168.222.1/24 (example)
 
+#### Proxmox Setup:
+- EFI BIOS with secure boot disabled (don't enroll keys)
+
 #### Preparations
 
 boot a suitable rescue system (hetzner, systemrescuecd) on target machine. 
 - use the kernel parameter net.ifnames=0 if needed # on machines utilizing DHCP
-- config network (to an IP known to genesis)
+- config network (to an IP known to genesis).
 
 ##### SystemRescueCD
 - always download the latest version, as arch' rolling release nature will have strange results without updating.
