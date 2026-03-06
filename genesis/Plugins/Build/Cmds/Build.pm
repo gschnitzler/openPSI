@@ -5,16 +5,16 @@ use Exporter qw(import);
 use Data::Dumper;
 use Readonly;
 
-use InVivo qw(kexists kdelete);
-use IO::Config::Check qw(file_exists);
-use Tree::Slice qw(slice_tree);
-use Tree::Build qw(build_image_tree);
-use PSI::Parse::Dir qw(get_directory_list);
-use PSI::Parse::File qw(write_file);
-use PSI::Console qw(print_table count_down);
-use PSI::RunCmds qw(run_cmd run_system run_open);
-use PSI::Tag qw(get_tag);
-use PSI::Store qw(store_image load_image);
+use InVivo             qw(kexists kdelete);
+use IO::Config::Check  qw(file_exists);
+use Tree::Slice        qw(slice_tree);
+use Tree::Build        qw(build_image_tree);
+use PSI::Parse::Dir    qw(get_directory_list);
+use PSI::Parse::File   qw(write_file read_files);
+use PSI::Console       qw(print_table count_down);
+use PSI::RunCmds       qw(run_cmd run_system run_open);
+use PSI::Tag           qw(get_tag);
+use PSI::Store         qw(store_image load_image);
 use PSI::System::BTRFS qw(delete_btrfs_subvolume create_btrfs_snapshot create_btrfs_subvolume get_btrfs_subvolumes);
 
 our @EXPORT_OK = qw(import_build);
@@ -329,7 +329,7 @@ sub _bm_add_root_image ( $task, $state, $paths ) {
     return 1;
 }
 
-sub _bm_copy_genesis ( $p ) {
+sub _bm_copy_genesis ($p) {
 
     my $path         = $p->{path};
     my $data_root    = $p->{data_root};
@@ -347,7 +347,7 @@ sub _bm_copy_genesis ( $p ) {
     return;
 }
 
-sub _bm_create_chroot_files ( $p) {
+sub _bm_create_chroot_files ($p) {
 
     my $name           = $p->{name};
     my $path           = $p->{path};
@@ -357,11 +357,11 @@ sub _bm_create_chroot_files ( $p) {
     my $bootstrap      = $p->{bootstrap};
     my $psi            = $p->{psi};
     my $bashinit2      = join( '', $bashinit, '_2' );
-    my $full_bashinit  = join( '', $path, $bashinit );
-    my $full_bashinit2 = join( '', $path, $bashinit2 );
-    my $full_dataroot  = join( '', $path, $data_root );
-    my $full_genesis   = join( '', $path, $genesis );
-    my $full_psi       = join( '', $path, $psi );
+    my $full_bashinit  = join( '', $path,     $bashinit );
+    my $full_bashinit2 = join( '', $path,     $bashinit2 );
+    my $full_dataroot  = join( '', $path,     $data_root );
+    my $full_genesis   = join( '', $path,     $genesis );
+    my $full_psi       = join( '', $path,     $psi );
 
     print_table( 'Creating chroot entry files', ' ', ': ' );
 
@@ -395,7 +395,17 @@ sub _bm_create_chroot_files ( $p) {
         "rm $bashinit2",
     );
 
-    push @data_bashinit2, "echo nameserver 8.8.8.8 > /etc/resolv.conf && cd $genesis && ./require.sh" if ($bootstrap);
+    if ($bootstrap) {
+        my $resolvconf = read_files('/etc/resolv.conf');
+        my $resolvconfline = shift $resolvconf->{CONTENT}->@*;
+        push @data_bashinit2, "echo $resolvconfline > /etc/resolv.conf";
+        for my $line ($resolvconf->{CONTENT}->@*){
+            push @data_bashinit2, "echo $line >> /etc/resolv.conf";
+        }
+        push @data_bashinit2, 'echo nameserver 8.8.8.8 >> /etc/resolv.conf';
+        push @data_bashinit2, "cd $genesis && ./require.sh";
+    }
+
     push @data_bashinit2, "cd $genesis && ./genesis.pl image build $name";
     push @data_bashinit2, 'error $?';
     push @data_bashinit2, 'rm /failflag';
@@ -530,7 +540,7 @@ sub _bm_start_task ( $task, $state, $paths ) {
     if ( $task->{bootstrap} ) {
 
         say 'BOOTSTRAP';
-        run_cmd("chroot $folder /usr/bin/bash --init-file $task->{bashinit}");         # if its the only task, keep it in foreground
+        run_cmd("chroot $folder /usr/bin/bash --init-file $task->{bashinit}");     # if its the only task, keep it in foreground
     }
     else {
         # the \" is needed for old tmux version (hetzner)
@@ -557,7 +567,7 @@ sub _bm_finished ( $finished, $paths ) {
             my $tag      = $finished_task->{tag};
             my $name     = $finished_task->{name};
             my $tar      = $finished_task->{export}->{$tar_name};
-            my $source   = join( '', $root, $tar->{source} );
+            my $source   = join( '', $root,    $tar->{source} );
             my $filename = join( '', 'image_', $tar_name );
             my @excludes = ();
 
@@ -590,7 +600,7 @@ sub _bm_finished ( $finished, $paths ) {
             run_cmd("cp -Rfp $root/etc/shadow $root/etc/shadow.tmp && sed -i 's/:[^:]*:/:!:/' $root/etc/shadow") if ( file_exists "$root/etc/shadow" );
             store_image( { source => $source, target => $tar_path, filename => $filename, tag => $tag, options => $options } );
             run_cmd("rm -f $root/etc/shadow && mv $root/etc/shadow.tmp $root/etc/shadow") if ( file_exists "$root/etc/shadow.tmp" );
-            run_cmd("rm -rf $root") if ( $tar->{diff} );
+            run_cmd("rm -rf $root")                                                       if ( $tar->{diff} );
         }
     }
     return;
