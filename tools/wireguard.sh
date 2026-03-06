@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
-cluster_dir="/data/openPSI/openPSI-config-dotz/Cluster/"
-user_dir="/data/openPSI/openPSI-config-dotz/Accounts/User"
+cluster_dir="/data/psi/config-private/Cluster/"
+user_dir="/data/psi/config-private/Accounts/User"
 
 # generate host keys 
 for file in $(find $cluster_dir -mindepth 2 -type f| grep cfgen$); do

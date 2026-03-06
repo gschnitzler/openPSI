@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 exit 0 # dont run this
-cluster_dir="/data/openPSI/openPSI-config-dotz/Cluster/"
+cluster_dir="/data/psi/config-private/Cluster/"
 
 #generate host CAs (key and cert)
 for group in $(find $cluster_dir -type d | grep -v '/$' | sed -e 's/.*\///' | grep -v '^$'); do
@@ -35,8 +35,9 @@ done
 
 # do users manually, use 'email', create certs per group
 # note the export passwort and give it to the user with the p12 file
+exit 0
 name="gs"
-cluster_dir="/data/openPSI/openPSI-config-dotz/Cluster/"
+cluster_dir="/data/psi/config-private/Cluster/"
 for group in build; do
 
 	# pick a random fqdn of the nodes in a group

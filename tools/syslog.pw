@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-cluster_dir="/data/openPSI/openPSI-config-dotz/Cluster/"
+cluster_dir="/data/psi/config-private/Cluster/"
 
 # generate CA
 openssl req -nodes -days 3000 -new -x509 -subj "/C=US/ST=State/L=Location/O=Company/CN=suminus.at" -keyout syslog.ca.priv -out syslog.ca.cert

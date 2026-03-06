@@ -7,7 +7,7 @@ use Data::Dumper;
 
 use IO::Config::Read qw(read_config_single load_config);
 
-my $config_path = "/data/psi/config/Cluster/";
+my $config_path = "/data/psi/config-private/Cluster/";
 my $cluster     = load_config( read_config_single( 0, $config_path ) );
 my @machines    = ();
 
