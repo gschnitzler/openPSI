@@ -73,6 +73,7 @@ rm -rf /tmp/cfgen_cache && ./cfgen.pl build
 # in dnssl dir
 ./dnssl.pl update dns 
 ./dnssl.pl update ssl certs # On Wait for DNS hangs, change resolv.conf to 1.1.1.1 and restart dnsmasq
+./dnssl.pl update dns # remove challenges
 tmux
 ./dnssl.pl update git secrets # update repo secrets
 rm -rf /tmp/cfgen_cache && ./cfgen.pl build # rebuild
