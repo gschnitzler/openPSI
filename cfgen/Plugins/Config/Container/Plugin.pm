@@ -25,13 +25,13 @@ our @EXPORT_OK = qw(import_hooks);
 
 my $IPEX         = qr/(\d{1,3}[.]\d{1,3}[.]\d{1,3}[.]\d{1,3})/x;
 my $docker_paths = {
-    CONFIG     => [ qr/(.+)/x, 'dircheck' ],
-    DATA       => [ qr/(.+)/x, 'dircheck' ],
-    PERSISTENT => [ qr/(.+)/x, 'dircheck' ],
-    SHARED     => [ qr/(.+)/x, 'dircheck' ],
-    MAPPED     => [ qr/(.+)/x, 'dircheck' ],
-    ARCHIVE    => [ qr/(.+)/x, 'dircheck' ],
-    BACKUP     => [ qr/(.+)/x, 'dircheck' ]
+    CONFIG     => [ qr/(.+)/x, 'dircheck' ], # genesis generated container config 
+    DATA       => [ qr/(.+)/x, 'dircheck' ], # container deployable data. stored locally or deployed and mounted as RO image. HTML, PHP, Code etc
+    PERSISTENT => [ qr/(.+)/x, 'dircheck' ], # container persistent data. local to the host its running on. Databases, logfiles, lockfiles etc
+    SHARED     => [ qr/(.+)/x, 'dircheck' ], # no usage in current code. was used by distributed filesync. can be used with hostmounted fc storage 
+    MAPPED     => [ qr/(.+)/x, 'dircheck' ], # map container volumes into another container. 
+    ARCHIVE    => [ qr/(.+)/x, 'dircheck' ], # no usage in current code. Must have been a PSI feature that did not get open sourced. ETL?
+    BACKUP     => [ qr/(.+)/x, 'dircheck' ]  # container backups
 };
 my $check = {
     NETWORK => {
