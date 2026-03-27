@@ -29,10 +29,12 @@ sub _gen_dhcp ( $content, $config ) {
     #dhcp-host=kouch,192.168.111.30
     #dhcp-host=00:A0:DE:A3:7E:27,yamaha,192.168.111.29
 
-    push @add, 'dhcp-authoritative',                                              #
+    push @add,
+
+      #'dhcp-authoritative',                                              #
       join( '', 'dhcp-range=', $ifname, ',', $start, ',', $end, ',', $lease ),    #
-      join( '', 'dhcp-option=option:router,', $router ), #
-      '';   #   newline
+      join( '', 'dhcp-option=option:router,', $router ),                          #
+      '';                                                                         #   newline
 
     push @add, join( '', 'dhcp-option=', $option ) if $option;
 

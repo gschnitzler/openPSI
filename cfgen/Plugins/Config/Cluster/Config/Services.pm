@@ -35,6 +35,7 @@ my $backup = {
 
 my $dhcp = {
     INTERFACE => [qr/(.+)/x],    # the interface name to serve (not the actual interface name, but the section name from NETWORK. this gets translated in cfgen)
+                                 # IPs are expanded to match network of that interface. correlates with ipsec.
     START     => [qr/(\d{1,3})/x],    # dhcp range start
     END       => [qr/(\d{1,3})/x],    # dhcp range end
     LEASE     => [qr/(.+)/x],         # lease time
@@ -101,7 +102,7 @@ my $strongswan = {
     # this is the interface IPSEC connections for roadwarriors should be terminated on.
     # for normal servers with a single physical NIC, only INTERN (docker0) is an option.
     # machines with multiple interfaces may use those. (like PRIVATE)
-    # for dhcp services to work, this must be the same interface the dhcpd listens on
+    # for dhcp services to work, this must be the same interface listed in dhcp
     INTERFACE => [qr/^(.+)/x],
 };
 
