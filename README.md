@@ -138,7 +138,7 @@ on production, also take out the node from DNS and wait for all connections to c
 
 ```
 # genesis
-# for production machines, push hostos and boot images by hand
+# for production machines, push hostos images by hand
 # ie with 
 push normal image_hostos de-cluster2
 # on stagecontrol, then, on the production machine, use

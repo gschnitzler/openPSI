@@ -208,8 +208,9 @@ sub update_boot ( $query, @ ) {
         local $!;
         run_cmd( join( '', "ln -s $hostos_modules_path $modules_path/", '$(uname -r) > /dev/null 2>&1 || true' ) );
     }
-
-    run_cmd( join( ' ', @cmd ) );
+    my $joined_cmd = join( ' ', @cmd );
+    say $joined_cmd; # for debug reasons
+    run_cmd( $joined_cmd );
 
     return;
 }
